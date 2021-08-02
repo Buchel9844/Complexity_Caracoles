@@ -1,0 +1,41 @@
+INTRODUCTION TO THE THEORY 
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To begin the exploration of the theory, I navigate throught different resources. For each I created a script that implement the example. 
+
+1. Statistical Rethinking - A Bayesian Course with Examples in R and Stan - Richard McElreath - Sec. ED. -> Code/RethinkingR.Rmd
+The book gives the first step of theory behing bayesian thinking, with easy examples. 
+
+2. An Introduction to Stan, Michael Betancourt, March 2020  - https://betanalpha.github.io/assets/case_studies/stan_intro.html#2_the_stan_ecosystem
+-> Code/stan101.R and Code/stan101.rds and Code/stan101.stan
+The page gives an introduction to stan language and modality,  good start to undertand a .stan script and environment
+For further info on installing Stan, see: https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started 
+
+3. Building a Multilevel Model in BRMS Tutorial: Popularity Data, Laurent Smeets and Rens van de Schoot, Last modified: 26 August 2019  - https://www.rensvandeschoot.com/tutorials/brms-started/
+-> Code/Tutorial_brms.R 
+Good tutorial to install Stan, C++ and BRMS. BRMS is a good package, with building function that execute bayesian model, with a diversity of priors, without the need to play with a .stan script
+
+4. Online courses on time series -> Code/Time_series.R 
+
+5. Sparsity Blues, Michael Betancourt, May 2021 - https://betanalpha.github.io/assets/case_studies/modeling_sparsity.html
+-> Code/Sparsity_blues.R
+Learn when to use sparse approach and the theory behind it, with example. 
+
+6. inverse function: https://discourse.mc-stan.org/t/inverse-function-in-modeling/5466
+
+7. hierarchical modelling : https://betanalpha.github.io/assets/case_studies/hierarchical_modeling.html
+
+APPLICATION OF BAYESIAN APPROACH TO CARACOLES DATA
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Repository contains the R and stan scripts necessary to recreate the analyses presented in the manuscript "Disentangling key species interactions in diverse and heterogeneous communities: A Bayesian sparse modeling approach", Christopher Weiss-Lehman & al, 2021. 
+https://github.com/tpweiss06/SparseInteractions
+-> Code/SparseInteraction
+Introduce the sparsity approach, all the following work is based on the approach developped by Christopher Weiss-Lehman & al, 2021. 
+
+2. Martyn, T. E. et al. Identifying ‘useful’ fitness models: balancing the benefits of added complexity with realistic data requirements in models of individual plant fitness. Am. Nat. 4, (2020). 
+Show how to integrate a grouping method to handle high complexity
+
+
+
+

@@ -1,0 +1,106 @@
+---
+title: "RethinkingR"
+author: "Lisa Buche"
+date: "28/06/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+## Install rethinking R package
+```{r rethinking package}
+install.packages(c("coda","mvtnorm","devtools","dagitty"))
+library(devtools)
+devtools::install_github("rmcelreath/rethinking")
+```
+
+## Chapter II: the garden of forking data
+
+You can compute the plausibility of conjucture of the Land:Water example 
+
+```{r plausibility}
+ways <- c(0,3,8,9,0) # ways to produce each compotition date 
+ways/sum(ways)
+```
+
+The model describing the probablity of observing W water and L lands,with a probability p of water on each toss,is " the counts of W and L are distributed binomially, with a probality p of water on each toss"
+```{r binomial}
+dbinom(6,size=9,prob=0.5) # 6= number ot time we draw 6,size=number of sampling 
+```
+
+To run a bayesien approach you need a motor that runs a posterior distribution.
+(1) Grid approximation 
+```{r Grid approximation,echo=FALSE  }
+# define grid 
+p_grid <- seq(from=0,to =1, length.out = 20)
+# define prior, you have different possibility 
+#prior <- rep(1,20) 
+#prior <- ifelse(p_grid < 0.5, 0, 1) 
+prior <- exp(-5*abs(p_grid-0.5))
+
+# compute likelihood at each value in grid
+likelihood <- dbinom(6,size=9,prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior <- likelihood*prior
+
+#standardize the posterior, so it sums to 1
+posterior <- unstd.posterior/ sum(unstd.posterior)
+
+#To display the posterior distribution now: 
+plot(p_grid,posterior, type="b",
+     xlab="probability of water", ylab="posterior probability")
+mtext("20 points")
+
+```
+
+(2) Quadratic approximation
+```{r Quadratic approximation,echo=FALSE  }
+library(rethinking)
+globe.qa <- quap(
+  alist(
+    W ~ dbinom(W+L, p) , # binomial likelihood
+     p ~ dunif(0,1) # uniform prior
+  ), 
+  data=list(W=6, L=3)
+)
+# display summary of quadratic approximation
+precis (globe.qa)
+
+# analytical calculation
+ W <- 6
+ L <- 3
+ curve(dbeta(x,W+1,L+1), from =0, to=1)
+ # Quadratic approximation 
+ curve (dnorm(x,0.67,0.16), lty=2, add=T)
+```
+
+(3) Markov Chain Monte Carlo
+```{r Markov Chain Monte Carlo,echo=FALSE  }
+n_samples <- 1000
+
+p <- rep(NA, n_samples)
+p[1] <- 0.5
+ W <- 6
+ L <- 3
+for ( i in 2:n_samples){
+  p_new <- rnorm(1, p[i-1], 0.1)
+  if ( p_new < 0) p_new <- abs(p_new)
+  if ( p_new > 1) p_new <- 2 - p_new
+  q0 <- dbinom ( W, W+L, p[i-1])
+  q1 <- dbinom ( W, W+L, p_new)
+  p[i] <- ifelse(runif(1) < q1/q0, p_new, p[i-1])
+} 
+ # the values in p are samples from the posterior distribution
+ # to compare to the analytical posterior
+ dens(p,xlim=c(0,1))
+ curve( dbeta(x,W+1,L+1), lty=2,add=T)
+```
