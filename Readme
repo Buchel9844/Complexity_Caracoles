@@ -25,12 +25,16 @@ Learn when to use sparse approach and the theory behind it, with example.
 
 7. hierarchical modelling : https://betanalpha.github.io/assets/case_studies/hierarchical_modeling.html
 
+8. Bayes Sparse Regression : https://betanalpha.github.io/assets/case_studies/bayes_sparse_regression.html
+
+9. Horse shoe prior : Weiss-lehman, C. et al. Disentangling key species interactions in diverse and heterogeneous communities : A Bayesian sparse modeling approach. (2021).
+
 APPLICATION OF BAYESIAN APPROACH TO CARACOLES DATA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Repository contains the R and stan scripts necessary to recreate the analyses presented in the manuscript "Disentangling key species interactions in diverse and heterogeneous communities: A Bayesian sparse modeling approach", Christopher Weiss-Lehman & al, 2021. 
 https://github.com/tpweiss06/SparseInteractions
--> Code/SparseInteraction
+-> Code/Topher_BH_Final.stan , Code/Topher_BH_FH_Prelimibary.stan and Topher_modelFit.R
 Introduce the sparsity approach, all the following work is based on the approach developped by Christopher Weiss-Lehman & al, 2021. 
 
 2. Martyn, T. E. et al. Identifying ‘useful’ fitness models: balancing the benefits of added complexity with realistic data requirements in models of individual plant fitness. Am. Nat. 4, (2020). 

@@ -4,7 +4,8 @@
 
 rm(list = ls())
 library(rstan)
-library(here)
+
+#library(here)
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 
@@ -16,7 +17,8 @@ EnvCov <- "Phos" # "Phos" or "Shade"
 EnvCol <- 71  # 72 for Canopy or 71 for Phosphorous
 
 # Load in the data and subset out the current focal species.
-SpData <- read.csv(here("Empirical/water_full_env.csv"))
+SpData <- read.csv("data/water_full_env.csv")
+str(SpData)
 SpData <- subset(SpData, select = -c(X.NA., Seedcount.extrapolated.integer))
 SpData <- na.omit(SpData) 
 FocalLetter
@@ -55,16 +57,17 @@ slab_df <- 4
 DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", "Intra", "tau0", "slab_scale", "slab_df")
 
 # Now run a perliminary fit of the model to assess parameter shrinkage
-PrelimFit <- stan(file = here("Empirical/StanCode/BH_FH_Preliminary.stan"), data = DataVec, iter = 3000, 
+PrelimFit <- stan(file = "Code/Topher_BH_FH_Preliminary.stan", data = DataVec, iter = 3000, 
                   chains = 3)
 PrelimPosteriors <- extract(PrelimFit)
 
 ##### Diagnostic plots
-# First check the distribution of Rhats and effective sample sizes
+# First check the distribution of Rhats and effective sample sizes 
+# N.B. amount by which autocorrelation within the chains increases uncertainty in estimates can be measured
 hist(summary(PrelimFit)$summary[,"Rhat"])
 hist(summary(PrelimFit)$summary[,"n_eff"])
 # Next check the correlation among key model parameters and identify any
-#       divergent transitions
+#       c
 pairs(PrelimFit, pars = c("lambdas", "alpha_generic", "alpha_intra"))
 # Finally, check for autocorrelation in the posteriors of key model parameters
 acf(PrelimPosteriors$lambdas[,1,1])
