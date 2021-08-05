@@ -11,6 +11,8 @@ data{
   int<lower = 0> Intra[S];  // Indicator boolean variable to identify the focal species (0 for non-focal and 1 for focal). Included for easier calculations
   int Inclusion_ij[2,S];  // Boolean indicator variables to identify the species x reserve intercept parameters identified for inclusion in the final model
   int Inclusion_eij[2,S]; // Boolean indicator variables to identify the species x reserve slope parameters identified for inclusion in the final model
+  int beta_Inclusion_ij[2,S];  // Boolean indicator variables to identify the species x reserve intercept parameters identified for inclusion in the final model
+  int beta_Inclusion_eij[2,S]; // Boolean indicator variables to identify the species x reserve slope parameters identified for inclusion in the final model
 }
 
 parameters{
@@ -19,6 +21,10 @@ parameters{
   vector[2] alpha_intra_tilde;
   matrix[2,S] alpha_hat_ij;
   matrix[2,S] alpha_hat_eij;
+  
+   vector[2] beta_generic_tilde;
+  matrix[2,S] beta_hat_ijk;
+  matrix[2,S] beta_hat_eijk;
 }
 
 transformed parameters{
