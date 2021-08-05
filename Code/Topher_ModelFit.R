@@ -58,7 +58,7 @@ DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", "Intra", "tau0
 
 # Now run a perliminary fit of the model to assess parameter shrinkage
 PrelimFit <- stan(file = "Code/Topher_BH_FH_Preliminary.stan", data = DataVec, iter = 3000, 
-                  chains = 3)
+                  chains = 1)
 PrelimPosteriors <- extract(PrelimFit)
 
 ##### Diagnostic plots
@@ -68,7 +68,7 @@ hist(summary(PrelimFit)$summary[,"Rhat"])
 hist(summary(PrelimFit)$summary[,"n_eff"])
 # Next check the correlation among key model parameters and identify any
 #       c
-pairs(PrelimFit, pars = c("lambdas", "alpha_generic", "alpha_intra"))
+pairs(PrelimFit, pars = c("lambdas", "alpha_generic", "alpha_intra","beta_generic"))
 # Finally, check for autocorrelation in the posteriors of key model parameters
 acf(PrelimPosteriors$lambdas[,1,1])
 acf(PrelimPosteriors$lambdas[,1,2])
@@ -78,6 +78,8 @@ acf(PrelimPosteriors$alpha_generic[,1])
 acf(PrelimPosteriors$alpha_generic[,2])
 acf(PrelimPosteriors$alpha_intra[,1])
 acf(PrelimPosteriors$alpha_intra[,2])
+acf(PrelimPosteriors$beta_generic[,1])
+acf(PrelimPosteriors$beta_generic[,2])
 
 #### If the diagnostic plots don't reveal any problems wiht the model fit, now
 #       move on to determining which parameters warrant inclusion in the final
@@ -86,21 +88,40 @@ acf(PrelimPosteriors$alpha_intra[,2])
 #       the regularized horseshoe priors.
 Inclusion_ij <- matrix(data = 0, nrow = 2, ncol = S)
 Inclusion_eij <- matrix(data = 0, nrow = 2, ncol = S)
+beta_Inclusion_ij <- matrix(data = 0, nrow = 2, ncol = S)
+beta_Inclusion_eij <- matrix(data = 0, nrow = 2, ncol = S)
 IntLevel <- 0.5 #0.5 usually, 0.75 for Waitzia, shade
 for(i in 1:2){
   for(s in 1:S){
     Ints_ij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_ij[,i,s], credMass = IntLevel)
     Ints_eij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_eij[,i,s], credMass = IntLevel)
+    
+    beta_Ints_ij <- HDInterval::hdi(PrelimPosteriors$beta_hat_ij[,i,s], credMass = IntLevel)
+    beta_Ints_eij <- HDInterval::hdi(PrelimPosteriors$beta_hat_eij[,i,s], credMass = IntLevel)
+    
     if(Ints_ij[1] > 0 | Ints_ij[2] < 0){
       Inclusion_ij[i,s] <- 1
     }
+    if(Ints_eij[1] > 0 | Ints_eij[2] < 0){
+      Inclusion_eij[i,s] <- 1
+    }
+    if(beta_Ints_eij[1] > 0 | beta_Ints_eij[2] < 0){
+      beta_Inclusion_eij[i,s] <- 1
+    }
+
+    if(beta_Ints_ij[1] > 0 | beta_Ints_ij[2] < 0){
+      beta_Inclusion_ij[i,s] <- 1
+    }
   }
 }
+
 sum(Inclusion_ij)
 sum(Inclusion_eij)
+sum(beta_Inclusion_ij)
+sum(beta_Inclusion_eij)
 
 DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", "Intra",
-             "Inclusion_ij", "Inclusion_eij")
+             "Inclusion_ij", "Inclusion_eij","beta_Inclusion_ij", "beta_Inclusion_eij")
 FinalFit <- stan(file = here("Empirical/StanCode/BH_Final.stan"), data = DataVec, iter = 3000, chains = 3)
 FinalPosteriors <- extract(FinalFit)
 
