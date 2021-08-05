@@ -4,7 +4,7 @@ INTRODUCTION TO THE THEORY
 To begin the exploration of the theory, I navigate throught different resources. For each I created a script that implement the example. 
 
 1. Statistical Rethinking - A Bayesian Course with Examples in R and Stan - Richard McElreath - Sec. ED. -> Code/RethinkingR.Rmd
-The book gives the first step of theory behing bayesian thinking, with easy examples. 
+The book gives the first step of theory behing bayesian thinking, with easy examples. You can also find his lectures here (https://www.youtube.com/channel/UCNJK6_DZvcMqNSzQdEkzvzA/playlists) and an adaptation of the book codes with brms, ggplot and tidyverse, here (https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/). 
 
 2. An Introduction to Stan, Michael Betancourt, March 2020  - https://betanalpha.github.io/assets/case_studies/stan_intro.html#2_the_stan_ecosystem
 -> Code/stan101.R and Code/stan101.rds and Code/stan101.stan
@@ -21,13 +21,17 @@ Good tutorial to install Stan, C++ and BRMS. BRMS is a good package, with buildi
 -> Code/Sparsity_blues.R
 Learn when to use sparse approach and the theory behind it, with example. 
 
-6. inverse function: https://discourse.mc-stan.org/t/inverse-function-in-modeling/5466
+6. Inverse function: https://discourse.mc-stan.org/t/inverse-function-in-modeling/5466
 
-7. hierarchical modelling : https://betanalpha.github.io/assets/case_studies/hierarchical_modeling.html
+7. Hierarchical modelling : https://betanalpha.github.io/assets/case_studies/hierarchical_modeling.html
 
 8. Bayes Sparse Regression : https://betanalpha.github.io/assets/case_studies/bayes_sparse_regression.html
 
 9. Horse shoe prior : Weiss-lehman, C. et al. Disentangling key species interactions in diverse and heterogeneous communities : A Bayesian sparse modeling approach. (2021).
+
+10. Posterior predited recruitment : exemple for Beverton–Holt modelling https://meridian.allenpress.com/jfwm/article/10/2/691/433057/Bayesian-Model-Selection-in-Fisheries-Management
+
+11. Bayes theorem, theory and application : https://jrnold.github.io/bayesian_notes/bayesian-computation.html
 
 APPLICATION OF BAYESIAN APPROACH TO CARACOLES DATA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
