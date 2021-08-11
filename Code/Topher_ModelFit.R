@@ -119,7 +119,7 @@ for(i in 1:2){
 
 sum(Inclusion_ij)
 sum(Inclusion_eij)
-sum(beta_Inclusion_ij)
+sum(beta_Inclusion_ij) # 0 means that no specific HOIs are relevant
 sum(beta_Inclusion_eij)
 
 DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", "Intra",
