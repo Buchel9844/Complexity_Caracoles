@@ -153,7 +153,7 @@ model{
         alpha_eij[i,s] = exp((1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + (1-Intra[s]) * alpha_hat_ij[reserve[i],s] + ((1-Intra[s]) * alpha_generic[2] + (1-Intra[s]) * alpha_hat_eij[reserve[i],s] + Intra[s] * alpha_intra[2]) * env[i]);
         
         for(k in 1:S){
-        beta_eij[s,k] = exp(beta_generic[1] + beta_hat_ij[reserve[i],s]);
+        beta_eij[s,k] = exp(beta_generic[1] + beta_hat_ij[reserve[i],s] + (beta_generic[2] +  beta_hat_eij[reserve[i],s]) * env[i]);
         }
         
         matrix_beta_eij[i,s] = sum(beta_eij[s,] .* matrix_HOIs[s,]);

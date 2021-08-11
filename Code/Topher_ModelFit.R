@@ -3,8 +3,9 @@
 #       figures for the manuscript
 
 rm(list = ls())
-library(rstan)
-
+library("rstan")
+install.packages("HDInterval")
+library("HDInterval")
 #library(here)
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
@@ -58,7 +59,7 @@ DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", "Intra", "tau0
 
 # Now run a perliminary fit of the model to assess parameter shrinkage
 PrelimFit <- stan(file = "Code/Topher_BH_FH_Preliminary.stan", data = DataVec, iter = 3000, 
-                  chains = 1)
+                  chains = 3)
 PrelimPosteriors <- extract(PrelimFit)
 
 ##### Diagnostic plots
@@ -93,6 +94,7 @@ beta_Inclusion_eij <- matrix(data = 0, nrow = 2, ncol = S)
 IntLevel <- 0.5 #0.5 usually, 0.75 for Waitzia, shade
 for(i in 1:2){
   for(s in 1:S){
+    # hdi : Calculate the highest density interval (HDI) for a probability distribution for a given probability mass
     Ints_ij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_ij[,i,s], credMass = IntLevel)
     Ints_eij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_eij[,i,s], credMass = IntLevel)
     
