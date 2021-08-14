@@ -124,7 +124,7 @@ sum(beta_Inclusion_eij)
 
 DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", "Intra",
              "Inclusion_ij", "Inclusion_eij","beta_Inclusion_ij", "beta_Inclusion_eij")
-FinalFit <- stan(file = here("Empirical/StanCode/BH_Final.stan"), data = DataVec, iter = 3000, chains = 3)
+FinalFit <- stan(file = "Code/Topher_BH_Final.stan", data = DataVec, iter = 3000, chains = 3)
 FinalPosteriors <- extract(FinalFit)
 
 # Diagnostic figures
@@ -140,6 +140,6 @@ acf(FinalPosteriors$alpha_generic[,2])
 acf(FinalPosteriors$alpha_intra[,1])
 acf(FinalPosteriors$alpha_intra[,2])
 
-FileName <- paste(here("Empirical/StanFits/"), FocalPrefix, "_", EnvCov, "_FinalFit.rdata", sep = "")
+FileName <- paste("Code/", FocalPrefix, "_", EnvCov, "_FinalFit.rdata", sep = "")
 save(FinalFit, SpNames, N, S, Fecundity, reserve, SpMatrix, env, Inclusion_ij,
      Inclusion_eij, tau0, slab_scale, slab_df, Intra, file = FileName)

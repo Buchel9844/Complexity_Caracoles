@@ -23,8 +23,8 @@ parameters{
   matrix[2,S] alpha_hat_eij;
   
    vector[2] beta_generic_tilde;
-  matrix[2,S] beta_hat_ijk;
-  matrix[2,S] beta_hat_eijk;
+  matrix[2,S] beta_hat_ij;
+  matrix[2,S] beta_hat_eij;
 }
 
 transformed parameters{
@@ -49,7 +49,7 @@ model{
   //     of the the alpha*N values for each species.
   vector[N] F_hat;
   vector[N] interaction_effects;
-  vector[N] HOIs_effects;
+  vector[N] HOI_effects;
   matrix[N,S] alpha_eij;
   matrix[N,S] beta_eij;
   vector[N] lambda_ei;
@@ -93,7 +93,7 @@ matrix[S,S] matrix_HOIs;
     }
      HOI_effects[i] = sum(matrix_beta_eij[i,]);
     interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]);
-    F_hat[i] = lambda_ei[i] / (1 + interaction_effects[i]);
+    F_hat[i] = lambda_ei[i] / (1 + interaction_effects[i] + HOI_effects[i]);
   }
   Fecundity ~ poisson(F_hat);
 }
