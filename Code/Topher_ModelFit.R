@@ -3,8 +3,11 @@
 #       figures for the manuscript
 
 rm(list = ls())
+remotes::install_version("ggplot2", version = "3.3.5", 
+                         repos = "http://cran.us.r-project.org")  
+#library(ggplot2)
 library("rstan")
-install.packages("HDInterval")
+#install.packages("HDInterval")
 library("HDInterval")
 #library(here)
 options(mc.cores = parallel::detectCores())
@@ -22,7 +25,7 @@ SpData <- read.csv("data/water_full_env.csv")
 str(SpData)
 SpData <- subset(SpData, select = -c(X.NA., Seedcount.extrapolated.integer))
 SpData <- na.omit(SpData) 
-FocalLetter
+
 SpDataFocal <- subset(SpData, Focal.sp.x == FocalLetter)
 
 # Next continue to extract the data needed to run the model. 
@@ -50,12 +53,14 @@ for(s in 1:ncol(AllSpAbunds)){
 SpNames <- AllSpNames[SpToKeep]
 Intra <- ifelse(SpNames == FocalSpecies, 1, 0)
 
+
 # Set the parameters defining the regularized horseshoe prior, as described in
 #       the "Incorporating sparsity-inducing priors" section of the manuscript.
 tau0 <- 1
 slab_scale <- sqrt(2)
 slab_df <- 4
-DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", "Intra", "tau0", "slab_scale", "slab_df")
+DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", 
+             "Intra", "tau0", "slab_scale", "slab_df")
 
 # Now run a perliminary fit of the model to assess parameter shrinkage
 PrelimFit <- stan(file = "Code/Topher_BH_FH_Preliminary.stan", data = DataVec, iter = 3000, 
@@ -71,6 +76,9 @@ hist(summary(PrelimFit)$summary[,"n_eff"])
 #       c
 pairs(PrelimFit, pars = c("lambdas", "alpha_generic", "alpha_intra","beta_generic"))
 # Finally, check for autocorrelation in the posteriors of key model parameters
+# N.B.  ACF =  autocorrelation function = 
+# coefficient of correlation between two values in a time series
+# how to interpret ACF : https://medium.com/analytics-vidhya/interpreting-acf-or-auto-correlation-plot-d12e9051cd14
 acf(PrelimPosteriors$lambdas[,1,1])
 acf(PrelimPosteriors$lambdas[,1,2])
 acf(PrelimPosteriors$lambdas[,2,1])
@@ -82,6 +90,12 @@ acf(PrelimPosteriors$alpha_intra[,2])
 acf(PrelimPosteriors$beta_generic[,1])
 acf(PrelimPosteriors$beta_generic[,2])
 
+# Briefly, the scale is from -1 to 1 because it is the correlation coefficient.
+# From the graph we can see the lags do not have significant effect
+# (within the bounds - cannot tell them from being zero). 
+# The ACF function says if the current value depends consistently on previous 
+# values (the lags)
+str(PrelimPosteriors)
 #### If the diagnostic plots don't reveal any problems wiht the model fit, now
 #       move on to determining which parameters warrant inclusion in the final
 #       model (i.e. the data pulled their posteriors away from 0). The final model
@@ -92,6 +106,9 @@ Inclusion_eij <- matrix(data = 0, nrow = 2, ncol = S)
 beta_Inclusion_ij <- matrix(data = 0, nrow = 2, ncol = S)
 beta_Inclusion_eij <- matrix(data = 0, nrow = 2, ncol = S)
 IntLevel <- 0.5 #0.5 usually, 0.75 for Waitzia, shade
+is.list(PrelimPosteriors$beta_hat_ij)
+str(PrelimPosteriors$beta_hat_ij)
+str(PrelimPosteriors$alpha_hat_ij)
 for(i in 1:2){
   for(s in 1:S){
     # hdi : Calculate the highest density interval (HDI) for a probability distribution for a given probability mass
@@ -130,7 +147,7 @@ FinalPosteriors <- extract(FinalFit)
 # Diagnostic figures
 hist(summary(FinalFit)$summary[,"Rhat"])
 hist(summary(FinalFit)$summary[,"n_eff"])
-pairs(FinalFit, pars = c("lambdas", "alpha_generic", "alpha_intra"))
+pairs(FinalFit, pars = c("lambdas", "alpha_generic", "alpha_intra","beta_generic"))
 acf(FinalPosteriors$lambdas[,1,1])
 acf(FinalPosteriors$lambdas[,1,2])
 acf(FinalPosteriors$lambdas[,2,1])
@@ -139,7 +156,10 @@ acf(FinalPosteriors$alpha_generic[,1])
 acf(FinalPosteriors$alpha_generic[,2])
 acf(FinalPosteriors$alpha_intra[,1])
 acf(FinalPosteriors$alpha_intra[,2])
+acf(FinalPosteriors$beta_generic[,1])
+acf(FinalPosteriors$beta_generic[,2])
 
-FileName <- paste("Code/", FocalPrefix, "_", EnvCov, "_FinalFit.rdata", sep = "")
+FileName <- paste("Results/", FocalPrefix, "_", EnvCov, "_FinalFit.rdata", sep = "")
 save(FinalFit, SpNames, N, S, Fecundity, reserve, SpMatrix, env, Inclusion_ij,
-     Inclusion_eij, tau0, slab_scale, slab_df, Intra, file = FileName)
+     Inclusion_eij,beta_Inclusion_ij,beta_Inclusion_eij, 
+     tau0, slab_scale, slab_df, Intra, file = FileName)

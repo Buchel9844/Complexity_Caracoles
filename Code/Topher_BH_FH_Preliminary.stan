@@ -26,18 +26,20 @@ parameters{
   vector[2] alpha_intra_tilde;
   
   vector[2] beta_generic_tilde;
-  vector[2] beta_intra_tilde;
-  
+
   matrix[2,S] alpha_hat_ij_tilde;
   matrix[2,S] alpha_hat_eij_tilde;
   
-  matrix[2,S] beta_hat_ij_tilde;
-  matrix[2,S] beta_hat_eij_tilde;
+
+  real beta_hat_ijk_tilde[2,S,S];
+  real beta_hat_eijk_tilde[2,S,S];
+  
   matrix<lower = 0>[2,S] local_shrinkage_ij;
   matrix<lower = 0>[2,S] local_shrinkage_eij;
   
-  matrix<lower = 0>[2,S] beta_local_shrinkage_ij;
-  matrix<lower = 0>[2,S] beta_local_shrinkage_eij;
+  real<lower = 0> beta_local_shrinkage_ijk[2,S,S];
+  real<lower = 0> beta_local_shrinkage_eijk[2,S,S];
+  
   real<lower = 0> c2_tilde;
   real<lower = 0> tau_tilde;
 }
@@ -52,10 +54,10 @@ transformed parameters{
   matrix[2,S] alpha_hat_eij;
   matrix[2,S] local_shrinkage_eij_tilde;
   
-  matrix[2,S] beta_hat_ij;
-  matrix[2,S] beta_local_shrinkage_ij_tilde;
-  matrix[2,S] beta_hat_eij;
-  matrix[2,S] beta_local_shrinkage_eij_tilde;
+  real beta_hat_ijk[2,S,S];
+  real beta_local_shrinkage_ijk_tilde[2,S,S];
+  real beta_hat_eijk[2,S,S];
+  real beta_local_shrinkage_eijk_tilde[2,S,S];
   
   vector[2] alpha_generic;
   vector[2] alpha_intra;
@@ -74,12 +76,13 @@ transformed parameters{
       local_shrinkage_eij_tilde[i,s] = sqrt( c2 * square(local_shrinkage_eij[i,s]) / (c2 + square(tau) * square(local_shrinkage_eij[i,s])) );
       alpha_hat_eij[i,s] = tau * local_shrinkage_eij_tilde[i,s] * alpha_hat_eij_tilde[i,s];
 
-      beta_local_shrinkage_ij_tilde[i,s] = sqrt( c2 * square(beta_local_shrinkage_ij[i,s]) / (c2 + square(tau) * square(beta_local_shrinkage_ij[i,s])) );
-      beta_hat_ij[i,s] = tau * beta_local_shrinkage_ij_tilde[i,s] * beta_hat_ij_tilde[i,s];
+ for(k in 1:S){
+      beta_local_shrinkage_ijk_tilde[i,s,k] = sqrt( c2 * square(beta_local_shrinkage_ijk[i,s,k]) / (c2 + square(tau) * square(beta_local_shrinkage_ijk[i,s,k])) );
+      beta_hat_ijk[i,s,k] = tau * beta_local_shrinkage_ijk_tilde[i,s,k] * beta_hat_ijk_tilde[i,s,k];
 
-      beta_local_shrinkage_eij_tilde[i,s] = sqrt( c2 * square(beta_local_shrinkage_eij[i,s]) / (c2 + square(tau) * square(beta_local_shrinkage_eij[i,s])) );
-      beta_hat_eij[i,s] = tau * beta_local_shrinkage_eij_tilde[i,s] * beta_hat_eij_tilde[i,s];
-
+      beta_local_shrinkage_eijk_tilde[i,s,k] = sqrt( c2 * square(beta_local_shrinkage_eijk[i,s,k]) / (c2 + square(tau) * square(beta_local_shrinkage_eijk[i,s,k])) );
+      beta_hat_eijk[i,s,k] = tau * beta_local_shrinkage_eijk_tilde[i,s,k] * beta_hat_eijk_tilde[i,s,k];
+ }
     }
   }
 
@@ -125,41 +128,48 @@ model{
     alpha_hat_eij_tilde[i,] ~ normal(0,1);
     local_shrinkage_eij[i,] ~ normal(0,1);
     
+for (s in 1:S){
+    beta_hat_ijk_tilde[i,s,] ~ normal(0,1); 
+    beta_local_shrinkage_ijk[i,s,] ~ cauchy(0,1);
 
-    beta_hat_ij_tilde[i,] ~ normal(0,1);
-    beta_local_shrinkage_ij[i,] ~ cauchy(0,1);
-
-    beta_hat_eij_tilde[i,] ~ normal(0,1);
-    beta_local_shrinkage_eij[i,] ~ normal(0,1);
+    beta_hat_eijk_tilde[i,s,] ~ normal(0,1);
+    beta_local_shrinkage_eijk[i,s] ~ normal(0,1);
+}
     
   }
   tau_tilde ~ cauchy(0,1);
   c2_tilde ~ inv_gamma(half_slab_df, half_slab_df);
 
   // implement the biological model
-  for(i in 1:N){
+  for(i in 1:N){ // for the observation N 
     lambda_ei[i] = exp(lambdas[reserve[i],1] + lambdas[reserve[i],2] * env[i]);
     
-    Spmatrixi[1,] = SpMatrix[i,];
+    // creation of a matrix of S by S of the interaction jk in HOIs_ijk
+    
+    Spmatrixi[1,] = SpMatrix[i,]; 
     for (n in 1:S) {
           for (m in 1:S) {
             if (m <= n){
               matrix_HOIs[n,m] = 0;
             }
-        matrix_HOIs[n,m] = Spmatrixi[1,n]* Spmatrixi[1,m]; 
+            else{
+        matrix_HOIs[n,m] = Spmatrixi[1,n]* Spmatrixi[1,m];
+            } 
         }
         }
-    for(s in 1:S){
+        
+      for(s in 1:S){ // for one competing species j in alpha_ij, here s = species j
         alpha_eij[i,s] = exp((1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + (1-Intra[s]) * alpha_hat_ij[reserve[i],s] + ((1-Intra[s]) * alpha_generic[2] + (1-Intra[s]) * alpha_hat_eij[reserve[i],s] + Intra[s] * alpha_intra[2]) * env[i]);
         
-        for(k in 1:S){
-        beta_eij[s,k] = exp(beta_generic[1] + beta_hat_ij[reserve[i],s] + (beta_generic[2] +  beta_hat_eij[reserve[i],s]) * env[i]);
+        for(k in 1:S){ // for all third competing species k in HOIs_ijk, here k = species k 
+        beta_eij[s,k] = exp(beta_generic[1] + beta_hat_ijk[reserve[i],s,k] + (beta_generic[2] +  beta_hat_eijk[reserve[i],s,k]) * env[i]);
         }
         
         matrix_beta_eij[i,s] = sum(beta_eij[s,] .* matrix_HOIs[s,]);
     }
      HOI_effects[i] = sum(matrix_beta_eij[i,]);
-    interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]);
+     
+     interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]);
    
     
     F_hat[i] = lambda_ei[i] / (1 + interaction_effects[i] + HOI_effects[i]);
