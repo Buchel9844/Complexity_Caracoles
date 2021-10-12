@@ -103,41 +103,45 @@ str(PrelimPosteriors)
 #       the regularized horseshoe priors.
 Inclusion_ij <- matrix(data = 0, nrow = 2, ncol = S)
 Inclusion_eij <- matrix(data = 0, nrow = 2, ncol = S)
-beta_Inclusion_ij <- matrix(data = 0, nrow = 2, ncol = S)
-beta_Inclusion_eij <- matrix(data = 0, nrow = 2, ncol = S)
+beta_Inclusion_ij <- matrix(data = 0, nrow = S, ncol = S)
+beta_Inclusion_eij <- matrix(data = 0, nrow = S, ncol = S)
+beta_Inclusion <-list()
 IntLevel <- 0.5 #0.5 usually, 0.75 for Waitzia, shade
 is.list(PrelimPosteriors$beta_hat_ij)
-str(PrelimPosteriors$beta_hat_ij)
+str(PrelimPosteriors$beta_hat_ijk)
 str(PrelimPosteriors$alpha_hat_ij)
 for(i in 1:2){
   for(s in 1:S){
     # hdi : Calculate the highest density interval (HDI) for a probability distribution for a given probability mass
     Ints_ij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_ij[,i,s], credMass = IntLevel)
     Ints_eij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_eij[,i,s], credMass = IntLevel)
-    
-    beta_Ints_ij <- HDInterval::hdi(PrelimPosteriors$beta_hat_ij[,i,s], credMass = IntLevel)
-    beta_Ints_eij <- HDInterval::hdi(PrelimPosteriors$beta_hat_eij[,i,s], credMass = IntLevel)
-    
     if(Ints_ij[1] > 0 | Ints_ij[2] < 0){
       Inclusion_ij[i,s] <- 1
     }
     if(Ints_eij[1] > 0 | Ints_eij[2] < 0){
       Inclusion_eij[i,s] <- 1
     }
+    
+    for(m in 1:S){
+    beta_Ints_ij <- HDInterval::hdi(PrelimPosteriors$beta_hat_ijk[,i,s,m], credMass = IntLevel)
+    beta_Ints_eij <- HDInterval::hdi(PrelimPosteriors$beta_hat_eijk[,i,s,m], credMass = IntLevel)
+    
     if(beta_Ints_eij[1] > 0 | beta_Ints_eij[2] < 0){
-      beta_Inclusion_eij[i,s] <- 1
+      beta_Inclusion_eij[s,m] <- 1
     }
-
+    
     if(beta_Ints_ij[1] > 0 | beta_Ints_ij[2] < 0){
-      beta_Inclusion_ij[i,s] <- 1
+      beta_Inclusion_ij[s,m] <- 1
+    }
     }
   }
+  beta_Inclusion[[i]] <- list(beta_Inclusion_eij,beta_Inclusion_ij)
 }
 
 sum(Inclusion_ij)
 sum(Inclusion_eij)
-sum(beta_Inclusion_ij) # 0 means that no specific HOIs are relevant
-sum(beta_Inclusion_eij)
+sum(beta_Inclusion[[1]][[1]]) + sum(beta_Inclusion[[2]][[1]]) # 0 means that no specific HOIs are relevant
+sum(beta_Inclusion[[1]][[2]]) + sum(beta_Inclusion[[2]][[2]]) # 0 means that no specific HOIs are relevant
 
 DataVec <- c("N", "S", "Fecundity", "reserve", "SpMatrix", "env", "Intra",
              "Inclusion_ij", "Inclusion_eij","beta_Inclusion_ij", "beta_Inclusion_eij")
