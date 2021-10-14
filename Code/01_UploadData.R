@@ -8,79 +8,91 @@ str(plot.coords)
 # Plant abundance and competition
 #################################################################################
 #---- Import the Data ----
-abundance.plant <- read.csv("Caracoles/UnderTheHood/data/to_delete/abundances_ME_wide.csv", sep=";")
+abundance.plant <- read.csv("/Users/lisabuche/Code/Project/Caracoles/UnderTheHood/data/abundance.csv", sep=",")
 str(abundance.plant)
-code.plant <- c(names(abundance.plant[,6:ncol(abundance.plant)]))
-abundance.plant.gathered <- gather(abundance.plant, all_of(code.plant),
-               key = "code.plant", value = "abundance")
-head(abundance.plant.gathered)
+code.plant <- levels(abundance.plant$species)
+abundance.plant  <- subset(abundance.plant, year %in% years)
 
-competition.plant <- read.csv("Caracoles/UnderTheHood/data/to_delete/competition_ME_wide.csv", sep=";")
+competition.plant <- read.csv("/Users/lisabuche/Code/Project/Caracoles/UnderTheHood/data/competition.csv", sep=",")
 str(competition.plant)
-names(competition.plant)[4] <- "id.plant"
 
+competition.plant <- subset(competition.plant, year %in% years)
 
 #---- Classify the plant ----
 plant.class <- read.csv("data/plant_class.csv", sep=",")
 
 #---- visualise abundance ----
-abundance.plant.gathered.short <- aggregate(abundance ~ year+month+day +code.plant,
-                                            abundance.plant.gathered,mean)
-  
-abundance.plant.gathered.short <- unite(abundance.plant.gathered.short,year,month,day,
+abundance.plant.gathered <- aggregate(individuals ~ year + month + day + species,
+                                            abundance.plant,mean)
+  library(tidyr)
+abundance.plant.gathered <- unite(abundance.plant.gathered,year,month,day,
                                         col="date",sep = "-", remove = F)
 
-head(abundance.plant.gathered)
 
-abundance.plant.gathered.short$date <- as.Date(abundance.plant.gathered.short$date)
-
-ggplot(abundance.plant.gathered.short,aes(x=date,y=abundance,color=code.plant)) +
+abundance.plant.gathered$date <- as.Date(abundance.plant.gathered$date)
+library(ggplot2)
+ggplot(abundance.plant.gathered,aes(x=date,y=individuals,color=species)) +
   geom_line() + 
   xlab("") +
-  scale_x_date(date_labels = "%Y %b")
+  scale_x_date(date_labels = "%Y %b") +
+  scale_y_sqrt("mean abundance per subplot per day ") + 
+  theme_bw()
 
 #---- to determine the rare species througt the years -----
-abundance.sp.years <- right_join(aggregate(abundance ~ year + code.plant, abundance.plant.gathered,sum),
-       aggregate(abundance ~ year,abundance.plant.gathered,sum),
+library(dplyr)
+abundance.sp.years <- full_join(aggregate(individuals ~ year + species, abundance.plant,sum),
+       aggregate(individuals ~ year,abundance.plant,sum),
        by = c("year"),
        suffix = c(".sp.year", ".year"))
  head(abundance.sp.years)
 
- abundance.sp.years$ratio <- abundance.sp.years$abundance.sp.year/abundance.sp.years$abundance.year
- abundance.sp.years$ratio.all.years <- abundance.sp.years$abundance.year/ sum(abundance.plant.gathered$abundance,na.rm=T)
+ abundance.sp.years$ratio <- abundance.sp.years$individuals.sp.year/abundance.sp.years$individuals.year
+ 
+ abundance.sp.all.years <- aggregate(ratio ~  species, abundance.sp.years,sum)
  
  abundance.sp.years$rare <- F
  abundance.sp.years$rare[which(abundance.sp.years$ratio < 0.01)] <- T
- abundance.sp.years$rare.all.years <- F
- abundance.sp.years$rare[which(abundance.sp.years$ratio.all.years < 0.01)] <- T
+
+
+ abundance.rare <- aggregate(rare ~ species,abundance.sp.years,mean)
  
- 
- abundance.rare <- aggregate(rare ~ code.plant,abundance.sp.years,mean)
  abundance.rare$rare.overall <- "abundant"
  # give the species which were rare (>1% of the total abundance) over more than one year 
- 
  abundance.rare$rare.overall[which(abundance.rare$rare >= 0.4)] <- "rare"
+ 
  abundance.rare <- abundance.rare[,-2]
- 
- #---- Join dataset ----
- code.plant.comp <- c(names(competition.plant[,7:ncol(competition.plant)]))
- 
- plant.class <- right_join(plant.class,abundance.rare, by = c("code.plant"))
+ names(abundance.rare) <-c("code.plant","rareORabundant")
 
-  competition.plant.test <- gather(competition.plant,all_of(code.plant.comp),
+ 
+ #---- Join dataset with plant.class ----
+ 
+ 
+ plant.class <- read.csv("data/plant_class.csv", sep=",")
+ 
+ plant.class <- right_join( plant.class, abundance.rare)
+ 
+ plant.class <- write.csv( plant.class,"data/plant_class.csv")
+ plant.class <-  plant.class[,-c(1,2)]
+ 
+ 
+plant.class <- right_join(plant.class,abundance.rare, by = c("code.plant"))
+names(competition.plant)
+code.plant.comp <- names(competition.plant)[!names(competition.plant) %in%
+                                              c("day","month", "year","plot","subplot" ,"focal","fruit","seed")]
+competition.plant.test <- gather(competition.plant,all_of(code.plant.comp),
                                   key = "code.plant", value = "abundance")
  
  head(competition.plant.test)
  
- competition.plant.test <- inner_join(competition.plant.test,plant.class, by = c("code.plant"))
-head(competition.plant.test.test)
+ competition.plant.test <- inner_join(competition.plant.test, plant.class, by = c("code.plant"))
+head(competition.plant.test)
 
 # merge data frame horyzntally
-
+names(competition.plant)
  for ( n in names(plant.class)[c(!names(plant.class) %in% c("code.plant","species"))]){
    competition.plant.test.test <- competition.plant.test %>%
-     dplyr::select(year,plot,subplot,id.plant,fruit,seed,abundance,n)
-   competition.plant.test.test <-aggregate(abundance ~ competition.plant.test.test[,n] + year + plot + subplot+ id.plant+ fruit + seed,
+     dplyr::select(year,plot,subplot,focal,fruit,abundance,seed,n)
+   competition.plant.test.test <-aggregate(abundance ~ competition.plant.test.test[,n] + year + plot + subplot+ focal+ fruit + seed,
                                            competition.plant.test.test,sum)
    
    names(competition.plant.test.test)[1] <- c(n) 
@@ -89,11 +101,10 @@ head(competition.plant.test.test)
    
    competition.plant <- inner_join(competition.plant,
                                    competition.plant.test.test, 
-                                   by = c("year","plot","subplot","id.plant","fruit","seed"))
+                                   by = c("year","plot","subplot","focal","fruit","seed"))
    }
  
-
- head(competition.plant)
+ write.csv( competition.plant,"data/competition.csv")
 
 #################################################################################
 # HigherTL & floral visitor
