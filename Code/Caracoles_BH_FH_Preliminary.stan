@@ -14,6 +14,7 @@ data{
   real tau0; 		// determines the scale of the global shrinkage parameter (tau)
   real slab_scale;	// scale for significant alpha_sp values
   real slab_df;		// effective degrees of freedom for significant alpha_sp values
+
 }
 
 transformed data{
@@ -22,22 +23,22 @@ transformed data{
 }
 
 parameters{
-  matrix[7,2] lambdas;
+  matrix[3,2] lambdas;
   vector[2] alpha_generic_tilde;
   vector[2] alpha_intra_tilde;
   
   vector[2] beta_generic_tilde;
 
-  matrix[7,S] alpha_hat_ij_tilde;
+  matrix[3,S] alpha_hat_ij_tilde;
   //matrix[2,S] alpha_hat_eij_tilde;
 
-  real beta_hat_ijk_tilde[7,S,S];
+  real beta_hat_ijk_tilde[3,S,S];
   //real beta_hat_eijk_tilde[2,S,S];
   
-  matrix<lower = 0>[7,S] local_shrinkage_ij;
+  matrix<lower = 0>[3,S] local_shrinkage_ij;
   //matrix<lower = 0>[2,S] local_shrinkage_eij;
   
-  real<lower = 0> beta_local_shrinkage_ijk[7,S,S];
+  real<lower = 0> beta_local_shrinkage_ijk[3,S,S];
   //real<lower = 0> beta_local_shrinkage_eijk[2,S,S];
   
   real<lower = 0> c2_tilde;
@@ -49,13 +50,13 @@ transformed parameters{
   // 	counterparts declared in the parameters block
   real c2;
   real tau;
-  matrix[7,S] alpha_hat_ij;
-  matrix[7,S] local_shrinkage_ij_tilde;
+  matrix[3,S] alpha_hat_ij;
+  matrix[3,S] local_shrinkage_ij_tilde;
   //matrix[2,S] alpha_hat_eij;
   //matrix[2,S] local_shrinkage_eij_tilde;
   
-  real beta_hat_ijk[7,S,S];
-  real beta_local_shrinkage_ijk_tilde[7,S,S];
+  real beta_hat_ijk[3,S,S];
+  real beta_local_shrinkage_ijk_tilde[3,S,S];
   //real beta_hat_eijk[2,S,S];
   //real beta_local_shrinkage_eijk_tilde[2,S,S];
   
@@ -67,8 +68,8 @@ transformed parameters{
   tau = tau0*tau_tilde; 	// tau ~ cauchy(0, tau0)
   c2 = slab_scale2*c2_tilde;	// c2 ~ inv_gamma(half_slab_df, half_slab_df*slab_scale2)
 
-  // This calculation follows equation 2.8 in Piironen and Vehtari 2017
-  for(i in 1:7){
+  // This calculation follows equation 2.8 in Piironen and Vehtari 2013
+  for(i in 1:3){
     for(s in 1:S){
       local_shrinkage_ij_tilde[i,s] = sqrt( c2 * square(local_shrinkage_ij[i,s]) / (c2 + square(tau) * square(local_shrinkage_ij[i,s])) );
       alpha_hat_ij[i,s] = tau * local_shrinkage_ij_tilde[i,s] * alpha_hat_ij_tilde[i,s];
@@ -111,13 +112,13 @@ model{
   alpha_generic_tilde ~ normal(0,1);
   alpha_intra_tilde ~ normal(0,1);
   beta_generic_tilde ~ normal(0,1);
-  for(i in 1:7){ //  1 to number of years included in the data
+  for(i in 1:3){ //  1 to number of years included in the data
     lambdas[i,] ~ normal(0, 1);
   }
 
   // set the hierarchical priors for the Finnish horseshoe (regularized horseshoe) (Piironen and Vehtari 2017)
   // Following the stan implementation from https://betanalpha.github.io/assets/case_studies/bayes_sparse_regression.html
-  for(i in 1:7){
+  for(i in 1:3){
     alpha_hat_ij_tilde[i,] ~ normal(0,1);
     local_shrinkage_ij[i,] ~ cauchy(0,1);
 

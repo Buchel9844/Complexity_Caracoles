@@ -2,25 +2,25 @@
 // 	following the stan implementation demonstrated on https://betanalpha.github.io/assets/case_studies/bayes_sparse_regression.html
 
 data{
-  int<lower = 1> N;  // Number of plots
+  int<lower = 1> N;  // Number of observations
   int<lower = 1> S;  // Number of species
   int Fecundity[N];  // Fecundity of the focal species in each plot
   int year[N];   // Indicator the year of each observation
   matrix[N,S] SpMatrix;  // Matrix of abundances for each species (including abundances of non-focal individuals of the focal species)
   //vector[N] env;  // Environmental values for each plot
   int<lower = 0> Intra[S];  // Indicator boolean variable to identify the focal species (0 for non-focal and 1 for focal). Included for easier calculations
-  int Inclusion_ij[2,S];  // Boolean indicator variables to identify the species x reserve intercept parameters identified for inclusion in the final model
-   int beta_Inclusion_ij[2,S];  // Boolean indicator variables to identify the species x reserve intercept parameters identified for inclusion in the final model
+  int Inclusion_ij[3,S];  // Boolean indicator variables to identify the species x reserve intercept parameters identified for inclusion in the final model
+   int beta_Inclusion[S*3,S+1];  // Boolean indicator variables to identify the species x reserve intercept parameters identified for inclusion in the final model
 }
 
 parameters{
-  matrix[7,2] lambdas;
+  matrix[3,2] lambdas;
   vector[2] alpha_generic_tilde;
   vector[2] alpha_intra_tilde;
-  matrix[7,S] alpha_hat_ij;
+  matrix[3,S] alpha_hat_ij;
 
    vector[2] beta_generic_tilde;
-   real beta_hat_ij[7,S,S];
+   real beta_hat_ij[3,S,S];
 }
 
 transformed parameters{
@@ -58,7 +58,7 @@ matrix[S,S] matrix_HOIs;
   alpha_generic_tilde ~ normal(0,1);
   alpha_intra_tilde ~ normal(0,1);
   beta_generic_tilde ~ normal(0,1);
-  for(i in 1:7){
+  for(i in 1:3){
     lambdas[i,] ~ normal(0, 1);
     alpha_hat_ij[i,] ~ normal(0,1);
     
@@ -83,7 +83,9 @@ matrix[S,S] matrix_HOIs;
       alpha_eij[i,s] = exp((1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + Inclusion_ij[year[i],s] * alpha_hat_ij[year[i],s]);
       
       for(k in 1:S){ // for all third competing species k in HOIs_ijk, here k = species k 
-        beta_eij[s,k] = exp(beta_generic[1] + beta_Inclusion_ij[year[i],s].beta_hat_ij[year[i],s,k]) ;
+
+        beta_eij[s,k] = exp(beta_generic[1] + beta_Inclusion[k*year[i],s]*beta_hat_ij[year[i],s,k]) ;
+        
         }
         
         
