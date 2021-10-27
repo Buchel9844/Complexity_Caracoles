@@ -14,16 +14,18 @@ ReserveNames <- c("Bendering", "Perenjori")
 load("Results/WAAC_Phos_FinalFit.rdata")
 Post <- rstan::extract(FinalFit)
 Phos <- list(Post = Post, SpNames = SpNames, N = N, S = S, Fecundity = Fecundity,
-             reserve = reserve, SpMatrix = SpMatrix, env = env, Inclusion_ij = Inclusion_ij,
-             Inclusion_eij = Inclusion_eij, Intra = Intra, beta_Inclusion_ij = beta_Inclusion_ij,
-             beta_Inclusion_eij = beta_Inclusion_eij )
-rm(FinalFit, SpNames, N, S, Fecundity, reserve, SpMatrix, env, Inclusion_ij,
-   Inclusion_eij, beta_Inclusion_ij,beta_Inclusion_eij,tau0, slab_scale, slab_df, Intra, Post) 
+             year= year, SpMatrix = SpMatrix, Inclusion_ij = Inclusion_ij,
+             Intra = Intra, beta_Inclusion_ij = beta_Inclusion_ij)
+
+rm(FinalFit, SpNames, N, S, Fecundity, year, SpMatrix, Inclusion_ij,
+    beta_Inclusion_ij,tau0, slab_scale, slab_df, Intra, Post) 
 # remove object
 
 
 # First, calculate the lambda values over both environmental variables
-LambdaPlotVals <- array(NA, dim = c(2, 2, EnvLength, 3)) # Environmental co-variate, reserve, environmental sequence, metric (mean, lwr, upr)
+LambdaPlotVals <- array(NA, dim = c(2, 2, EnvLength, 3)) 
+# Environmental co-variate, reserve, environmental sequence, metric (mean, lwr, upr)
+
 for(i in 1:EnvLength){
   for(j in 1:2){
     PhosPost <- exp(Phos$Post$lambdas[,j,1] + Phos$Post$lambdas[,j,2] * PlotPhos[i])

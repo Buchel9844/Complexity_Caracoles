@@ -103,7 +103,7 @@ names(competition.plant)
                                    competition.plant.test.test, 
                                    by = c("year","plot","subplot","focal","fruit","seed"))
    }
- 
+ head(competition.plant)
  write.csv( competition.plant,"data/competition.csv")
 
 #################################################################################
