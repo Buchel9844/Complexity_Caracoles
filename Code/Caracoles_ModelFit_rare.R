@@ -11,6 +11,7 @@ library("HDInterval")
 library("tidyverse")
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
+summary.interactions <- data.frame()
 #focal <- "CHFU"
 #complexity  <- "family"
 for ( years in c("2017","2018","2019","2020","2021")){
@@ -23,7 +24,7 @@ for ( focal in c("MESU","LEMA","HOMA","CHFU")){
 
 FocalPrefix <-focal # "LEMA" or "HOMA" or "CHFU"
 #FocalSpecies <- "Hordeum marinum" # "Leontodon maroccanus" or " Hordeum marinum" or "PUPA"
-plant.class <- read.csv("data/plant_class.csv", sep=",")
+plant.class <- read.csv("data/plant_code.csv", sep=",")
 # determine the level of complexity based on any levels of the plant_class dataframe
 # code.plant or rareORabundant
 # if levels of complexity is not code.plant then uncomment this line 
@@ -74,6 +75,10 @@ for(s in 1:ncol(AllSpAbunds)){
   }
 }
 SpNames <- AllSpNames[SpToKeep]
+summary.interactions <- bind_rows(summary.interactions,tibble(focal= focal,year=years,
+                                                                  complexity=complexity,
+                                                                  n.competitors=length(SpNames)-1))
+
 #assign(paste0("SpNames_",FocalPrefix),
  #     SpNames)
 Intra <- ifelse(SpNames == FocalPrefix, 1, 0)
@@ -97,7 +102,7 @@ PrelimFit <- stan(file = "/Users/lisabuche/Code/Project/HOI_Caracoles/code/Carac
                   chains = 3)
 PrelimPosteriors <- rstan::extract(PrelimFit)
 print("prelimi nary fit done")
-pdf(paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/figure/beta_Inclusion_",complexity,"_",FocalPrefix,".pdf"))
+pdf(paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/figure/beta_Inclusion_",years,"_",complexity,"_",FocalPrefix,".pdf"))
 ##### Diagnostic plots
 # First check the distribution of Rhats and effective sample sizes 
 # N.B. amount by which autocorrelation within the chains increases uncertainty in estimates can be measured
@@ -128,38 +133,30 @@ str(PrelimPosteriors)
 #       model (i.e. the data pulled their posteriors away from 0). The final model
 #       will then be run with only these species-specific parameters, but without
 #       the regularized horseshoe priors.
-Inclusion_ij <- matrix(data = 0, nrow = nlevels(as.factor(year)), ncol = S+1)
-beta_Inclusion <-data.frame()
+Inclusion_ij <- matrix(data = 0, nrow = 1, ncol = length(SpNames))
+beta_Inclusion <- data.frame(nrow = length(SpNames), ncol = length(SpNames))
 IntLevel <- 0.5 #0.5 usually, 0.75 for Waitzia, shade
 is.list(PrelimPosteriors$beta_hat_ij)
 #str(PrelimPosteriors$beta_hat_ijk)
 #str(PrelimPosteriors$alpha_hat_ij)
-for(i in 1:nlevels(as.factor(year))){
-  beta_Inclusion_ij <- matrix(data = 0, nrow = S, ncol = S)
-  for(s in 1:S){
+  for(s in 1:length(SpNames)){
     # hdi : Calculate the highest density interval (HDI) for a probability distribution for a given probability mass
-    Ints_ij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_ij[,i,s], credMass = IntLevel)
+    Ints_ij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_ij[,s], credMass = IntLevel)
     if(Ints_ij[1] > 0 | Ints_ij[2] < 0){
-      Inclusion_ij[i,s] <- 1
+      Inclusion_ij[1,s] <- 1
     }
     for(m in 1:S){
-      beta_Ints_ij <- HDInterval::hdi(PrelimPosteriors$beta_hat_ijk[,i,s,m], credMass = IntLevel)
+      beta_Ints_ij <- HDInterval::hdi(PrelimPosteriors$beta_hat_ijk[,s,m], credMass = IntLevel)
       
       if(beta_Ints_ij[1] > 0 | beta_Ints_ij[2] < 0){
-        beta_Inclusion_ij[s,m] <- 1
+        beta_Inclusion[s,m] <- 1
       }
     }
-  }
-  beta_Inclusion_ij <- as.data.frame(beta_Inclusion_ij)
-  beta_Inclusion_ij$year <- years[as.integer(levels(as.factor(year)))[i]]
-  beta_Inclusion <- rbind(beta_Inclusion,beta_Inclusion_ij)
-  Inclusion_ij[i,S+1]<- years[as.integer(levels(as.factor(year)))[i]]
-  
 }
-
-names(beta_Inclusion) <- c(names(SpTotals[SpTotals!=SpToKeep]),"year")
+beta_Inclusion <- as.data.frame(beta_Inclusion)
+names(beta_Inclusion) <- c(names(SpTotals[SpTotals!=SpToKeep]))
 Inclusion_ij  <- as.data.frame(Inclusion_ij )
-names(Inclusion_ij) <- c(names(SpTotals[SpTotals!=SpToKeep]),"year")
+names(Inclusion_ij) <- c(names(SpTotals[SpTotals!=SpToKeep]))
 
 #write.csv(beta_Inclusion,
 #          paste("/home/lisavm/Simulations/beta_Inclusion_",FocalPrefix,".csv"))
@@ -167,22 +164,20 @@ names(Inclusion_ij) <- c(names(SpTotals[SpTotals!=SpToKeep]),"year")
  #         paste("/home/lisavm/Simulations/Inclusion_ij_",FocalPrefix,".csv"))
 
 write.csv(beta_Inclusion,
-          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/beta_Inclusion_",complexity,"_",FocalPrefix,".csv"))
+          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/beta_Inclusion_",years,"_",complexity,"_",FocalPrefix,".csv"))
 write.csv(Inclusion_ij,
-          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/Inclusion_ij_",complexity,"_",FocalPrefix,".csv"))
+          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/Inclusion_ij_",years,"_",complexity,"_",FocalPrefix,".csv"))
 
   }
 }}
 
-
-
 return(sum(Inclusion_ij))
-return(sum(beta_Inclusion[,1:nyear])) # 0 means that no specific HOIs are relevant overall years
+return(sum(beta_Inclusion)) # 0 means that no specific HOIs are relevant overall years
 
 
 DataVec <- c("N", "S", "Fecundity", "year", "SpMatrix","Intra",
              "Inclusion_ij", "beta_Inclusion")
-FinalFit <- stan(file = "/home/lisavm/Simulations/code/Caracoles_BH_Final.stan", data = DataVec, iter = 1000, chains = 2)
+#FinalFit <- stan(file = "/home/lisavm/Simulations/code/Caracoles_BH_Final.stan", data = DataVec, iter = 1000, chains = 2)
 FinalFit <- stan(file = "/Users/lisabuche/Code/Project/HOI_Caracoles/code/Caracoles_BH_Final.stan", 
                  data = DataVec,
                  iter = 100, 
@@ -191,16 +186,15 @@ FinalFit <- stan(file = "/Users/lisabuche/Code/Project/HOI_Caracoles/code/Caraco
 FinalPosteriors <- extract(FinalFit)
 
 # Diagnostic figures
-for (i in 1:nyear){
-  return(acf(FinalPosteriors$lambdas[,i,1]))
-  return(acf(FinalPosteriors$lambdas[,i,2]))
-}
+
+return(acf(FinalPosteriors$lambdas[,1]))
+return(acf(FinalPosteriors$lambdas[,2]))
 return(acf(FinalPosteriors$alpha_generic[,1]))
 return(acf(FinalPosteriors$alpha_intra[,1]))
 return(acf(FinalPosteriors$beta_generic[,1]))
 
-FileName <- paste("/home/lisavm/Simulations/", FocalPrefix, "_", "_FinalFit.rdata", sep = "")
-FileName <- paste("/Users/lisabuche/Code/Project/HOI_Caracoles/code/", FocalPrefix, "_", "_FinalFit.rdata", sep = "")
+#FileName <- paste("/home/lisavm/Simulations/", FocalPrefix, "_", "_FinalFit.rdata", sep = "")
+FileName <- paste("/Users/lisabuche/Code/Project/HOI_Caracoles/code/", years,"_",complexity,"_",FocalPrefix, "_FinalFit.rdata", sep = "")
 
 save(FinalFit, SpNames, N, S, Fecundity, year, SpMatrix, Inclusion_ij,
      beta_Inclusion_ij,

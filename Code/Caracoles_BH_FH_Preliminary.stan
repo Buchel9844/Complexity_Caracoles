@@ -31,13 +31,13 @@ parameters{
   vector[S] alpha_hat_ij_tilde;
   //matrix[2,S] alpha_hat_eij_tilde;
 
-  matrix beta_hat_ijk_tilde[S,S];
+  matrix[S,S] beta_hat_ijk_tilde;
   //real beta_hat_eijk_tilde[2,S,S];
   
   vector<lower = 0>[S] local_shrinkage_ij;
   //matrix<lower = 0>[2,S] local_shrinkage_eij;
   
-  matrix<lower = 0> beta_local_shrinkage_ijk[S,S];
+  matrix<lower = 0>[S,S] beta_local_shrinkage_ijk;
   //real<lower = 0> beta_local_shrinkage_eijk[2,S,S];
   
   real<lower = 0> c2_tilde;
@@ -54,8 +54,8 @@ transformed parameters{
   //matrix[2,S] alpha_hat_eij;
   //matrix[2,S] local_shrinkage_eij_tilde;
   
-  matrix beta_hat_ijk[S,S];
-  matrix beta_local_shrinkage_ijk_tilde[S,S];
+  matrix[S,S] beta_hat_ijk;
+  matrix[S,S] beta_local_shrinkage_ijk_tilde;
   //real beta_hat_eijk[2,S,S];
   //real beta_local_shrinkage_eijk_tilde[2,S,S];
   
@@ -75,7 +75,7 @@ transformed parameters{
 
  for(k in 1:S){
       beta_local_shrinkage_ijk_tilde[s,k] = sqrt( c2 * square(beta_local_shrinkage_ijk[s,k]) / (c2 + square(tau) * square(beta_local_shrinkage_ijk[s,k])) );
-      beta_hat_ijk[s,k] = tau * beta_local_shrinkage_ijk_tilde[i,s,k] * beta_hat_ijk_tilde[s,k];
+      beta_hat_ijk[s,k] = tau * beta_local_shrinkage_ijk_tilde[s,k] * beta_hat_ijk_tilde[s,k];
 
  }
     }
@@ -110,9 +110,8 @@ model{
   alpha_generic_tilde ~ normal(0,1);
   alpha_intra_tilde ~ normal(0,1);
   beta_generic_tilde ~ normal(0,1);
-  for(i in 1:3){ //  1 to number of years included in the data
-    lambdas[i,] ~ normal(0, 1);
-  }
+  lambdas ~ normal(0, 1);
+
 
   // set the hierarchical priors for the Finnish horseshoe (regularized horseshoe) (Piironen and Vehtari 2017)
   // Following the stan implementation from https://betanalpha.github.io/assets/case_studies/bayes_sparse_regression.html
@@ -133,7 +132,7 @@ for (s in 1:S){
 
   // implement the biological model
   for(i in 1:N){ // for the observation N 
-    lambda_ei[i] = exp(lambdas[year[i],1]);
+    lambda_ei[i] = exp(lambdas[1]);
     
     // creation of a matrix of S by S of the interaction jk in HOIs_ijk
     
