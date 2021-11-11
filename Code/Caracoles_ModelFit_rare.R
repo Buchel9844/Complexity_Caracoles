@@ -13,10 +13,11 @@ options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 #focal <- "CHFU"
 #complexity  <- "family"
+for ( years in c("2017","2018","2019","2020","2021")){
 for ( focal in c("MESU","LEMA","HOMA","CHFU")){
   for(complexity  in c("family","class","rareORabundant")){ #add "code.plant" ,make sure it is the name of a column of plant.class
   # set complexity levels 
-  complexity.minimize <- F
+  complexity.minimize <- T
   print(focal)
   print(complexity)
 
@@ -32,11 +33,10 @@ print(complexitylevel)
 # Load in the data and subset out the current focal species.
 #SpData <- read.csv("/home/lisavm/Simulations/data/competition.csv")
 SpData <- read.csv("/Users/lisabuche/Code/Project/HOI_Caracoles/data/competition.csv")
-#view(SpData)
 
 SpData <- na.omit(SpData) 
-years <- c("2017","2018","2019")
 SpDataFocal <- subset(SpData, focal == FocalPrefix & year %in% years)
+
 #view(SpDataFocal)
 SpDataFocal <- select(SpDataFocal,
   all_of(c("day","month", "year","plot","subplot" ,"focal","fruit","seed",complexitylevel,FocalPrefix)))
@@ -49,7 +49,6 @@ SpDataFocal[,levels.of.focal] <- SpDataFocal[,levels.of.focal] - SpDataFocal[,Fo
 # Next continue to extract the data needed to run the model. 
 N <- as.integer(nrow(SpDataFocal))
 Fecundity <- as.integer(SpDataFocal$seed) # X fruit ? 
-year <- as.integer(factor(as.factor(SpDataFocal$year), levels = c("2017", "2018", "2019")))
 plot <- as.integer(factor(as.factor(SpDataFocal$plot), levels = c("1","2","3","4","5","6","7","8","9")))
 
 # Now calculate the total number of species to use for the model, discounting
@@ -85,7 +84,7 @@ Intra <- ifelse(SpNames == FocalPrefix, 1, 0)
 tau0 <- 1
 slab_scale <- sqrt(2)
 slab_df <- 4
-nyear <- length(years)
+
 DataVec <- c("N", "S", "Fecundity", "year", "SpMatrix",
              "Intra", "tau0", "slab_scale", "slab_df")
 
@@ -173,7 +172,10 @@ write.csv(Inclusion_ij,
           paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/Inclusion_ij_",complexity,"_",FocalPrefix,".csv"))
 
   }
-}
+}}
+
+
+
 return(sum(Inclusion_ij))
 return(sum(beta_Inclusion[,1:nyear])) # 0 means that no specific HOIs are relevant overall years
 
