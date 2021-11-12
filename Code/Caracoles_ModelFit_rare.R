@@ -9,55 +9,90 @@ library(rstan)
 #install.packages(HDInterval)
 library("HDInterval")
 library("tidyverse")
+library(dplyr)
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 summary.interactions <- data.frame()
+# Run UploadData.R 2. and 3. or uncomment the following lines 
+plant.class <- read.csv("data/plant_code.csv", sep=",")
+years <- "2020"
+focal <- "LEMA"
+complexity.plant  <- "class"
+complexity.animal <- "group"
 #focal <- "CHFU"
 #complexity  <- "family"
-for ( years in c("2017","2018","2019","2020","2021")){
-for ( focal in c("MESU","LEMA","HOMA","CHFU")){
-  for(complexity  in c("family","class","rareORabundant")){ #add "code.plant" ,make sure it is the name of a column of plant.class
-  # set complexity levels 
-  complexity.minimize <- T
+for (years in c("2017","2018","2019","2020","2021")){
+for (focal in c("MESU","LEMA","HOMA","CHFU")){
+for(complexity.plant  in c("code.plant","family","class")){ #add "code.plant" ,make sure it is the name of a column of plant.class
+for(complexity.animal  in c("species","family","group")){ #add "code.plant" ,make sure it is the name of a column of plant.class
+    
+  # view complexity levels 
   print(focal)
-  print(complexity)
-
+  print(complexity.plant)
+  # determine the levels of complexity for plant 
+  complexitylevel.plant <- levels(as.factor(plant.class[,complexity.plant]))
+  
+  print(complexity.animal)
+  if (complexity.plant != "code.plant"){complexity.minimize <- T}else{complexity.minimize <- F}
+  
 FocalPrefix <-focal # "LEMA" or "HOMA" or "CHFU"
-#FocalSpecies <- "Hordeum marinum" # "Leontodon maroccanus" or " Hordeum marinum" or "PUPA"
-plant.class <- read.csv("data/plant_code.csv", sep=",")
-# determine the level of complexity based on any levels of the plant_class dataframe
-# code.plant or rareORabundant
-# if levels of complexity is not code.plant then uncomment this line 
 
-complexitylevel <- levels(as.factor(plant.class[,complexity])) # change at line 35 too !!!
-print(complexitylevel)
-# Load in the data and subset out the current focal species.
+# Load in the data and subset out the current focal species and complexity levels
 #SpData <- read.csv("/home/lisavm/Simulations/data/competition.csv")
-SpData <- read.csv("/Users/lisabuche/Code/Project/HOI_Caracoles/data/competition.csv")
+SpData<- read.csv("/Users/lisabuche/Code/Project/HOI_Caracoles/data/competition.csv")
 
 SpData <- na.omit(SpData) 
-SpDataFocal <- subset(SpData, focal == FocalPrefix & year %in% years)
+SpData <- subset(SpData, year == years)
+SpData<- select(SpData,all_of(c("day","month", "year","plot","subplot" ,"focal",
+                               "fruit","seed",complexitylevel.plant,FocalPrefix)))
 
-#view(SpDataFocal)
-SpDataFocal <- select(SpDataFocal,
-  all_of(c("day","month", "year","plot","subplot" ,"focal","fruit","seed",complexitylevel,FocalPrefix)))
-head(SpDataFocal)
+SpDataFocal <- subset(SpData, focal == FocalPrefix )
+#head(SpData)
+
 
 if (complexity.minimize == T){
-levels.of.focal <- plant.class[which(plant.class$code.plant==FocalPrefix),complexity]
-SpDataFocal[,levels.of.focal] <- SpDataFocal[,levels.of.focal] - SpDataFocal[,FocalPrefix]
+  levels.of.focal <- plant.class[which(plant.class$code.plant==FocalPrefix),complexity.plant]
+  SpDataFocal[,levels.of.focal] <- SpDataFocal[,levels.of.focal] - SpDataFocal[,FocalPrefix]
 }
+
+
+
+SpDataherbivore <- subset(get(paste0("herbivore","_",complexity.animal)),year %in% years)
+names(SpDataherbivore)[which(names(SpDataherbivore) == "plant")] <- "focal"
+
+SpDataherbivore <- left_join(SpData,SpDataherbivore,by=c("month","year","plot",
+                                            "subplot","focal"))
+
+SpDatafloralvis <- subset(get(paste0("floral_visitor","_",complexity.animal)),year %in% years)
+names(SpDatafloralvis)[which(names(SpDatafloralvis) == "plant")] <- "focal"
+
+SpDatafloralvis <- left_join(SpData,SpDatafloralvis,by=c("month","year","plot",
+                                                              "subplot","focal"))
+view(SpDatafloralvis)
+# determine the levels of complexity  animals
+complexitylevel.herbivore <- names(SpDataherbivore)[which(!names(SpDataherbivore) %in% c(complexitylevel.plant,"focal","seed",
+                                                                                         "fruit","day.x",FocalPrefix,
+                                                                                         "day","month","year","plot",
+                                                                                         "subplot","plant",
+                                                                                         "code.plant"))]
+complexitylevel.floral.visitor <- names(SpDatafloralvis)[which(!names(SpDatafloralvis) %in% c(complexitylevel.plant,"seed",
+                                                                                              "fruit","day.x","focal",FocalPrefix,
+                                                                                              "day","month","year","plot",
+                                                                                              "subplot","plant",
+                                                                                              "code.plant"))]
+
+
+
 # Next continue to extract the data needed to run the model. 
 N <- as.integer(nrow(SpDataFocal))
-Fecundity <- as.integer(SpDataFocal$seed) # X fruit ? 
+Fecundity <- as.integer(SpDataFocal$seed)  
 plot <- as.integer(factor(as.factor(SpDataFocal$plot), levels = c("1","2","3","4","5","6","7","8","9")))
 
-# Now calculate the total number of species to use for the model, discounting
+# Now calculate the total number of plant species to use for the model, discounting
 #       any species columns with 0 abundance. Save a vector of the species names
 #       corresponding to each column for easy matching later.
 AllSpNames <- names(SpDataFocal)[!names(SpDataFocal) %in% c("day","month","year","plot",
                                                             "subplot", "focal","fruit","seed")]
-library(dplyr)
 
 AllSpAbunds <- SpDataFocal %>% 
   select(all_of(AllSpNames))
@@ -75,13 +110,101 @@ for(s in 1:ncol(AllSpAbunds)){
   }
 }
 SpNames <- AllSpNames[SpToKeep]
-summary.interactions <- bind_rows(summary.interactions,tibble(focal= focal,year=years,
-                                                                  complexity=complexity,
-                                                                  n.competitors=length(SpNames)-1))
 
 #assign(paste0("SpNames_",FocalPrefix),
  #     SpNames)
 Intra <- ifelse(SpNames == FocalPrefix, 1, 0)
+
+# Interaction matrix of herbivores with FOCAL
+ 
+SpDataherbivore_focal <- subset(SpDataherbivore,focal == focal)
+  
+AllSpAbunds_herbivore <- SpDataherbivore_focal %>% 
+  select(all_of(complexitylevel.herbivore))
+
+SpTotals_herbivore <- colSums(AllSpAbunds_herbivore, na.rm = T)
+SpToKeep_herbivore  <- SpTotals_herbivore  > 0
+
+H <- sum(SpToKeep_herbivore)
+SpMatrix_herbivore  <- matrix(NA, nrow = N, ncol = H)
+i <- 1
+for(s in 1:ncol(AllSpAbunds_herbivore)){
+  if(SpToKeep_herbivore[s] == 1){
+    SpMatrix_herbivore[,i] <- AllSpAbunds_herbivore[,s]
+    i <- i + 1
+  }
+}
+SpNames_herbivore <- names(SpToKeep_herbivore)[SpToKeep_herbivore]
+
+# Interaction matrix of floral visitors with FOCAL
+
+SpDatafloralvis_focal <- subset(SpDatafloralvis,focal == focal)
+
+AllSpAbunds_floralvis<- SpDatafloralvis_focal %>% 
+  select(all_of(complexitylevel.floral.visitor))
+
+SpTotals_floralvis <- colSums(AllSpAbunds_floralvis, na.rm = T)
+SpToKeep_floralvis <- SpTotals_floralvis  > 0
+
+FV <- sum(SpToKeep_floralvis)
+SpMatrix_floralvis  <- matrix(NA, nrow = N, ncol = FV)
+i <- 1
+for(s in 1:ncol(AllSpAbunds_floralvis)){
+  if(SpToKeep_floralvis[s] == 1){
+    SpMatrix_floralvis[,i] <- AllSpAbunds_floralvis[,s]
+    i <- i + 1
+  }
+}
+SpNames_floralvis <- names(SpToKeep_floralvis)[SpToKeep_floralvis]
+
+summary.interactions <- bind_rows(summary.interactions,tibble(focal= focal,year=years,
+                                                              complexity_plant=complexity.plant,
+                                                              n.competitors_plant=length(SpNames)-1,
+                                                              competitors_plant=list(SpNames[which(!SpNames %in% focal)]),
+                                                              n.competitors_herbivore=length(SpNames_herbivore),
+                                                              competitors_herbivore=list(SpNames_herbivore),
+                                                              n.competitors_floralvisitor=length(SpNames_floralvis),
+                                                              competitors_floralvisitor=list(SpNames_floralvis)))
+
+# Interaction matrix of herbivores with COMPETITORS
+SpDatafloralvis_comp <- select(SpDatafloralvis[which(!SpDatafloralvis$focal == focal),],
+                               c("month","year","plot",
+                                 "subplot","focal",all_of(complexitylevel.floral.visitor)))%>%
+  gather( all_of(complexitylevel.floral.visitor),
+            key = "floral.visitor", value = "visits") %>%
+  unite(focal, floral.visitor,
+      col = "plant_floral.visitor", sep = "_") 
+SpDatafloralvis_comp <- aggregate(visits ~ plant_floral.visitor + subplot + plot + year + month, 
+                                    SpDatafloralvis_comp, sum)
+SpDatafloralvis_comp <-  spread(SpDatafloralvis_comp ,plant_floral.visitor, visits)
+
+
+
+SpDatafloralvis_comp <- left_join(SpDataFocal,SpDatafloralvis_comp, 
+                                  by=c('subplot', "plot", "year","month"))
+
+View(SpDatafloralvis_comp)
+
+AllSpAbunds_floralvis_comp <- SpDatafloralvis_comp  %>% 
+  select(all_of(names(SpDatafloralvis_comp)[!names(SpDatafloralvis_comp) %in% c('subplot', "plot", "year","month",
+                                                                                "day","focal","fruit","seed",focal, complexitylevel.plant)]))
+
+SpTotals_floralvis_comp <- colSums(AllSpAbunds_floralvis_comp, na.rm = T)
+SpToKeep_floralvis_comp <- SpTotals_floralvis_comp  > 0
+
+FV_comp <- sum(SpToKeep_floralvis_comp)
+SpMatrix_floralvis_comp  <- matrix(NA, nrow = N, ncol = FV_comp )
+i <- 1
+for(s in 1:ncol(AllSpAbunds_floralvis_comp)){
+  if(SpToKeep_floralvis_comp[s] == 1){
+    SpMatrix_floralvis_comp[,i] <- AllSpAbunds_floralvis_comp[,s]
+    i <- i + 1
+  }
+}
+
+SpNames_floralvis <- names(SpToKeep_floralvis)[SpToKeep_floralvis]
+
+# Interaction matrix of floral visitors with COMPETITORS
 
 
 # Set the parameters defining the regularized horseshoe prior, as described in
@@ -169,7 +292,7 @@ write.csv(Inclusion_ij,
           paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/Inclusion_ij_",years,"_",complexity,"_",FocalPrefix,".csv"))
 
   }
-}}
+}}}
 
 return(sum(Inclusion_ij))
 return(sum(beta_Inclusion)) # 0 means that no specific HOIs are relevant overall years
