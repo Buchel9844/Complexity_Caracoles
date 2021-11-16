@@ -111,41 +111,41 @@ head(plant.class)
  names(floral_visitor)
  floral_visitor_species <- subset(floral_visitor,list=c("day","month","year","plot","subplot",
                                                 "id_final","number_visits","plant")) 
- floral_visitor_species <-stats::aggregate(number_visits ~ id_final + month+ year + plot +subplot + plant,
+ floral_visitor_species <-stats::aggregate(number_visits ~ id_final +year +plot + plant,
                     data= floral_visitor_species,
-                    mean)
+                    sum)
  
  floral_visitor_species <-  spread( floral_visitor_species,id_final, number_visits)
  floral_visitor_species[is.na(floral_visitor_species)] <- 0
  head(floral_visitor_species)
- length(which(!names(floral_visitor_species) %in% c("day","month","year","plot","subplot","plant")))
+ length(which(!names(floral_visitor_species) %in% c("plot","year","subplot","plant")))
  
  
- floral_visitor_family <- subset(floral_visitor,list=c("day","month","year","plot","subplot",
+ floral_visitor_family <- subset(floral_visitor,list=c("plot","subplot",
                                                         "family","number_visits","plant")) 
- floral_visitor_family <-stats::aggregate(number_visits ~ family +  month+ year + plot +subplot + plant,
+ floral_visitor_family <-stats::aggregate(number_visits ~ family + year + plot + plant,
                                            data=  floral_visitor_family,
-                                           mean)
+                                           sum)
 
  
  floral_visitor_family  <-  spread(  floral_visitor_family,family, number_visits)
  floral_visitor_family[is.na(floral_visitor_family)] <- 0
  head( floral_visitor_family )
- length(which(!names( floral_visitor_family) %in% c("day","month","year","plot","subplot","plant")))
+ length(which(!names( floral_visitor_family) %in% c("plot","year","subplot","plant")))
  
  
- floral_visitor_group <- subset(floral_visitor,list=c("day","month","year","plot","subplot",
+ floral_visitor_group <- subset(floral_visitor,list=c("plot","subplot",
                                                        "group","number_visits","plant")) 
- floral_visitor_group <-stats::aggregate(number_visits ~ group + month+ year + plot +subplot + plant,
+ floral_visitor_group <-stats::aggregate(number_visits ~ group + year +plot + plant,
                                           data=  floral_visitor_group,
-                                          mean)
+                                          sum)
 
  floral_visitor_group  <-  spread(  floral_visitor_group,group, number_visits)
  
  floral_visitor_group[is.na(floral_visitor_group)] <- 0
  
  head(floral_visitor_group)
- length(which(!names( floral_visitor_group) %in% c("day","month","year","plot","subplot","plant")))
+ length(which(!names( floral_visitor_group) %in% c("plot","year","subplot","plant")))
  view( floral_visitor_group)
 
  #---- herbivor ----
@@ -157,19 +157,19 @@ head(plant.class)
  
  herbivore_species <- subset( herbivore,list=c("day","month","year","plot","subplot",
                                                         "id_final","number_animal","plant")) 
-  herbivore_species <-stats::aggregate(number_animal ~ id_final + month+ year + plot +subplot + plant,
+  herbivore_species <-stats::aggregate(number_animal ~ id_final + year +plot + plant,
                                            data=  herbivore_species,
                                            sum)
  
   herbivore_species <-  spread(  herbivore_species,id_final, number_animal)
   herbivore_species[is.na( herbivore_species)] <- 0
   head( herbivore_species)
-  length(which(!names(herbivore_species) %in% c("day","month","year","plot","subplot","plant")))
+  length(which(!names(herbivore_species) %in% c("plot","year","subplot","plant")))
  
  
   herbivore_family <- subset( herbivore,list=c("day","month","year","plot","subplot",
                                                        "family","number_animal","plant")) 
-  herbivore_family <-stats::aggregate(number_animal ~ family + month+ year + plot +subplot + plant,
+  herbivore_family <-stats::aggregate(number_animal ~ family + year +plot  + plant,
                                           data=   herbivore_family,
                                           sum)
  
@@ -177,12 +177,12 @@ head(plant.class)
   herbivore_family  <-  spread(   herbivore_family,family, number_animal)
   herbivore_family[is.na( herbivore_family)] <- 0
   head(herbivore_family )
-  length(which(!names(herbivore_family) %in% c("day","month","year","plot","subplot","plant")))
+  length(which(!names(herbivore_family) %in% c("plot","year","subplot","plant")))
   
   
   herbivore_group <- subset( herbivore,list=c("day","month","year","plot","subplot",
                                                       "group","number_animal","plant")) 
-  herbivore_group <-stats::aggregate(number_animal ~ group + month+ year + plot +subplot + plant,
+  herbivore_group <-stats::aggregate(number_animal ~ group + year + plot  + plant,
                                          data=   herbivore_group,
                                          sum)
  
@@ -191,7 +191,7 @@ head(plant.class)
   herbivore_group[is.na( herbivore_group)] <- 0
  
   head(herbivore_group)
-  length(which(!names(herbivore_group) %in% c("day","month","year","plot","subplot","plant")))
+  length(which(!names(herbivore_group) %in% c("plot","year","subplot","plant")))
   
   view(herbivore_group)
  
