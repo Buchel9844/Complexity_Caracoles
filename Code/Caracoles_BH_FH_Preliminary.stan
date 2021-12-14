@@ -10,8 +10,8 @@ data{
   int Fecundity[N]; // Fecundity of the focal species in each plot
   //int plot[N];   // Indicator variable for plot
   matrix[N,S] SpMatrix; // Matrix of abundances for each plant species 
-  matrix[N,H] SpMatrix_herbivore; // Matrix of abundances for each herbivores species 
-  matrix[N,FV] SpMatrix_floralvis; // Matrix of abundances for each floral visitors species
+  matrix[N,H] SpMatrix_H; // Matrix of abundances for each herbivores species 
+  matrix[N,FV] SpMatrix_FV; // Matrix of abundances for each floral visitors species
   
   real matrix_HOIs_plant[N,S,S]; // Matrix of abundances for each plant species with each other plant species
   
@@ -349,7 +349,7 @@ for (fv in 1:FV){
 
      HOI_effects[i] = sum(matrix_beta_ijk[i,]) + sum(matrix_beta_F_ijf[i,]) +  sum(matrix_beta_H_ijh[i,])  + sum(matrix_beta_2H_ihh[i,]) +  sum(matrix_beta_FvH_ifh[i,]) + sum(matrix_beta_2FV_iff[i,]);
      
-     D_effects[i] = sum(alpha_ij[i,] .* SpMatrix[i,]) +  sum( gamma_H_ih[i,] .* SpMatrix_herbivore[i,]) + sum( gamma_FV_if[i,] .* SpMatrix_floralvis[i,]);
+     D_effects[i] = sum(alpha_ij[i,] .* SpMatrix[i,]) +  sum( gamma_H_ih[i,] .* SpMatrix_H[i,]) + sum( gamma_FV_if[i,] .* SpMatrix_FV[i,]);
      
     F_hat[i] = lambda_i[i]/ (D_effects[i] + HOI_effects[i]);
   }
