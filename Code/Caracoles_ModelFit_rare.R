@@ -14,19 +14,22 @@ options(mc.cores = parallel::detectCores())
 #rstan_options(auto_write = TRUE)
 summary.interactions <- data.frame()
 # Run UploadData.R 2. and 3. or uncomment the following lines 
-plant.class <- read.csv("data/plant_code.csv", sep=",")
+plant.class <- read.csv("/Users/lisabuche/Code/Project/HOI_Caracoles/data/plant_code.csv", sep=",")
 years <- "2020"
-focal <- "LEMA"
+focal <- "CHFU"
 complexity.plant  <- "class"
 complexity.animal <- "group"
+source("/Users/lisabuche/Code/Project/HOI_Caracoles/code/Group_FvH.R")
 #focal <- "CHFU"
 #complexity  <- "family"
 for (years in c("2017","2018","2019","2020","2021")){
 for (focal in c("MESU","LEMA","HOMA","CHFU")){
 for(complexity.plant  in c("code.plant","family","class")){ #add "code.plant" ,make sure it is the name of a column of plant.class
 for(complexity.animal  in c("species","family","group")){ 
-    
+
+#--- setting ups----    
   # view complexity levels 
+  summary.interactions.n <- data.frame()
   print(focal)
   print(complexity.plant)
   # determine the levels of complexity for plant 
@@ -58,25 +61,25 @@ if (complexity.minimize == T){
 }
 
 head(SpDataFocal)
-# add herbivore presences and floral visitor visits
-SpDataherbivore <- subset(get(paste0("herbivore","_",complexity.animal)),year %in% years & 
+# add H presences and floral visitor visits
+SpData_H <- subset(get(paste0("herbivore","_",complexity.animal)),year %in% years & 
                             code.plant == focal)
-SpDataherbivore <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
-                             SpDataherbivore)
+SpData_H <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
+                             SpData_H)
 
-SpDatafloralvis <- subset(get(paste0("floral_visitor","_",complexity.animal)),year %in% years & 
+SpData_FV <- subset(get(paste0("floral_visitor","_",complexity.animal)),year %in% years & 
                             code.plant == focal)
-SpDatafloralvis <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
-                            SpDatafloralvis)
+SpData_FV <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
+                            SpData_FV)
 
 view(SpDataFocal)
 # determine the levels of complexity  animals
-complexitylevel.herbivore <- names(SpDataherbivore)[which(!names(SpDataherbivore) %in% c(complexitylevel.plant,"focal","seed",
+complexitylevel.H <- names(SpData_H)[which(!names(SpData_H) %in% c(complexitylevel.plant,"focal","seed",
                                                                                          "fruit","day.x",FocalPrefix,
                                                                                          "day","month","year","plot",
                                                                                          "subplot","plant",
                                                                                          "code.plant"))]
-complexitylevel.floral.visitor <- names(SpDatafloralvis)[which(!names(SpDatafloralvis) %in% c(complexitylevel.plant,"seed",
+complexitylevel.FV <- names(SpData_FV)[which(!names(SpData_FV) %in% c(complexitylevel.plant,"seed",
                                                                                               "fruit","day.x","focal",FocalPrefix,
                                                                                               "day","month","year","plot",
                                                                                               "subplot","plant",
@@ -110,7 +113,7 @@ for(s in 1:ncol(AllSpAbunds)){
   if(SpToKeep[s] == 1){
     SpMatrix[,i] <- AllSpAbunds[,s]
     i <- i + 1
-  }
+  }else{next}
 }
 SpMatrix <-(SpMatrix/max(SpMatrix))*100 #scale all the interaction between 0 and 100
 if(max(SpMatrix) == 100){print("scale SpMatrix_plant correct")}
@@ -121,456 +124,603 @@ SpNames <- AllSpNames[SpToKeep]
  #     SpNames)
 Intra <- ifelse(SpNames == FocalPrefix, 1, 0)
 
+# creation of a matrix of S by S of the interaction jk in HOIs_ijk for plants
+matrix_HOIs_plant <- list()
+for (i in 1:N){
+  matrix_i <- matrix(nrow=S,ncol=S)
+  for (n in 1:S) {
+    for (m in 1:S) {
+      if (m <= n){
+        matrix_i[n,m] = 0
+      }
+      else{
+        matrix_i[n,m] = SpMatrix[i,n]* SpMatrix[i,m]
+      } 
+    }
+  }
+  matrix_i[is.na(matrix_i)] <- 0
+  matrix_HOIs_plant[[i]] <-  matrix_i
+}
+
 #---- Interaction (direct) matrix of herbivores with FOCAL ----
  
-AllSpAbunds_herbivore <- SpDataherbivore %>% 
-  select(all_of(complexitylevel.herbivore))
+AllSpAbunds_H <- SpData_H %>% 
+  select(all_of(complexitylevel.H))
 
-SpTotals_herbivore <- colSums(AllSpAbunds_herbivore, na.rm = T)
-SpToKeep_herbivore  <- SpTotals_herbivore  > 0
-H <- sum(SpToKeep_herbivore)
-SpMatrix_herbivore  <- matrix(NA, nrow = N, ncol = H)
+SpTotals_H <- colSums(AllSpAbunds_H, na.rm = T)
+SpToKeep_H  <- SpTotals_H  > 0
+H <- sum(SpToKeep_H)
+
+SpMatrix_H  <- matrix(NA, nrow = N, ncol = H)
 i <- 1
-for(h in 1:H){
-  if(SpToKeep_herbivore[h] == 1){
-    SpMatrix_herbivore[,i] <- AllSpAbunds_herbivore[,h]
+for(h in 1:length(SpToKeep_H)){
+  if(SpToKeep_H[h] == 1){
+    SpMatrix_H[,i] <- AllSpAbunds_H[,h]
     i <- i + 1
-  }
+  }else{next}
 }
-SpMatrix_herbivore <-(SpMatrix_herbivore/max(SpMatrix_herbivore,na.rm = T))*100 #scale all the interaction between 0 and 100
-if(max(SpMatrix_herbivore,na.rm = T) == 100){print("scale SpMatrix_herbivore correct")}
-
-SpNames_herbivore <- names(SpToKeep_herbivore)[SpToKeep_herbivore]
+SpMatrix_H <-(SpMatrix_H/max(SpMatrix_H,na.rm = T))*100 #scale all the interaction between 0 and 100
+if(max(SpMatrix_H,na.rm = T) == 100){print("scale SpMatrix_H correct")}
+SpMatrix_H[is.na(SpMatrix_H)] <- 0
+SpNames_H <- names(SpToKeep_H)[SpToKeep_H]
 
 #---- Interaction (direct) matrix of floral visitors with FOCAL ----
 
-AllSpAbunds_floralvis<- SpDatafloralvis %>% 
-  select(all_of(complexitylevel.floral.visitor))
+AllSpAbunds_FV<- SpData_FV %>% 
+  select(all_of(complexitylevel.FV))
 
-SpTotals_floralvis <- colSums(AllSpAbunds_floralvis, na.rm = T)
-SpToKeep_floralvis <- SpTotals_floralvis  > 0
+SpTotals_FV <- colSums(AllSpAbunds_FV, na.rm = T)
+SpToKeep_FV <- SpTotals_FV  > 0
 
-FV <- sum(SpToKeep_floralvis)
-SpMatrix_floralvis  <- matrix(NA, nrow = N, ncol = FV)
+FV <- sum(SpToKeep_FV)
+SpMatrix_FV  <- matrix(NA, nrow = N, ncol = FV)
 i <- 1
-for(s in 1:ncol(AllSpAbunds_floralvis)){
-  if(SpToKeep_floralvis[s] == 1){
-    SpMatrix_floralvis[,i] <- AllSpAbunds_floralvis[,s]
+for(s in 1:ncol(AllSpAbunds_FV)){
+  if(SpToKeep_FV[s] == 1){
+    SpMatrix_FV[,i] <- AllSpAbunds_FV[,s]
     i <- i + 1
-  }
+  }else{next}
 }
-SpMatrix_floralvis <-(SpMatrix_floralvis/max(SpMatrix_floralvis,na.rm = T))*100 #scale all the interaction between 0 and 100
-if(max(SpMatrix_floralvis,na.rm = T) == 100){print("scale SpMatrix_floralvis correct")}
-
-SpNames_floralvis <- names(SpToKeep_floralvis)[SpToKeep_floralvis]
+SpMatrix_FV <-(SpMatrix_FV/max(SpMatrix_FV,na.rm = T))*100 #scale all the interaction between 0 and 100
+if(max(SpMatrix_FV,na.rm = T) == 100){print("scale SpMatrix_FV correct")}
+SpMatrix_FV[is.na(SpMatrix_FV)] <- 0
+SpNames_FV <- names(SpToKeep_FV)[SpToKeep_FV]
 
 #---- Interaction (HOIs) matrix of floral visitors with COMPETITORS ----
 
-SpDatafloralvis_comp <- left_join(SpDataFocal,
-                             SpDatafloralvis,
+SpData_FV_comp <- left_join(SpDataFocal,
+                             SpData_FV,
                              by=c("day","month","year","plot","subplot")) %>%
   unique() %>%
   gather( all_of(c(complexitylevel.plant,focal)),
          key = "plant.comp", value = "abundance.plant.comp") %>%
-  gather(all_of(complexitylevel.floral.visitor),
-         key = "floral.visitor", value = "visits")
+  gather(all_of(complexitylevel.FV),
+         key = "FV", value = "visits")
 
 
 
-SpDatafloralvis_comp$abundance.plant.comp <-as.numeric(SpDatafloralvis_comp$abundance.plant.comp)
-SpDatafloralvis_comp$comp.abund_visits <- SpDatafloralvis_comp$visits*SpDatafloralvis_comp$abundance.plant.comp
-SpDatafloralvis_comp <-  unite(SpDatafloralvis_comp,
-                               plant.comp, floral.visitor,
-      col = "plant_floral.visitor", sep = "_") 
+SpData_FV_comp$abundance.plant.comp <-as.numeric(SpData_FV_comp$abundance.plant.comp)
+SpData_FV_comp$comp.abund_visits <- SpData_FV_comp$visits*SpData_FV_comp$abundance.plant.comp
+SpData_FV_comp <-  unite(SpData_FV_comp,
+                               plant.comp, FV,
+      col = "plant_FV", sep = "_") 
 
-SpDatafloralvis_comp <- aggregate(comp.abund_visits ~ plant_floral.visitor + focal + fruit + 
+SpData_FV_comp <- aggregate(comp.abund_visits ~ plant_FV + focal + fruit + 
                                     seed + subplot 
                                   + plot + year + month + day, 
-                                    SpDatafloralvis_comp, sum,na.action=na.omit)
+                                    SpData_FV_comp, sum,na.action=na.omit)
 
-SpDatafloralvis_comp <-  spread(SpDatafloralvis_comp ,plant_floral.visitor, comp.abund_visits)
+SpData_FV_comp <-  spread(SpData_FV_comp ,plant_FV, comp.abund_visits)
 
-SpDatafloralvis_comp <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
-                                  SpDatafloralvis_comp)
+SpData_FV_comp <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
+                                  SpData_FV_comp)
 
-SpDatafloralvis_comp <- unique(SpDatafloralvis_comp)
+SpData_FV_comp <- unique(SpData_FV_comp)
 
-AllSpAbunds_floralvis_comp <- SpDatafloralvis_comp  %>% 
-  select(all_of(names(SpDatafloralvis_comp)[!names(SpDatafloralvis_comp) %in% c('subplot', "plot", "year","month",
+AllSpAbunds_FV_comp <- SpData_FV_comp  %>% 
+  select(all_of(names(SpData_FV_comp)[!names(SpData_FV_comp) %in% c('subplot', "plot", "year","month",
                                                                                 "day","focal","fruit","seed",
                                                                                 focal, complexitylevel.plant)]))
-all.interaction.floralvis <- as.vector(t(outer(c(complexitylevel.plant,focal), complexitylevel.floral.visitor, paste, sep="_")))
-missing.interaction.floralvis <-all.interaction.floralvis[which(!all.interaction.floralvis %in% names(AllSpAbunds_floralvis_comp))]
+all.interaction.FV_comp <- as.vector(t(outer(c(complexitylevel.plant,focal), complexitylevel.FV, paste, sep="_")))
+missing.interaction.FV_comp  <-all.interaction.FV_comp [which(!all.interaction.FV_comp  %in% names(AllSpAbunds_FV_comp))]
 
 
-for (n in missing.interaction.floralvis){
-  AllSpAbunds_floralvis_comp[,n] <- NA
+for (n in missing.interaction.FV_comp){
+  AllSpAbunds_FV_comp[,n] <- NA
 }
 
-AllSpAbunds_floralvis_comp <- select(AllSpAbunds_floralvis_comp,
-                                     all_of(all.interaction.floralvis)) # make the matrix in specific order
+AllSpAbunds_FV_comp <- select(AllSpAbunds_FV_comp,
+                                     all_of(all.interaction.FV_comp)) # make the matrix in specific order
 
 
 
-#view(AllSpAbunds_floralvis_comp)
+#view(AllSpAbunds_FV_comp)
 # this part is strickly to know the potential of interaction at the before the sparsity approach
 
-SpTotals_floralvis_comp <- colSums(AllSpAbunds_floralvis_comp, na.rm = T)
-SpToKeep_floralvis_comp <- SpTotals_floralvis_comp  > 0
+SpTotals_FV_comp <- colSums(AllSpAbunds_FV_comp, na.rm = T)
+SpToKeep_FV_comp <- SpTotals_FV_comp  > 0
 
-FV_comp <- sum(SpToKeep_floralvis_comp)
-SpMatrix_floralvis_comp  <- matrix(NA, nrow = N, ncol = FV_comp )
+FV_comp <- sum(SpToKeep_FV_comp)
+SpMatrix_FV_comp  <- matrix(NA, nrow = N, ncol = FV_comp )
 i <- 1
-for(s in 1:ncol(AllSpAbunds_floralvis_comp)){
-  if(SpToKeep_floralvis_comp[s] == 1){
-    SpMatrix_floralvis_comp[,i] <- AllSpAbunds_floralvis_comp[,s]
+for(s in 1:ncol(AllSpAbunds_FV_comp)){
+  if(SpToKeep_FV_comp[s] == 1){
+    SpMatrix_FV_comp[,i] <- AllSpAbunds_FV_comp[,s]
     i <- i + 1
-  }
+  }else{next}
 }
-SpMatrix_floralvis_comp <-(SpMatrix_floralvis_comp/max(SpMatrix_floralvis_comp,na.rm = T))*100 #scale all the interaction between 0 and 100
-if(max(SpMatrix_floralvis_comp,na.rm = T) == 100){print("scale SpMatrix_floralvis_comp correct")}
+SpMatrix_FV_comp <-(SpMatrix_FV_comp/max(SpMatrix_FV_comp,na.rm = T))*100 #scale all the interaction between 0 and 100
+if(max(SpMatrix_FV_comp,na.rm = T) == 100){print("scale SpMatrix_FV_comp correct")}
 
-SpNames_floralvis_comp <- names(SpToKeep_floralvis_comp)[SpToKeep_floralvis_comp]
+SpNames_FV_comp <- names(SpToKeep_FV_comp)[SpToKeep_FV_comp]
 
-vector_floralvis_comp <- vector() # make a vector of the position of each competitor plant species
+vector_FV_comp <- vector() # make a vector of the position of each competitor plant species
 # important to be able to divide in the bayesian approach  
 for (n in 1:(length(complexitylevel.plant)+1)){
-  vector_floralvis_comp[n] <- max(grep(c(complexitylevel.plant,focal)[n], SpNames_floralvis_comp))
- if(vector_floralvis_comp[n] < 0){vector_floralvis_comp[n] <- NA} 
+  vector_FV_comp[n] <- max(grep(c(complexitylevel.plant,focal)[n], SpNames_FV_comp))
+ if(vector_FV_comp[n] < 0){vector_FV_comp[n] <- NA} 
 }
-vector_floralvis_comp <- vector_floralvis_comp[!is.na(vector_floralvis_comp)]
+vector_FV_comp <- vector_FV_comp[!is.na(vector_FV_comp)]
+
+# creation matrix_HOIs_ijf
+matrix_HOIs_ijf <- list()
+FV_comp <- ncol(SpMatrix_FV_comp) 
+for (i in 1:N){
+  matrix_i <- matrix(nrow=S,ncol=FV)  
+  n = 1
+  m=1
+  for (fv in 1:FV_comp) {
+    if(fv == vector_FV_comp[n] + 1){
+      n = n+1
+      m = 1 }
+    matrix_i[n,m] = SpMatrix_FV_comp[i,fv]
+    m = m+1 
+  }
+  matrix_i[is.na(matrix_i)]<- 0
+  matrix_HOIs_ijf[[i]]  <- matrix_i
+  if(sum(rowSums(is.na(matrix_i)))==T){
+    print("One or multiple row(s) in matrix_HOIs_ijf contain only NAs")
+  }
+}
+
+
 #---- Interaction (HOIs) matrix of herbivores with COMPETITORS ----
 
 
-SpDataherbivore_comp <- left_join(SpDataFocal,
-                                  SpDataherbivore,
+SpData_H_comp <- left_join(SpDataFocal,
+                                  SpData_H,
                                   by=c("day","month","year","plot","subplot")) %>%
   unique() %>%
   gather( all_of(c(complexitylevel.plant,focal)),
           key = "plant.comp", value = "abundance.plant.comp") %>%
-  gather(all_of(complexitylevel.herbivore),
-         key = "herbivore", value = "presence")
+  gather(all_of(complexitylevel.H),
+         key = "H", value = "presence")
 
 
 
-SpDataherbivore_comp$abundance.plant.comp <-as.numeric(SpDataherbivore_comp$abundance.plant.comp)
-SpDataherbivore_comp$comp.abund_presence <- SpDataherbivore_comp$presence*SpDataherbivore_comp$abundance.plant.comp
-SpDataherbivore_comp <-  unite(SpDataherbivore_comp,
-                               plant.comp, herbivore,
-                               col = "plant_herbivore", sep = "_") 
+SpData_H_comp$abundance.plant.comp <-as.numeric(SpData_H_comp$abundance.plant.comp)
+SpData_H_comp$comp.abund_presence <- SpData_H_comp$presence*SpData_H_comp$abundance.plant.comp
+SpData_H_comp <-  unite(SpData_H_comp,
+                               plant.comp, H,
+                               col = "plant_H", sep = "_") 
 
-SpDataherbivore_comp <- aggregate(comp.abund_presence ~ plant_herbivore + focal + fruit + 
+SpData_H_comp <- aggregate(comp.abund_presence ~ plant_H + focal + fruit + 
                                     seed + subplot 
                                   + plot + year + month + day, 
-                                  SpDataherbivore_comp, sum,na.action=na.omit)
+                                  SpData_H_comp, sum,na.action=na.omit)
 
-SpDataherbivore_comp <-  spread(SpDataherbivore_comp ,plant_herbivore, comp.abund_presence)
+SpData_H_comp <-  spread(SpData_H_comp ,plant_H, comp.abund_presence)
 
-SpDataherbivore_comp <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
-                                  SpDataherbivore_comp)
+SpData_H_comp <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
+                                  SpData_H_comp)
 
-SpDataherbivore_comp <- unique(SpDataherbivore_comp)
+SpData_H_comp <- unique(SpData_H_comp)
 
-AllSpAbunds_herbivore_comp <- SpDataherbivore_comp  %>% 
-  select(all_of(names(SpDataherbivore_comp)[!names(SpDataherbivore_comp) %in% c('subplot', "plot", "year","month",
+AllSpAbunds_H_comp <- SpData_H_comp  %>% 
+  select(all_of(names(SpData_H_comp)[!names(SpData_H_comp) %in% c('subplot', "plot", "year","month",
                                                                                 "day","focal","fruit","seed",
                                                                                 focal, complexitylevel.plant)]))
-all.interaction.herbivore <- as.vector(t(outer(c(complexitylevel.plant,focal), complexitylevel.herbivore, paste, sep="_")))
-missing.interaction.herbivore <-all.interaction.herbivore[which(!all.interaction.herbivore %in% names(AllSpAbunds_herbivore_comp))]
+all.interaction.H_comp <- as.vector(t(outer(c(complexitylevel.plant,focal), complexitylevel.H, paste, sep="_")))
+missing.interaction.H_comp <-all.interaction.H_comp[which(!all.interaction.H_comp %in% names(AllSpAbunds_H_comp))]
 
 
-for (n in missing.interaction.herbivore){
-  AllSpAbunds_herbivore_comp[,n] <- NA
+for (n in missing.interaction.H_comp){
+  AllSpAbunds_H_comp[,n] <- NA
 }
 
-AllSpAbunds_herbivore_comp <- select(AllSpAbunds_herbivore_comp,
-                                     all_of(all.interaction.herbivore)) # make the matrix in specific order
+AllSpAbunds_H_comp <- select(AllSpAbunds_H_comp,
+                                     all_of(all.interaction.H_comp)) # make the matrix in specific order
 
 
 
-#view(AllSpAbunds_herbivore_comp)
+#view(AllSpAbunds_H_comp)
 # this part is strickly to know the potential of interaction at the before the sparsity approach
 
-SpTotals_herbivore_comp <- colSums(AllSpAbunds_herbivore_comp, na.rm = T)
-SpToKeep_herbivore_comp <- SpTotals_herbivore_comp  > 0
+SpTotals_H_comp <- colSums(AllSpAbunds_H_comp, na.rm = T)
+SpToKeep_H_comp <- SpTotals_H_comp  > 0
 
-FV_comp <- sum(SpToKeep_herbivore_comp)
-SpMatrix_herbivore_comp  <- matrix(NA, nrow = N, ncol = FV_comp )
+FV_comp <- sum(SpToKeep_H_comp)
+SpMatrix_H_comp  <- matrix(NA, nrow = N, ncol = FV_comp)
 i <- 1
-for(s in 1:ncol(AllSpAbunds_herbivore_comp)){
-  if(SpToKeep_herbivore_comp[s] == 1){
-    SpMatrix_herbivore_comp[,i] <- AllSpAbunds_herbivore_comp[,s]
+for(s in 1:ncol(AllSpAbunds_H_comp)){
+  if(SpToKeep_H_comp[s] == 1){
+    SpMatrix_H_comp[,i] <- AllSpAbunds_H_comp[,s]
     i <- i + 1
-  }
+  }else{next}
 }
-SpMatrix_herbivore_comp <-(SpMatrix_herbivore_comp/max(SpMatrix_herbivore_comp,na.rm = T))*100 #scale all the interaction between 0 and 100
-if(max(SpMatrix_herbivore_comp,na.rm = T) == 100){print("scale SpMatrix_herbivore_comp correct")}
+SpMatrix_H_comp <-(SpMatrix_H_comp/max(SpMatrix_H_comp,na.rm = T))*100 #scale all the interaction between 0 and 100
+if(max(SpMatrix_H_comp,na.rm = T) == 100){print("scale SpMatrix_H_comp correct")}
 
-SpNames_herbivore_comp <- names(SpToKeep_herbivore_comp)[SpToKeep_herbivore_comp]
+SpNames_H_comp <- names(SpToKeep_H_comp)[SpToKeep_H_comp]
 
-vector_herbivore_comp <- vector() # make a vector of the position of each competitor plant species
+vector_H_comp <- vector() # make a vector of the position of each competitor plant species
 # important to be able to divide in the bayesian approach  
 for (n in 1:(length(complexitylevel.plant)+1)){
-  vector_herbivore_comp[n] <- max(grep(c(complexitylevel.plant,focal)[n], SpNames_herbivore_comp))
-  if(vector_herbivore_comp[n] < 0){vector_herbivore_comp[n] <- NA} 
+  vector_H_comp[n] <- max(grep(c(complexitylevel.plant,focal)[n], SpNames_H_comp))
+  if(vector_H_comp[n] < 0){vector_H_comp[n] <- NA} 
 }
-vector_herbivore_comp <- vector_herbivore_comp[!is.na(vector_herbivore_comp)]
-#---- Interaction (HOIs) matrix of herbivores with herbivores ----
-SpDataH_herbivore <- left_join(SpDataherbivore,
-                               SpDataherbivore,
+vector_H_comp <- vector_H_comp[!is.na(vector_H_comp)]
+
+# creation of  matrix_HOIs_ijh
+
+
+matrix_HOIs_ijh <- list()
+H_comp <- ncol(SpMatrix_H_comp)
+for (i in 1:N){
+  matrix_i <- matrix(nrow=S,ncol=H)  
+  n = 1
+  m=1
+  for (h_comp in 1:H_comp) {
+    if(h_comp == vector_H_comp[n] + 1){
+      n = n+1
+      m = 1 }
+    matrix_i[n,m] = SpMatrix_H_comp[i,h_comp]
+    m = m+1 
+  }
+  matrix_i[is.na(matrix_i)] <- 0
+  matrix_HOIs_ijh[[i]] <-  matrix_i
+  if(sum(rowSums(is.na(matrix_i)))==T){
+    print("One or multiple row(s) in matrix_HOIs_ijf contain only NAs")
+  }
+}
+
+
+
+#---- Interaction (HOIs) matrix of Herbivores with Herbivores ----
+SpData_2H <- left_join(SpData_H,
+                               SpData_H,
                                by=c("day","month","year","plot","subplot","code.plant"),
                                suffix=c(".h1",".h2")) %>%
   unique() %>%
-  gather( all_of(paste0(complexitylevel.herbivore,".h1")),
+  gather( all_of(paste0(complexitylevel.H,".h1")),
           key = "herbivore.1", value = "presence.h.1") %>%
-  gather(all_of(paste0(complexitylevel.herbivore,".h2")),
+  gather(all_of(paste0(complexitylevel.H,".h2")),
          key = "herbivore.2", value = "presence.h.2")
 
-SpDataH_herbivore$presence.h <- SpDataH_herbivore$presence.h.1*SpDataH_herbivore$presence.h.2
-SpDataH_herbivore <-  unite(SpDataH_herbivore,
+SpData_2H$presence.h <- SpData_2H$presence.h.1*SpData_2H$presence.h.2
+SpData_2H <-  unite(SpData_2H,
                             herbivore.1, herbivore.2,
                             col = "herbivore_herbivore", sep = "_") 
 
-SpDataH_herbivore <- aggregate(presence.h ~ herbivore_herbivore + code.plant + subplot 
+SpData_2H <- aggregate(presence.h ~ herbivore_herbivore + code.plant + subplot 
                                + plot + year + month + day, 
-                               SpDataH_herbivore, sum,na.action=na.omit)
+                               SpData_2H, sum,na.action=na.omit)
 
-SpDataH_herbivore <-  spread(SpDataH_herbivore ,herbivore_herbivore, presence.h  )
+SpData_2H <-  spread(SpData_2H ,herbivore_herbivore, presence.h  )
 
-SpDataH_herbivore <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
-                               SpDataH_herbivore)
+SpData_2H <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
+                               SpData_2H)
 
 
-AllSpAbunds_H_herbivore <- SpDataH_herbivore  %>% 
-  select(all_of(names(SpDataH_herbivore)[!names(SpDataH_herbivore) %in% c('subplot', "plot", "year","month",
+AllSpAbunds_2H <- SpData_2H  %>% 
+  select(all_of(names(SpData_2H)[!names(SpData_2H) %in% c('subplot', "plot", "year","month",
                                                                           "day","focal","fruit","seed",
                                                                           focal, complexitylevel.plant)]))
 # check all posible interactions of h with h and see if they are included in the dataframe
-all.interaction.H_herbivore <- as.vector(t(outer(paste0(complexitylevel.herbivore,".h1"),
-                                                 paste0(complexitylevel.herbivore,".h2"),
+all.interaction_2H <- as.vector(t(outer(paste0(complexitylevel.H,".h1"),
+                                                 paste0(complexitylevel.H,".h2"),
                                                  paste, sep="_")))
 
-missing.interaction.H_herbivore <-all.interaction.H_herbivore[which(!all.interaction.H_herbivore %in% 
-                                                                      names(AllSpAbunds_H_herbivore))]
+missing.interaction_2H <-all.interaction_2H[which(!all.interaction_2H %in% 
+                                                                      names(AllSpAbunds_2H))]
 
-for (n in missing.interaction.H_herbivore){ # if not present, include them
-  AllSpAbunds_H_herbivore[,n] <- NA
+for (n in missing.interaction_2H){ # if not present, include them
+  AllSpAbunds_2H[,n] <- NA
 }
 
-AllSpAbunds_H_herbivore <- select(AllSpAbunds_H_herbivore,
-                                  all_of(all.interaction.H_herbivore)) # make the matrix in specific order
+AllSpAbunds_2H <- select(AllSpAbunds_2H,
+                                  all_of(all.interaction_2H)) # make the matrix in specific order
 
 
 
-#view(AllSpAbunds_H_herbivore)
+#view(AllSpAbunds_2H)
 # this part is strickly to know the potential of interaction at the before the sparsity approach
 
-SpTotals_H_herbivore <- colSums(AllSpAbunds_H_herbivore, na.rm = T)
-SpToKeep_H_herbivore <- SpTotals_H_herbivore  > 0
+SpTotals_2H <- colSums(AllSpAbunds_2H, na.rm = T)
+SpToKeep_2H <- SpTotals_2H  > 0
 
-H_herbivore  <- sum(SpToKeep_H_herbivore)
-SpMatrix_H_herbivore  <- matrix(NA, nrow = N, ncol = H_herbivore )
+H_H  <- sum(SpToKeep_2H)
+SpMatrix_2H  <- matrix(NA, nrow = N, ncol = H_H )
 i <- 1
-for(s in 1:ncol(AllSpAbunds_H_herbivore)){
-  if(SpToKeep_H_herbivore[s] == 1){
-    SpMatrix_H_herbivore[,i] <- AllSpAbunds_H_herbivore[,s]
+for(s in 1:ncol(AllSpAbunds_2H)){
+  if(SpToKeep_2H[s] == 1){
+    SpMatrix_2H[,i] <- AllSpAbunds_2H[,s]
     i <- i + 1
+  }else{next}
+}
+SpMatrix_2H <-(SpMatrix_2H/max(SpMatrix_2H,na.rm = T))*100 #scale all the interaction between 0 and 100
+if(max(SpMatrix_2H,na.rm = T) == 100){print("scale SpMatrix_2H correct")}
+
+SpNames_2H <- names(SpToKeep_2H)[SpToKeep_2H]
+
+vector_2H <- vector() # make a vector of the position of each competitor plant species
+# important to be able to divide in the bayesian approach  
+for (n in 1:(length(complexitylevel.H))){
+  hname <- paste0("^",paste0(complexitylevel.H,".h1")[n],"_")
+  if(length(grep(hname, SpNames_2H)) ==0){vector_2H[n] <- NA
+  next }
+  vector_2H[n] <- max(grep(hname, SpNames_2H))
+  if(vector_2H[n] < 0){vector_2H[n] <- NA} 
+}
+
+vector_2H <- vector_2H[!is.na(vector_2H)]
+
+# creation of matrix_HOIs_ihh
+H_H <- ncol(SpMatrix_2H)
+matrix_HOIs_ihh <- list()
+for (i in 1:N){
+  matrix_i <- matrix(nrow=H,ncol=H)  
+  n = 1
+  m=1
+  for (h_h in 1:H_H) {
+    if(h_h == vector_2H[n] + 1){
+      n = n+1
+      m = 1 }
+    matrix_i[n,m] = SpMatrix_2H[i,h_h]
+    m = m+1 
+  }
+  matrix_i[is.na(matrix_i)] <- 0
+  matrix_HOIs_ihh[[i]]  <- matrix_i
+  if(sum(rowSums(is.na(matrix_i)))==T){
+    print("One or multiple row(s) in matrix_HOIs_ijf contain only NAs")
   }
 }
-SpMatrix_H_herbivore <-(SpMatrix_H_herbivore/max(SpMatrix_H_herbivore,na.rm = T))*100 #scale all the interaction between 0 and 100
-if(max(SpMatrix_H_herbivore,na.rm = T) == 100){print("scale SpMatrix_H_herbivore correct")}
 
-SpNames_H_herbivore <- names(SpToKeep_H_herbivore)[SpToKeep_H_herbivore]
-
-vector_H_herbivore <- vector() # make a vector of the position of each competitor plant species
-# important to be able to divide in the bayesian approach  
-for (n in 1:(length(complexitylevel.herbivore))){
-  hname <- paste0("^",paste0(complexitylevel.herbivore,".h1")[n],"_")
-  if(length(grep(hname, SpNames_H_herbivore)) ==0){vector_H_herbivore[n] <- NA
-  next }
-  vector_H_herbivore[n] <- max(grep(hname, SpNames_H_herbivore))
-  if(vector_H_herbivore[n] < 0){vector_H_herbivore[n] <- NA} 
-}
-
-vector_H_herbivore <- vector_H_herbivore[!is.na(vector_H_herbivore)]
 #---- Interaction (HOIs) matrix of floral visitors with floral visitors ----
-SpDataFV_FV <- left_join(SpDatafloralvis,
-                         SpDatafloralvis,
+SpData_2FV <- left_join(SpData_FV,
+                         SpData_FV,
                          by=c("day","month","year","plot","subplot","code.plant"),
                          suffix=c(".fv1",".fv2")) %>%
   unique() %>%
-  gather( all_of(paste0(complexitylevel.floral.visitor,".fv1")),
+  gather( all_of(paste0(complexitylevel.FV,".fv1")),
           key = "floral.vis.1", value = "abundance.fv.1") %>%
-  gather(all_of(paste0(complexitylevel.floral.visitor,".fv2")),
+  gather(all_of(paste0(complexitylevel.FV,".fv2")),
          key = "floral.vis.2", value = "abundance.fv.2")
 
-SpDataFV_FV$abundance.fv <- SpDataFV_FV$abundance.fv.1*SpDataFV_FV$abundance.fv.2
-SpDataFV_FV <-  unite(SpDataFV_FV,
+SpData_2FV$abundance.fv <- SpData_2FV$abundance.fv.1*SpData_2FV$abundance.fv.2
+SpData_2FV <-  unite(SpData_2FV,
                       floral.vis.1, floral.vis.2,
-                      col = "Floralvis_floralvis", sep = "_") 
+                      col = "Fv_Fv", sep = "_") 
 
-SpDataFV_FV <- aggregate(abundance.fv ~ Floralvis_floralvis + code.plant + subplot 
+SpData_2FV <- aggregate(abundance.fv ~ Fv_Fv + code.plant + subplot 
                          + plot + year + month + day, 
-                         SpDataFV_FV, sum,na.action=na.omit)
+                         SpData_2FV, sum,na.action=na.omit)
 
-SpDataFV_FV <-  spread(SpDataFV_FV ,Floralvis_floralvis, abundance.fv  )
+SpData_2FV <-  spread(SpData_2FV ,Fv_Fv, abundance.fv  )
 
-SpDataFV_FV <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
-                         SpDataFV_FV)
+SpData_2FV <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
+                         SpData_2FV)
 
 
-AllSpAbunds_FV_FV <- SpDataFV_FV  %>% 
-  select(all_of(names(SpDataFV_FV)[!names(SpDataFV_FV) %in% c('subplot', "plot", "year","month",
+AllSpAbunds_2FV <- SpData_2FV  %>% 
+  select(all_of(names(SpData_2FV)[!names(SpData_2FV) %in% c('subplot', "plot", "year","month",
                                                               "day","focal","fruit","seed",
                                                               focal, complexitylevel.plant)]))
 # check all posible interactions of Fv with FV and see if they are included in the dataframe
-all.interaction.FV_FV <- as.vector(t(outer(paste0(complexitylevel.floral.visitor,".fv1"),
-                                           paste0(complexitylevel.floral.visitor,".fv2"),
+all.interaction.2FV <- as.vector(t(outer(paste0(complexitylevel.FV,".fv1"),
+                                           paste0(complexitylevel.FV,".fv2"),
                                            paste, sep="_")))
 
-missing.interaction.FV_FV <-all.interaction.FV_FV[which(!all.interaction.FV_FV %in% 
-                                                          names(AllSpAbunds_FV_FV))]
+missing.interaction.2FV <-all.interaction.2FV[which(!all.interaction.2FV %in% 
+                                                          names(AllSpAbunds_2FV))]
 
-for (n in missing.interaction.FV_FV){ # if not present, include them
-  AllSpAbunds_FV_FV[,n] <- NA
+for (n in missing.interaction.2FV){ # if not present, include them
+  AllSpAbunds_2FV[,n] <- NA
 }
 
-AllSpAbunds_FV_FV <- select(AllSpAbunds_FV_FV,
-                            all_of(all.interaction.FV_FV)) # make the matrix in specific order
+AllSpAbunds_2FV <- select(AllSpAbunds_2FV,
+                            all_of(all.interaction.2FV)) # make the matrix in specific order
 
 
 
-#view(AllSpAbunds_FV_FV)
+#view(AllSpAbunds_2FV)
 # this part is strickly to know the potential of interaction at the before the sparsity approach
 
-SpTotals_FV_FV <- colSums(AllSpAbunds_FV_FV, na.rm = T)
-SpToKeep_FV_FV <- SpTotals_FV_FV  > 0
+SpTotals_2FV <- colSums(AllSpAbunds_2FV, na.rm = T)
+SpToKeep_2FV <- SpTotals_2FV  > 0
 
-FV_FV  <- sum(SpToKeep_FV_FV)
-SpMatrix_FV_FV  <- matrix(NA, nrow = N, ncol = FV_FV )
+FV_FV  <- sum(SpToKeep_2FV)
+SpMatrix_2FV  <- matrix(NA, nrow = N, ncol = FV_FV )
 i <- 1
-for(s in 1:ncol(AllSpAbunds_FV_FV)){
-  if(SpToKeep_FV_FV[s] == 1){
-    SpMatrix_FV_FV[,i] <- AllSpAbunds_FV_FV[,s]
+for(s in 1:ncol(AllSpAbunds_2FV)){
+  if(SpToKeep_2FV[s] == 1){
+    SpMatrix_2FV[,i] <- AllSpAbunds_2FV[,s]
     i <- i + 1
+  }else{next}
+}
+SpMatrix_2FV <-(SpMatrix_2FV/max(SpMatrix_2FV,na.rm = T))*100 #scale all the interaction between 0 and 100
+if(max(SpMatrix_2FV,na.rm = T) == 100){print("scale SpMatrix_2FV correct")}
+
+SpNames_2FV <- names(SpToKeep_2FV)[SpToKeep_2FV]
+
+vector_2FV <- vector() # make a vector of the position of each competitor plant species
+# important to be able to divide in the bayesian approach  
+for (n in 1:(length(complexitylevel.FV))){
+  fvname <- paste0("^",paste0(complexitylevel.FV,".fv1")[n],"_")
+  if(length(grep(fvname, SpNames_2FV)) ==0){vector_2FV[n] <- NA
+  next }
+  vector_2FV[n] <- max(grep(fvname, SpNames_2FV))
+  if(vector_2FV[n] < 0){vector_2FV[n] <- NA} 
+}
+vector_2FV <- vector_2FV[!is.na(vector_2FV)]
+
+# creation of matrix_HOIs_iff
+
+FV_FV <- ncol(SpMatrix_2FV)
+matrix_HOIs_iff <- list()
+for (i in 1:N){
+  matrix_i <- matrix(nrow=FV,ncol=FV)  
+  n = 1
+  m=1
+  for (f_f in 1:FV_FV) {
+    if(f_f == vector_2FV[n] + 1){
+      n = n+1
+      m = 1 }
+    matrix_i[n,m] = SpMatrix_2FV[i,f_f]
+    m = m+1 
+  }
+  matrix_i[is.na(matrix_i)] <- 0
+  
+  matrix_HOIs_iff[[i]]  <- matrix_i
+  if(sum(rowSums(is.na(matrix_i)))==T){
+    print("One or multiple row(s) in matrix_HOIs_ijf contain only NAs")
   }
 }
-SpMatrix_FV_FV <-(SpMatrix_FV_FV/max(SpMatrix_FV_FV,na.rm = T))*100 #scale all the interaction between 0 and 100
-if(max(SpMatrix_FV_FV,na.rm = T) == 100){print("scale SpMatrix_FV_FV correct")}
 
-SpNames_FV_FV <- names(SpToKeep_FV_FV)[SpToKeep_FV_FV]
 
-vector_FV_FV <- vector() # make a vector of the position of each competitor plant species
-# important to be able to divide in the bayesian approach  
-for (n in 1:(length(complexitylevel.floral.visitor))){
-  fvname <- paste0("^",paste0(complexitylevel.floral.visitor,".fv1")[n],"_")
-  if(length(grep(fvname, SpNames_FV_FV)) ==0){vector_FV_FV[n] <- NA
-  next }
-  vector_FV_FV[n] <- max(grep(fvname, SpNames_FV_FV))
-  if(vector_FV_FV[n] < 0){vector_FV_FV[n] <- NA} 
-}
-vector_FV_FV <- vector_FV_FV[!is.na(vector_FV_FV)]
 #---- Interaction (HOIs) matrix of floral visitors with herbivores----
-common.sp.fv.h <- complexitylevel.floral.visitor[complexitylevel.floral.visitor %in% complexitylevel.herbivore]
+common.sp.FvH <- complexitylevel.FV[complexitylevel.FV %in% complexitylevel.H]
 
-SpDataFV_herbivore <- left_join(SpDatafloralvis,
-                                SpDataherbivore,
+SpData_FvH <- left_join(SpData_FV,
+                                SpData_H,
                                 by=c("day","month","year","plot","subplot","code.plant"),
                                 suffix=c(".fv",".h")) %>%
   unique() %>%
-  gather( all_of(c(complexitylevel.floral.visitor[!complexitylevel.floral.visitor %in% common.sp.fv.h],
-                   "beetle.fv","bug.fv")),
+  gather( all_of(c(complexitylevel.FV[!complexitylevel.FV %in% common.sp.FvH],
+                   paste0(common.sp.FvH,".fv"))),
           key = "floral.vis", value = "abundance.fv") %>%
-  gather(all_of(c(complexitylevel.herbivore[!complexitylevel.herbivore %in% common.sp.fv.h],
-                  "beetle.h","bug.h")),
+  gather(all_of(c(complexitylevel.H[!complexitylevel.H %in% common.sp.FvH],
+                  paste0(common.sp.FvH,".h"))),
          key = "herbivore", value = "presence.h")
 # to avoid multiplying apple and pear scale everything on a scale from 0 to 100
 # we will scale the multiplication again later on
-SpDataFV_herbivore$presence.h <- SpDataFV_herbivore$presence.h/max(SpDataFV_herbivore$presence.h,na.rm = T)*100
-SpDataFV_herbivore$abundance.fv <- SpDataFV_herbivore$abundance.fv/max(SpDataFV_herbivore$abundance.fv,na.rm = T)*100
+SpData_FvH$presence.h <- SpData_FvH$presence.h/max(SpData_FvH$presence.h,na.rm = T)*100
+SpData_FvH$abundance.fv <- SpData_FvH$abundance.fv/max(SpData_FvH$abundance.fv,na.rm = T)*100
 
 
-SpDataFV_herbivore$presence.h.abundance.fv <- SpDataFV_herbivore$presence.h*SpDataFV_herbivore$abundance.fv
-SpDataFV_herbivore <-  unite(SpDataFV_herbivore,
+SpData_FvH$presence.h.abundance.fv <- SpData_FvH$presence.h*SpData_FvH$abundance.fv
+SpData_FvH <-  unite(SpData_FvH,
                              floral.vis, herbivore,
-                             col = "Floralvis_herbivore", sep = "_") 
+                             col = "FvH", sep = "_") 
 
-SpDataFV_herbivore <- aggregate(presence.h.abundance.fv ~Floralvis_herbivore + code.plant + subplot 
+SpData_FvH <- aggregate(presence.h.abundance.fv ~FvH + code.plant + subplot 
                                 + plot + year + month + day, 
-                                SpDataFV_herbivore, sum,na.action=na.omit)
+                                SpData_FvH, sum,na.action=na.omit)
 
-SpDataFV_herbivore <-  spread(SpDataFV_herbivore ,Floralvis_herbivore, presence.h.abundance.fv )
+SpData_FvH <-  spread(SpData_FvH ,FvH, presence.h.abundance.fv )
 
-SpDataFV_herbivore <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
-                                SpDataFV_herbivore)
+SpData_FvH <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
+                                SpData_FvH)
 
 
-AllSpAbunds_FV_herbivore <- SpDataFV_herbivore  %>% 
-  select(all_of(names(SpDataFV_herbivore)[!names(SpDataFV_herbivore) %in% c('subplot', "plot", "year","month",
+AllSpAbunds_FvH <- SpData_FvH  %>% 
+  select(all_of(names(SpData_FvH)[!names(SpData_FvH) %in% c('subplot', "plot", "year","month",
                                                                             "day","focal","fruit","seed",
                                                                             focal, complexitylevel.plant)]))
-all.interaction.FV_herbivore <- as.vector(t(outer(c(complexitylevel.floral.visitor[!complexitylevel.floral.visitor %in% common.sp.fv.h],
+all.interaction.FvH <- as.vector(t(outer(c(complexitylevel.FV[!complexitylevel.FV %in% common.sp.FvH],
                                                     "beetle.fv","bug.fv"),
-                                                  c(complexitylevel.herbivore[!complexitylevel.herbivore %in% common.sp.fv.h],
+                                                  c(complexitylevel.H[!complexitylevel.H %in% common.sp.FvH],
                                                     "beetle.h","bug.h"),paste, sep="_")))
-missing.interaction.FV_herbivore <-all.interaction.FV_herbivore[which(!all.interaction.FV_herbivore %in% 
-                                                                        names(AllSpAbunds_FV_herbivore))]
+missing.interaction.FvH <-all.interaction.FvH[which(!all.interaction.FvH %in% 
+                                                                        names(AllSpAbunds_FvH))]
 
 
-for (n in missing.interaction.FV_herbivore){
-  AllSpAbunds_FV_herbivore[,n] <- NA
+for (n in missing.interaction.FvH){
+  AllSpAbunds_FvH[,n] <- NA
 }
 
-AllSpAbunds_FV_herbivore <- select(AllSpAbunds_FV_herbivore,
-                                   all_of(all.interaction.FV_herbivore)) # make the matrix in specific order
+AllSpAbunds_FvH <- select(AllSpAbunds_FvH,
+                                   all_of(all.interaction.FvH)) # make the matrix in specific order
 
 
 
-#view(AllSpAbunds_FV_herbivore)
+#view(AllSpAbunds_FvH)
 # this part is strickly to know the potential of interaction at the before the sparsity approach
 
-SpTotals_FV_herbivore <- colSums(AllSpAbunds_FV_herbivore, na.rm = T)
-SpToKeep_FV_herbivore <- SpTotals_FV_herbivore  > 0
+SpTotals_FvH <- colSums(AllSpAbunds_FvH, na.rm = T)
+SpToKeep_FvH <- SpTotals_FvH  > 0
 
-FV_herbivore  <- sum(SpToKeep_FV_herbivore)
-SpMatrix_FV_herbivore  <- matrix(NA, nrow = N, ncol = FV_herbivore )
+FvH  <- sum(SpToKeep_FvH)
+SpMatrix_FvH  <- matrix(NA, nrow = N, ncol = FvH )
 i <- 1
-for(s in 1:ncol(AllSpAbunds_FV_herbivore)){
-  if(SpToKeep_FV_herbivore[s] == 1){
-    SpMatrix_FV_herbivore[,i] <- AllSpAbunds_FV_herbivore[,s]
+for(s in 1:ncol(AllSpAbunds_FvH)){
+  if(SpToKeep_FvH[s] == 1){
+    SpMatrix_FvH[,i] <- AllSpAbunds_FvH[,s]
     i <- i + 1
+  }else{next}
+}
+SpMatrix_FvH <-(SpMatrix_FvH/max(SpMatrix_FvH,na.rm = T))*100 #scale all the interaction between 0 and 100
+if(max(SpMatrix_FvH,na.rm = T) == 100){print("scale SpMatrix_FvH correct")}
+
+SpNames_FvH <- names(SpToKeep_FvH)[SpToKeep_FvH]
+
+vector_FvH <- vector() # make a vector of the position of each competitor plant species
+# important to be able to divide in the bayesian approach  
+for (n in 1:(length(complexitylevel.FV))){
+  fvname <- paste0("^",c(complexitylevel.FV[!complexitylevel.FV %in% common.sp.FvH],
+                         "beetle.fv","bug.fv")[n],"_")
+  if(length(grep(fvname, SpNames_FvH)) ==0){vector_FvH[n] <- NA
+  next }
+  vector_FvH[n] <- max(grep(fvname, SpNames_FvH))
+  if(vector_FvH[n] < 0){vector_FvH[n] <- NA} 
+}
+vector_FvH <- vector_FvH[!is.na(vector_FvH)]
+
+# creation of matrix_HOIs_ifh
+FV_H <- ncol(SpMatrix_FvH)
+matrix_HOIs_ifh <- list()
+for (i in 1:N){
+  matrix_i <- matrix(nrow=FV,ncol=H)  
+  n = 1;
+  m=1
+  for (Fvh in 1:FV_H) {
+    if(Fvh == vector_FvH[n] + 1){
+      n = n+1;
+      m = 1 }
+    matrix_i[n,m] = SpMatrix_FvH[i,Fvh];
+    m = m+1 ;
+  }
+  matrix_i[is.na(matrix_i)] <- 0
+
+  matrix_HOIs_ifh[[i]] <-   matrix_i
+  if(sum(rowSums(is.na(matrix_i)))==T){
+    print("One or multiple row(s) in matrix_HOIs_ijf contain only NAs")
   }
 }
-SpMatrix_FV_herbivore <-(SpMatrix_FV_herbivore/max(SpMatrix_FV_herbivore,na.rm = T))*100 #scale all the interaction between 0 and 100
-if(max(SpMatrix_FV_herbivore,na.rm = T) == 100){print("scale SpMatrix_FV_herbivore correct")}
 
-SpNames_FV_herbivore <- names(SpToKeep_FV_herbivore)[SpToKeep_FV_herbivore]
 
-vector_FV_herbivore <- vector() # make a vector of the position of each competitor plant species
-# important to be able to divide in the bayesian approach  
-for (n in 1:(length(complexitylevel.floral.visitor))){
-  fvname <- paste0("^",c(complexitylevel.floral.visitor[!complexitylevel.floral.visitor %in% common.sp.fv.h],
-                         "beetle.fv","bug.fv")[n],"_")
-  if(length(grep(fvname, SpNames_FV_herbivore)) ==0){vector_FV_herbivore[n] <- NA
-  next }
-  vector_FV_herbivore[n] <- max(grep(fvname, SpNames_FV_herbivore))
-  if(vector_FV_herbivore[n] < 0){vector_FV_herbivore[n] <- NA} 
-}
-vector_FV_herbivore <- vector_FV_herbivore[!is.na(vector_FV_herbivore)]
 #---- Preliminary fit ---- 
 # create summary data frame to see all the potential interactions 
-summary.interactions <- bind_rows(summary.interactions,tibble(focal= focal,year=years,
+summary.interactions.n <- tibble(focal= focal,year=years,
                                                               complexity_plant=complexity.plant,
                                                               n.competitors_plant=length(SpNames)-1,
-                                                              competitors_plant=list(SpNames[which(!SpNames %in% focal)]),
-                                                              n.competitors_herbivore=length(SpNames_herbivore),
-                                                              competitors_herbivore=list(SpNames_herbivore),
-                                                              n.competitors_floralvisitor=length(SpNames_floralvis),
-                                                              competitors_floralvisitor=list(SpNames_floralvis),
-                                                              n.HOIs_herbivore=length(SpNames_herbivore_comp),
-                                                              HOIs_herbivore=list(SpNames_herbivore_comp),
-                                                              n.HOIs_floralvisitor=length(SpNames_floralvis_comp),
-                                                              HOIs_floralvisitor=list(SpNames_floralvis_comp)))
+                                                              competitors_plant=paste(collapse=",",SpNames[which(!SpNames %in% focal)]),
+                                                              n.competitors_H=length(SpNames_H),
+                                                              competitors_H=paste(collapse=",",SpNames_H),
+                                                              n.competitors_FVitor=length(SpNames_FV),
+                                                              competitors_FVitor=paste(collapse=",",SpNames_FV),
+                                                              n.HOIs_H=length(SpNames_H_comp),
+                                                              HOIs_H=paste(collapse=",",SpNames_H_comp),
+                                                              n.HOIs_FVitor=length(SpNames_FV_comp),
+                                                              HOIs_FVitor=paste(SpNames_FV_comp,collapse=","),
+                                                              n.HOIs_2FV=length(SpNames_2FV),
+                                                              HOIs_2FV=paste(collapse=",",SpNames_2FV),
+                                                              n.HOIs_2h=length(SpNames_2H),
+                                                              HOIs_2H=paste(collapse=",",SpNames_2H),
+                                                              n.HOIs_FvH=length(SpNames_FvH),
+                                                              HOIs_FvH=paste(collapse=",",SpNames_FvH)
+                                                              )
+
 
 
 # Set the parameters defining the regularized horseshoe prior, as described in
@@ -578,22 +728,17 @@ summary.interactions <- bind_rows(summary.interactions,tibble(focal= focal,year=
 tau0 <- 1
 slab_scale <- sqrt(2)
 slab_df <- 4
-# dimension of poll and herb direct interaction 
-FV <- ncol(SpMatrix_floralvis)
-H <- ncol(SpMatrix_herbivore)
-H_comp <- ncol(SpMatrix_herbivore_comp)
-FV_comp <- ncol(SpMatrix_floralvis_comp) 
-FV_FV <- ncol(SpMatrix_FV_FV)
-FV_H <- ncol(SpMatrix_FV_herbivore)
-H_H <- ncol(SpMatrix_H_herbivore)
 
-head(AllSpAbunds_floralvis_comp)
-DataVec <- c("N", "S", "H","FV","H_comp","FV_comp","FV_FV","FV_H","H_H",
-             "vector_herbivore_comp","vector_floralvis_comp",
-             "Fecundity", "year", "SpMatrix",
-             "SpMatrix_herbivore","SpMatrix_floralvis",
-             "SpMatrix_herbivore_comp","SpMatrix_floralvis_comp",
-             " SpMatrix_FV_herbivore"," SpMatrix_FV_FV"," SpMatrix_H_herbivore",
+# dimension of poll and herb direct interaction 
+FV <- ncol(SpMatrix_FV)
+H <- ncol(SpMatrix_H)
+
+DataVec <- c("N", "S", "H","FV",
+             "Fecundity", "SpMatrix",
+             "SpMatrix_H","SpMatrix_FV",
+             "matrix_HOIs_plant","matrix_HOIs_ijh",
+             "matrix_HOIs_ijf", "matrix_HOIs_ihh",
+             "matrix_HOIs_ifh","matrix_HOIs_iff",
              "Intra", "tau0", "slab_scale", "slab_df")
 
 # Now run a perliminary fit of the model to assess parameter shrinkage
@@ -605,6 +750,7 @@ PrelimFit <- stan(file = "/Users/lisabuche/Code/Project/HOI_Caracoles/code/Carac
                   chains = 3)
 PrelimPosteriors <- rstan::extract(PrelimFit)
 print("prelimi nary fit done")
+#---- Preliminary fit analysis---- 
 pdf(paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/figure/beta_Inclusion_",years,"_",complexity,"_",FocalPrefix,".pdf"))
 ##### Diagnostic plots
 # First check the distribution of Rhats and effective sample sizes 
@@ -636,46 +782,172 @@ str(PrelimPosteriors)
 #       model (i.e. the data pulled their posteriors away from 0). The final model
 #       will then be run with only these species-specific parameters, but without
 #       the regularized horseshoe priors.
-Inclusion_ij <- matrix(data = 0, nrow = 1, ncol = length(SpNames))
-beta_Inclusion <- data.frame(nrow = length(SpNames), ncol = length(SpNames))
+Inclusion_ij <- matrix(data = 0, nrow = 1, ncol = length(SpNames),
+                       dimnames=list(c(""),c(names(SpTotals[SpTotals!=SpToKeep]))))
+Inclusion_FV<- matrix(data = 0,nrow = 1, ncol = length(SpNames_FV),
+                             dimnames=list(c(""),c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV]))))
+Inclusion_H<- matrix(data = 0,nrow = 1, 
+                     ncol = length(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))),
+                             dimnames=list(c(""),c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))))
+
+
+beta_Inclusion_plant <- matrix(data = 0,nrow = length(SpNames), 
+                               ncol = length(SpNames),
+                               dimnames=list(c(names(SpTotals[SpTotals!=SpToKeep])),
+                                             c(names(SpTotals[SpTotals!=SpToKeep]))))
+
+beta_Inclusion_FV <- matrix(data = 0,nrow = length(SpNames), 
+                            ncol = length(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
+                                   dimnames=list(c(names(SpTotals[SpTotals!=SpToKeep])),
+                                                 c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV]))))
+
+beta_Inclusion_H<- matrix(data = 0,nrow = length(SpNames), 
+                          ncol = length(SpTotals_H[SpTotals_H!=SpToKeep_H]),
+                                  dimnames=list(c(names(SpTotals[SpTotals!=SpToKeep])),
+                                                c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))))
+
+beta_Inclusion_2FV<- matrix(data = 0,nrow = length(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
+                            ncol = length(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
+                              dimnames=list(c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
+                                            c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV]))))
+
+beta_Inclusion_2H<- matrix(data = 0,nrow = length(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))), 
+                           ncol = length(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))),
+                                    dimnames=list(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H])),
+                                                  c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))))
+
+beta_Inclusion_FvH<- matrix(data = 0,nrow = length(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
+                            ncol = length(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))),
+                            dimnames=list(c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
+                                          c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))))
+
+
+          
 IntLevel <- 0.5 #0.5 usually, 0.75 for Waitzia, shade
 is.list(PrelimPosteriors$beta_hat_ij)
 #str(PrelimPosteriors$beta_hat_ijk)
 #str(PrelimPosteriors$alpha_hat_ij)
-  for(s in 1:length(SpNames)){
+#For plants as second actor
+for(s in 1:length(SpNames)){
     # hdi : Calculate the highest density interval (HDI) for a probability distribution for a given probability mass
     Ints_ij <- HDInterval::hdi(PrelimPosteriors$alpha_hat_ij[,s], credMass = IntLevel)
     if(Ints_ij[1] > 0 | Ints_ij[2] < 0){
       Inclusion_ij[1,s] <- 1
     }
     for(m in 1:S){
-      beta_Ints_ij <- HDInterval::hdi(PrelimPosteriors$beta_hat_ijk[,s,m], credMass = IntLevel)
+      beta_Ints_ijk <- HDInterval::hdi(PrelimPosteriors$beta_plant_hat_ijk[,s,m], credMass = IntLevel)
       
-      if(beta_Ints_ij[1] > 0 | beta_Ints_ij[2] < 0){
-        beta_Inclusion[s,m] <- 1
+      if(beta_Ints_ijk[1] > 0 | beta_Ints_ijk[2] < 0){
+        beta_Inclusion_plant[s,m] <- 1
       }
     }
-}
-beta_Inclusion <- as.data.frame(beta_Inclusion)
-names(beta_Inclusion) <- c(names(SpTotals[SpTotals!=SpToKeep]))
-Inclusion_ij  <- as.data.frame(Inclusion_ij )
-names(Inclusion_ij) <- c(names(SpTotals[SpTotals!=SpToKeep]))
-
-#write.csv(beta_Inclusion,
-#          paste("/home/lisavm/Simulations/beta_Inclusion_",FocalPrefix,".csv"))
-#write.csv(Inclusion_ij,
- #         paste("/home/lisavm/Simulations/Inclusion_ij_",FocalPrefix,".csv"))
-
-write.csv(beta_Inclusion,
-          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/beta_Inclusion_",years,"_",complexity,"_",FocalPrefix,".csv"))
-write.csv(Inclusion_ij,
-          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/Inclusion_ij_",years,"_",complexity,"_",FocalPrefix,".csv"))
-
+      for(m in 1:length(SpNames_H)){
+        beta_Ints_ijh <- HDInterval::hdi(PrelimPosteriors$beta_H_hat_ijh[,s,m], credMass = IntLevel)
+        
+        if(beta_Ints_ijh[1] > 0 | beta_Ints_ijh[2] < 0){
+          beta_Inclusion_H[s,m] <- 1
+        }
+      }
+      for(m in 1:length(SpNames_FV)){
+        beta_Ints_ijf <- HDInterval::hdi(PrelimPosteriors$beta_FV_hat_ijf[,s,m], credMass = IntLevel)
+        
+        if(beta_Ints_ijf[1] > 0 | beta_Ints_ijf[2] < 0){
+          beta_Inclusion_FV[s,m] <- 1
+        }
+      }
   }
-}}}
 
-return(sum(Inclusion_ij))
-return(sum(beta_Inclusion)) # 0 means that no specific HOIs are relevant overall years
+#For H as second actor
+for(s in 1:length(SpNames_H)){
+  # hdi : Calculate the highest density interval (HDI) for a probability distribution for a given probability mass
+  Ints_ih <- HDInterval::hdi(PrelimPosteriors$gamma_H_hat_ih[,s], credMass = IntLevel)
+  if(Ints_ih[1] > 0 | Ints_ih[2] < 0){
+    Inclusion_H[1,s] <- 1
+  }
+  for(m in 1:length(SpNames_H)){
+    beta_Ints_ihh <- HDInterval::hdi(PrelimPosteriors$beta_2H_hat_ihh[,s,m], credMass = IntLevel)
+    
+    if(beta_Ints_ihh[1] > 0 | beta_Ints_ihh[2] < 0){
+      beta_Inclusion_2H[s,m] <- 1
+    }
+  }
+}
+
+#For pollinator as second actor
+for(s in 1:length(SpNames_FV)){
+  # hdi : Calculate the highest density interval (HDI) for a probability distribution for a given probability mass
+  Ints_if <- HDInterval::hdi(PrelimPosteriors$gamma_FV_hat_if[,s], credMass = IntLevel)
+  if(Ints_if[1] > 0 | Ints_if[2] < 0){
+    Inclusion_FV[1,s] <- 1
+  }
+  for(m in 1:length(SpNames_FV)){
+    beta_Ints_iff <- HDInterval::hdi(PrelimPosteriors$beta_2FV_hat_iff[,s,m], credMass = IntLevel)
+    
+    if(beta_Ints_iff[1] > 0 | beta_Ints_iff[2] < 0){
+      beta_Inclusion_2FV[s,m] <- 1
+    }
+  }
+  for(m in 1:length(SpNames_H)){
+    beta_Ints_ifh <- HDInterval::hdi(PrelimPosteriors$beta_FvH_hat_ifh[,s,m], credMass = IntLevel)
+    
+    if(beta_Ints_ifh[1] > 0 | beta_Ints_ifh[2] < 0){
+      beta_Inclusion_FvH[s,m] <- 1
+    }
+  }
+}
+
+
+summary.interactions.n$n.competitors_plant_inclus <- sum(Inclusion_ij)
+if (sum(Inclusion_ij) >0){
+  summary.interactions.n$competitors_plant_inclus <- c(colnames(Inclusion_ij))[Inclusion_ij]
+}
+write.csv(Inclusion_ij,
+          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/Inclusion_ij_",years,"_",complexity.plant,
+                 "_",complexity.animal,"_",FocalPrefix,".csv"))
+
+summary.interactions.n$n.competitors_FV_inclus <- sum(Inclusion_FV)
+if (sum(Inclusion_FV)>0){
+  summary.interactions.n$competitors_FV_inclus <- c(colnames(Inclusion_FV))[which(Inclusion_FV >=1)]
+}
+write.csv(Inclusion_FV,
+          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/Inclusion_FV_",years,"_",complexity.plant,
+                 "_",complexity.animal,"_",FocalPrefix,".csv"))
+
+
+summary.interactions.n$n.competitors_H_inclus <- sum(Inclusion_H)
+if (sum(Inclusion_H)>0){
+  summary.interactions.n$competitors_H_inclus <- c(colnames(Inclusion_H))[which(Inclusion_H >=1)]
+}
+write.csv(Inclusion_H,
+          paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/Inclusion_H_",years,"_",complexity.plant,
+                 "_",complexity.animal,"_",FocalPrefix,".csv"))
+
+
+summary.interactions.n <- as_tibble(summary.interactions.n)
+for ( x in c("plant","H","FV","2FV","2H","FvH")){
+  matrix_x <- get(paste0("beta_Inclusion_",x))
+  summary.interactions.n[,paste("n.HOIs",x,"inclus",sep="_")] = sum(matrix_x)
+  
+  if (sum(matrix_x  > 0)){
+    summary.interactions.n[,paste0("HOIs_",x,"_inclus")]  = paste(paste0(rownames(  matrix_x )[which(  matrix_x >=1, arr.in=TRUE)[,1]],sep="_",
+                                                            colnames(matrix_x )[which(  matrix_x >=1, arr.in=TRUE)[,2]]),collapse=",")
+  } 
+    write.csv(matrix_x,
+            paste0("/Users/lisabuche/Code/Project/HOI_Caracoles/results/beta_Inclusion_",x,"_",years,"_",complexity.plant,
+                   "_",complexity.animal,"_",FocalPrefix,".csv"))
+}
+
+
+
+
+
+  }# for complexity 
+}}
+  summary.interactions <- bind_rows(summary.interactions,summary.interactions.n)
+}
+
+write.csv(summary.interactions,"/Users/lisabuche/Code/Project/HOI_Caracoles/results/summary.interactions.csv")
+
 
 #---- Final fit ---- 
 
