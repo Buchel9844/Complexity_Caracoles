@@ -3,6 +3,18 @@
 #       figures for the manuscript
 
 rm(list = ls())
+#---- Import the Data ----
+abundance.plant <- read.csv("/Users/lisabuche/Code/Project/Caracoles/data/abundance.csv", sep=",")
+
+competition.plant <- read.csv("/Users/lisabuche/Code/Project/Caracoles/data/competition.csv", sep=",")
+
+plant.class <- read.csv("/Users/lisabuche/Code/Project/Caracoles/data/plant_code.csv", sep=",")
+
+herbivorypredator <- read.csv("/Users/lisabuche/Code/Project/Caracoles/data/herbivorypredator.csv", sep=",")
+
+floral_visitor <- read.csv("/Users/lisabuche/Code/Project/Caracoles/data/floral_visitor.csv", sep=",")
+
+
 
 #install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)
 library(rstan)
@@ -211,11 +223,16 @@ SpData_FV_comp <- aggregate(comp.abund_visits ~ plant_FV + focal + fruit +
                                     SpData_FV_comp, sum,na.action=na.omit)
 
 SpData_FV_comp <-  spread(SpData_FV_comp ,plant_FV, comp.abund_visits)
-
-SpData_FV_comp <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
-                                  SpData_FV_comp)
-
 SpData_FV_comp <- unique(SpData_FV_comp)
+
+SpData_FV_comp <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot","seed","fruit")),
+                                  SpData_FV_comp,by=c("day","month","year","plot","subplot","seed","fruit"),
+                            copy=FALSE)
+if( !nrow(SpData_FV_comp) == N){
+  print("problem in the numbr of observation, they don't match, 
+        try to add  unique(SpData_FV_comp) before the previous line.")
+}
+
 
 AllSpAbunds_FV_comp <- SpData_FV_comp  %>% 
   select(all_of(names(SpData_FV_comp)[!names(SpData_FV_comp) %in% c('subplot', "plot", "year","month",
@@ -242,6 +259,7 @@ SpToKeep_FV_comp <- SpTotals_FV_comp  > 0
 
 FV_comp <- sum(SpToKeep_FV_comp)
 SpMatrix_FV_comp  <- matrix(NA, nrow = N, ncol = FV_comp )
+
 i <- 1
 for(s in 1:ncol(AllSpAbunds_FV_comp)){
   if(SpToKeep_FV_comp[s] == 1){
@@ -311,10 +329,13 @@ SpData_H_comp <- aggregate(comp.abund_presence ~ plant_H + focal + fruit +
 
 SpData_H_comp <-  spread(SpData_H_comp ,plant_H, comp.abund_presence)
 
-SpData_H_comp <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
+SpData_H_comp <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot","seed","fruit")),
+                           SpData_H_comp,by=c("day","month","year","plot","subplot","seed","fruit"),
                                   SpData_H_comp)
-
-SpData_H_comp <- unique(SpData_H_comp)
+if( !nrow(SpData_H_comp) == N){
+  print("problem in the numbr of observation, they don't match, 
+        try to add  unique(SpData_H_comp) before the previous line.")
+}
 
 AllSpAbunds_H_comp <- SpData_H_comp  %>% 
   select(all_of(names(SpData_H_comp)[!names(SpData_H_comp) %in% c('subplot', "plot", "year","month",
