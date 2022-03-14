@@ -351,7 +351,7 @@ for (fv in 1:FV){
      
      D_effects[i] = sum(alpha_ij[i,] .* SpMatrix[i,]) +  sum( gamma_H_ih[i,] .* SpMatrix_H[i,]) + sum( gamma_FV_if[i,] .* SpMatrix_FV[i,]);
      
-    F_hat[i] = lambda_i[i]/ (1+ D_effects[i] + HOI_effects[i]);
+    F_hat[i] = lambda_i[i]/ (D_effects[i] + HOI_effects[i]);
   }
   Fecundity ~ poisson(F_hat); // change to negative binomial
 }
