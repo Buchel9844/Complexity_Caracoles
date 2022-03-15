@@ -22,7 +22,7 @@ plant.class <- read.csv("plant_code.csv", sep=",")
 #---- Import pacakges ----
 install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)
 library(rstan)
-install.packages(HDInterval)
+install.packages("HDInterval")
 library("HDInterval")
 install.packages("tidyverse")
 library("tidyverse")
@@ -36,6 +36,16 @@ years <- "2020"
 focal <- "CHFU"
 complexity.plant  <- "class"
 complexity.animal <- "group"
+
+for ( years in c("2016","2017",'2018',,"2019","2020","2021")){
+  for ( focal in c("CHFU","LEMA",'HOMA',"CETE")){
+    for ( complexity.plant in c("code.plant","family","class","rareORabundant")){   
+      for ( complexity.animal in c("species","group","family")){ }
+    }
+  }
+}
+focal <- "CHFU"
+
 source("Group_FvH.R")
 #focal <- "CHFU"
 #complexity  <- "family"
@@ -722,7 +732,6 @@ for (i in 1:N){
 
 
 #---- Preliminary fit ---- 
-view(summary.interactions.n)
 # create summary data frame to see all the potential interactions 
 summary.interactions.n <- tibble(focal= focal,year=years,
                                  complexity_plant=complexity.plant,
@@ -743,6 +752,7 @@ summary.interactions.n <- tibble(focal= focal,year=years,
                                  n.HOIs_FvH=length(SpNames_FvH),
                                  HOIs_FvH=paste(collapse=",",SpNames_FvH)
 )
+view(summary.interactions.n)
 
 
 
@@ -768,9 +778,9 @@ DataVec <- c("N", "S", "H","FV",
 print("preliminary fit beginning")
 
 PrelimFit <- stan(file = "Caracoles_BH_FH_Preliminary.stan", 
-                      data = DataVec,
-                      iter = 100, 
-                      chains = 3)
+                  data = DataVec,
+                  iter = 1000, 
+                  chains = 3)
 
 PrelimPosteriors <- rstan::extract(PrelimFit)
 print("preliminary fit done")
@@ -784,7 +794,7 @@ hist(summary(PrelimFit)$summary[,"Rhat"])
 hist(summary(PrelimFit)$summary[,"n_eff"])
 # Next check the correlation among key model parameters and identify any
 pairs(PrelimFit, pars = c("lambdas", "alpha_generic", "alpha_intra",
-                          "gamma_FV_generic","gamma_H_generic","beta_plant_generic",
+                          "gamma_FV","gamma_H","beta_plant_generic",
                           "beta_H_generic","beta_FV_generic","beta_2H_generic",
                           "beta_2FV_generic","beta_FvH_generic"))
 # Finally, check for autocorrelation in the posteriors of key model parameters
@@ -792,11 +802,12 @@ pairs(PrelimFit, pars = c("lambdas", "alpha_generic", "alpha_intra",
 # coefficient of correlation between two values in a time series
 # how to interpret ACF : https://medium.com/analytics-vidhya/interpreting-acf-or-auto-correlation-plot-d12e9051cd14
 for (n in c("lambdas", "alpha_generic", "alpha_intra",
-            "gamma_FV_generic","gamma_H_generic","beta_plant_generic",
+            "gamma_FV","gamma_H","beta_plant_generic",
             "beta_H_generic","beta_FV_generic","beta_2H_generic",
             "beta_2FV_generic","beta_FvH_generic")){
-  print(acf(PrelimPosteriors$n[1]))
+  print(acf(PrelimPosteriors[n][[1]], plot = TRUE, type = c("correlation")))
 }
+
 # Briefly, the scale is from -1 to 1 because it is the correlation coefficient.
 # From the graph we can see the lags do not have significant effect
 # (within the bounds - cannot tell them from being zero). 
@@ -811,10 +822,10 @@ str(PrelimPosteriors)
 Inclusion_ij <- matrix(data = 0, nrow = 1, ncol = length(SpNames),
                        dimnames=list(c(""),c(names(SpTotals[SpTotals!=SpToKeep]))))
 Inclusion_FV<- matrix(data = 0,nrow = 1, ncol = length(SpNames_FV),
-                      dimnames=list(c(""),c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV]))))
-Inclusion_H<- matrix(data = 0,nrow = 1, 
-                     ncol = length(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))),
-                     dimnames=list(c(""),c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))))
+                      dimnames=list(c(""),c(SpNames_FV)))
+Inclusion_H <- matrix(data = 0,nrow = 1, 
+                      ncol = length(SpNames_H),
+                      dimnames=list(c(""),c(SpNames_H)))
 beta_Inclusion_plant <- matrix(data = 0,nrow = length(SpNames), 
                                ncol = length(SpNames),
                                dimnames=list(c(names(SpTotals[SpTotals!=SpToKeep])),
@@ -824,21 +835,20 @@ beta_Inclusion_FV <- matrix(data = 0,nrow = length(SpNames),
                             dimnames=list(c(names(SpTotals[SpTotals!=SpToKeep])),
                                           c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV]))))
 beta_Inclusion_H<- matrix(data = 0,nrow = length(SpNames), 
-                          ncol = length(SpTotals_H[SpTotals_H!=SpToKeep_H]),
-                          dimnames=list(c(names(SpTotals[SpTotals!=SpToKeep])),
-                                        c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))))
+                          ncol = length(SpNames_H),
+                          dimnames=list(SpNames,
+                                        SpNames_H))
 beta_Inclusion_2FV<- matrix(data = 0,nrow = length(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
                             ncol = length(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
                             dimnames=list(c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
                                           c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV]))))
-beta_Inclusion_2H<- matrix(data = 0,nrow = length(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))), 
-                           ncol = length(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))),
-                           dimnames=list(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H])),
-                                         c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))))
+beta_Inclusion_2H<- matrix(data = 0,nrow = length(SpNames_H), 
+                           ncol = length(SpNames_H),
+                           dimnames=list(SpNames_H,SpNames_H))
 beta_Inclusion_FvH<- matrix(data = 0,nrow = length(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
-                            ncol = length(c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))),
+                            ncol = length(SpNames_H),
                             dimnames=list(c(names(SpTotals_FV[SpTotals_FV!=SpToKeep_FV])),
-                                          c(names(SpTotals_H[SpTotals_H!=SpToKeep_H]))))
+                                          SpNames_H))
 
 IntLevel <- 0.5 #0.5 usually, 0.75 for Waitzia, shade
 is.list(PrelimPosteriors$beta_hat_ij)
@@ -967,7 +977,7 @@ write.csv(summary.interactions,"results/summary.interactions.csv")
 
 #---- Final fit ---- 
 
-DataVec <- c("N", "S", "H","FV",
+DataVec <- c("N", "S", "H","FV","Intra",
              "Fecundity", "SpMatrix",
              "SpMatrix_H","SpMatrix_FV",
              "matrix_HOIs_plant","matrix_HOIs_ijh",
@@ -976,7 +986,7 @@ DataVec <- c("N", "S", "H","FV",
              "Inclusion_ij","Inclusion_FV","Inclusion_H",
              "beta_Inclusion_plant","beta_Inclusion_FV","beta_Inclusion_H",
              "beta_Inclusion_2FV","beta_Inclusion_2H","beta_Inclusion_FvH"
-             )
+)
 #FinalFit <- stan(file =  "/home/lisavm/Simulations/code/Caracoles_BH_Final.stan", data = DataVec, iter = 1000, chains = 2)
 print("final fit begins")
 FinalFit <- stan(file = "Caracoles_BH_Final.stan", 
@@ -993,9 +1003,9 @@ hist(summary(FinalFit)$summary[,"Rhat"])
 hist(summary(FinalFit)$summary[,"n_eff"])
 # Next check the correlation among key model parameters and identify any
 pairs(FinalFit, pars = c("lambdas", "alpha_generic", "alpha_intra",
-                          "gamma_FV_generic","gamma_H_generic","beta_plant_generic",
-                          "beta_H_generic","beta_FV_generic","beta_2H_generic",
-                          "beta_2FV_generic","beta_FvH_generic"))
+                         "gamma_FV_generic","gamma_H_generic","beta_plant_generic",
+                         "beta_H_generic","beta_FV_generic","beta_2H_generic",
+                         "beta_2FV_generic","beta_FvH_generic"))
 # Finally, check for autocorrelation in the posteriors of key model parameters
 # N.B.  ACF =  autocorrelation function = 
 # coefficient of correlation between two values in a time series

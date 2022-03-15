@@ -25,9 +25,9 @@ data{
   //vector[N] env;  // Environmental values for each plot
   int<lower = 0> Intra[S];  // Indicator boolean variable to identify the focal species (0 for non-focal and 1 for focal). Included for easier calculations
  
-  int Inclusion_ij[S];  // Boolean indicator variables to identify the plant species
-  int Inclusion_FV[FV] // Boolean indicator variables to identify the floral visitor species
-  int Inclusion_H[H] // Boolean indicator variables to identify the herbivore species
+  int Inclusion_ij[1,S];  // Boolean indicator variables to identify the plant species
+  int Inclusion_FV[1,FV]; // Boolean indicator variables to identify the floral visitor species
+  int Inclusion_H[1,H]; // Boolean indicator variables to identify the herbivore species
   
   int beta_Inclusion_plant[S,S];  // Boolean indicator variables to identify the HOIs plant-plant
   int beta_Inclusion_FV[S,FV];  // Boolean indicator variables to identify the HOIs 2 plants-FV
@@ -40,68 +40,64 @@ data{
 }
 
 parameters{
-  vector[2] lambdas;
+  vector[1] lambdas;
   
-  vector[2] alpha_intra_tilde;
-  vector[2] alpha_generic_tilde;
+  vector[1] alpha_intra_tilde;
+  vector[1] alpha_generic_tilde;
   vector[S] alpha_hat_ij;
   
-  vector[2] gamma_H_generic_tilde; // direct interaction plants - herbivores ; generic
+  vector[1] gamma_H_generic_tilde; // direct interaction plants - herbivores ; generic
   vector[H] gamma_H_hat_ih; // direct interaction plants - herbivores ; species -specific term
 
-  vector[2] gamma_FV_generic_tilde; // direct interaction plants - FV ; generic
+  vector[1] gamma_FV_generic_tilde; // direct interaction plants - FV ; generic
   vector[FV] gamma_FV_hat_if; // direct interaction plants - FV ; species -specific term
 
-  vector[2] beta_plant_generic_tilde; // HOIs plants
+  vector[1] beta_plant_generic_tilde; // HOIs plants
   matrix[S,S] beta_plant_hat_ijk; // HOIs plants
   
-  vector[2] beta_H_generic_tilde; // HOIs herbivores
+  vector[1] beta_H_generic_tilde; // HOIs herbivores
   matrix[S,H] beta_H_hat_ijh; // HOIs herbivores
   
-  vector[2] beta_FV_generic_tilde; // HOIs floral visitors
+  vector[1] beta_FV_generic_tilde; // HOIs floral visitors
   matrix[S,FV] beta_FV_hat_ijf; // HOIs floral visitors
   
-  vector[2] beta_2FV_generic_tilde; // HOIs 2 floral visitors
+  vector[1] beta_2FV_generic_tilde; // HOIs 2 floral visitors
   matrix[FV,FV] beta_2FV_hat_iff; // HOIs 2 floral visitors
   
-  vector[2] beta_2H_generic_tilde; // HOIs 2 herbivores
+  vector[1] beta_2H_generic_tilde; // HOIs 2 herbivores
   matrix[H,H] beta_2H_hat_ihh; // HOIs 2 herbivores 
   
-  vector[2] beta_FvH_generic_tilde; // HOIs 1 floral visitor & 1 herbivore
+  vector[1] beta_FvH_generic_tilde; // HOIs 1 floral visitor & 1 herbivore
   matrix[FV,H] beta_FvH_hat_ifh; // HOIs 1 floral visitor & 1 herbivore
 }
 
 transformed parameters{
-  vector[2] alpha_generic;
-  vector[2] alpha_intra;
+  vector[1] alpha_generic;
+  vector[1] alpha_intra;
   
-  vector[2] gamma_FV_generic;
-  vector[2] gamma_H_generic;
+  vector[1] gamma_FV_generic;
+  vector[1] gamma_H_generic;
   
-  vector[2] beta_plant_generic
-  vector[2] beta_H_generic
-  vector[2] beta_FV_generic
-  vector[2] beta_2FV_generic
-  vector[2] beta_2H_generic
-  vector[2] beta_FvH_generic
+  vector[1] beta_plant_generic;
+  vector[1] beta_H_generic;
+  vector[1] beta_FV_generic;
+  vector[1] beta_2FV_generic;
+  vector[1] beta_2H_generic;
+  vector[1] beta_FvH_generic;
   
   // scale the alpha values
   alpha_intra[1] = 3 * alpha_intra_tilde[1] - 6;
-    alpha_intra[2] = 0.5 * alpha_intra_tilde[2];
-    
+
   alpha_generic[1] = 3 * alpha_generic_tilde[1] - 6;
-    alpha_generic[2] = 0.5 * alpha_generic_tilde[2];
-    
+
   gamma_H_generic[1] = 3 * gamma_H_generic_tilde[1] - 6;
   
   gamma_FV_generic[1] = 3 * gamma_FV_generic_tilde[1] - 6;
   
   beta_plant_generic[1] = 3 * beta_plant_generic_tilde[1] - 6;
-    beta_plant_generic[2] = 0.5 * beta_plant_generic_tilde[2];
-  
+
   beta_H_generic[1] = 3 * beta_H_generic_tilde[1] - 6;
-    beta_plant_generic[2] = 0.5 * beta_plant_generic_tilde[2];
-    
+
   beta_2FV_generic[1] = 3 * beta_2FV_generic_tilde[1] - 6;
      
   beta_2H_generic[1] = 3 * beta_2H_generic_tilde[1] - 6;
@@ -159,7 +155,7 @@ model{
   for(i in 1:N){ // for the observation N 
      lambda_i[i] = exp(lambdas[1]);
     for(s in 1:S){ // for one competing species j in alpha_ij, here s = species j
-        alpha_ij[i,s] = exp((1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + Inclusion_ij[s] *(1-Intra[s]) * alpha_hat_ij[s]);
+        alpha_ij[i,s] = exp((1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + Inclusion_ij[1,s] *(1-Intra[s]) * alpha_hat_ij[s]);
         
         for(k in 1:S){ // for all third competing species k in HOIs_ijk, here k = plant species  
         beta_ijk[s,k] = exp(beta_plant_generic[1] + beta_Inclusion_plant[s,k]*beta_plant_hat_ijk[s,k]) ;
@@ -185,7 +181,7 @@ model{
         matrix_beta_F_ijf[i,s] = sum(beta_F_ijf[s,]);
 }
     for(h in 1:H){ // for one herbivore species h in gamma_H_ih, here h = species h
-        gamma_H_ih[i,h] = exp(gamma_H[1] + Inclusion_FV[h]*gamma_H_hat_ih[h]);
+        gamma_H_ih[i,h] = exp(gamma_H_generic[1] + Inclusion_FV[1,h]*gamma_H_hat_ih[h]);
         
         // for two herbivores inbeta_ihh, here h = herbivore species h
     for(h2 in 1:H){
@@ -198,7 +194,7 @@ model{
 
 }
     for(fv in 1:FV){ // for  floral visitor species f in gamma_FV_if, here f = species f
-        gamma_FV_if[i,fv] = exp(gamma_FV[1] + Inclusion_FV[fv]*gamma_FV_hat_if[fv]);
+        gamma_FV_if[i,fv] = exp(gamma_FV_generic[1] + Inclusion_FV[1,fv]*gamma_FV_hat_if[fv]);
         
         // for two floral visitor species fv inbeta_iff, here f = floral visitor species f
     for(fv2 in 1:FV){
