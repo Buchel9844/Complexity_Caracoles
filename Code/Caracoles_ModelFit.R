@@ -1,22 +1,22 @@
 # This script will run the empirical model fits for each focal species and each
 #       environmental covariate. A separate script will then make the empirical
 #       figures for the manuscript
-
+# https://mc-stan.org/docs/2_29/functions-reference/index.html#overview
 rm(list = ls())
 #---- Import the Data ----
 setwd("~/Eco_Bayesian")
-abundance.plant <- read.csv("abundance.csv", sep=",")
+abundance.plant <- read.csv("data/abundance.csv", sep=",")
 
-competition.plant <- read.csv("competition.csv", sep=",")
+competition.plant <- read.csv("data/competition.csv", sep=",")
 
-plant.class <- read.csv("plant_code.csv", sep=",")
+plant.class <- read.csv("data/plant_code.csv", sep=",")
 
-herbivorypredator <- read.csv("herbivorypredator.csv", sep=",")
+herbivorypredator <- read.csv("data/herbivorypredator.csv", sep=",")
 
-floral_visitor <- read.csv("floral_visitor.csv", sep=",")
+floral_visitor <- read.csv("data/floral_visitor.csv", sep=",")
 
 # Run UploadData.R 2. and 3. or uncomment the following lines 
-plant.class <- read.csv("plant_code.csv", sep=",")
+plant.class <- read.csv("data/plant_code.csv", sep=",")
 
 
 #---- Import pacakges ----
@@ -28,8 +28,10 @@ install.packages("tidyverse")
 library("tidyverse")
 install.packages("dplyr")
 library(dplyr)
-options(mc.cores = parallel::detectCores())
-#rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores()) # to use the core at disposition 
+
+rstan_options(auto_write = TRUE) #
+
 #---- Set parameters ----
 summary.interactions <- data.frame()
 years <- "2020"
@@ -44,32 +46,31 @@ for ( years in c("2016","2017",'2018',,"2019","2020","2021")){
     }
   }
 }
-focal <- "CHFU"
 
-source("Group_FvH.R")
+source("code/Group_FvH.R")
 #focal <- "CHFU"
 #complexity  <- "family"
 #---- setting ups----    
 # view complexity levels 
 summary.interactions.n <- data.frame()
-print(focal)
-print(complexity.plant)
+print(paste(focal,complexity.plant,complexity.animal))
+
 # determine the levels of complexity for plant 
 complexitylevel.plant <- levels(as.factor(plant.class[,complexity.plant]))
 
-print(complexity.animal)
+
 if (complexity.plant != "code.plant"){complexity.minimize <- T}else{complexity.minimize <- F}
 
 FocalPrefix <- focal # "LEMA" or "HOMA" or "CHFU"
 
 # Load in the data and subset out the current focal species and complexity levels
 #SpData <- read.csv("/home/lisavm/Simulations/data/competition.csv")
-SpData <- read.csv("SpData.csv")
+SpData <- read.csv("data/SpData.csv")
 SpData$seed <- round(SpData$seed)
 
 SpData <- na.omit(SpData) 
 SpData <- subset(SpData, year == years)
-str(SpData)
+
 SpData<- select(SpData,all_of(c("day","month", "year","plot","subplot" ,"focal",
                                 "fruit","seed",complexitylevel.plant,FocalPrefix)))
 
@@ -94,7 +95,7 @@ SpData_FV <- subset(get(paste0("floral_visitor","_",complexity.animal)),year %in
 SpData_FV <- left_join(subset(SpDataFocal,select=c("day","month","year","plot","subplot")),
                        SpData_FV)
 
-view(SpDataFocal)
+
 # determine the levels of complexity  animals
 complexitylevel.H <- names(SpData_H)[which(!names(SpData_H) %in% c(complexitylevel.plant,"focal","seed",
                                                                    "fruit","day.x",FocalPrefix,
@@ -765,6 +766,7 @@ slab_df <- 4
 # dimension of poll and herb direct interaction 
 FV <- ncol(SpMatrix_FV)
 H <- ncol(SpMatrix_H)
+run_estimation <- 1
 
 DataVec <- c("N", "S", "H","FV",
              "Fecundity", "SpMatrix",
@@ -776,46 +778,20 @@ DataVec <- c("N", "S", "H","FV",
 
 # Now run a perliminary fit of the model to assess parameter shrinkage
 print("preliminary fit beginning")
-
-PrelimFit <- stan(file = "Caracoles_BH_FH_Preliminary.stan", 
+options(mc.cores=parallel::detectCores())
+install.packages("codetools")
+library("codetools")
+PrelimFit <- stan(file = "code/Caracoles_BH_FH_Preliminary.stan", 
                   data = DataVec,
                   iter = 1000, 
+                  #options(mc.cores=parallel::detectCores()), 
                   chains = 3)
-
+save(file=paste0("results/PrelimFit",focal,"_",years,"_",complexity.plant,"_",complexity.animal,".RData"),
+     PrelimFit)
 PrelimPosteriors <- rstan::extract(PrelimFit)
 print("preliminary fit done")
 #---- Preliminary fit analysis---- 
-pdf(paste0("figure/beta_Inclusion_",
-           years,"_",complexity.plant,complexity.animal,"_",FocalPrefix,".pdf"))
-##### Diagnostic plots
-# First check the distribution of Rhats and effective sample sizes 
-# N.B. amount by which autocorrelation within the chains increases uncertainty in estimates can be measured
-hist(summary(PrelimFit)$summary[,"Rhat"])
-hist(summary(PrelimFit)$summary[,"n_eff"])
-# Next check the correlation among key model parameters and identify any
-pairs(PrelimFit, pars = c("lambdas", "alpha_generic", "alpha_intra",
-                          "gamma_FV","gamma_H","beta_plant_generic",
-                          "beta_H_generic","beta_FV_generic","beta_2H_generic",
-                          "beta_2FV_generic","beta_FvH_generic"))
-# Finally, check for autocorrelation in the posteriors of key model parameters
-# N.B.  ACF =  autocorrelation function = 
-# coefficient of correlation between two values in a time series
-# how to interpret ACF : https://medium.com/analytics-vidhya/interpreting-acf-or-auto-correlation-plot-d12e9051cd14
-for (n in c("lambdas", "alpha_generic", "alpha_intra",
-            "gamma_FV","gamma_H","beta_plant_generic",
-            "beta_H_generic","beta_FV_generic","beta_2H_generic",
-            "beta_2FV_generic","beta_FvH_generic")){
-  print(acf(PrelimPosteriors[n][[1]], plot = TRUE, type = c("correlation")))
-}
-
-# Briefly, the scale is from -1 to 1 because it is the correlation coefficient.
-# From the graph we can see the lags do not have significant effect
-# (within the bounds - cannot tell them from being zero). 
-# The ACF function says if the current value depends consistently on previous 
-# values (the lags)
-str(PrelimPosteriors)
-#### If the diagnostic plots don't reveal any problems wiht the model fit, now
-#       move on to determining which parameters warrant inclusion in the final
+#### Determine which parameters warrant inclusion in the final
 #       model (i.e. the data pulled their posteriors away from 0). The final model
 #       will then be run with only these species-specific parameters, but without
 #       the regularized horseshoe priors.
@@ -851,7 +827,7 @@ beta_Inclusion_FvH<- matrix(data = 0,nrow = length(names(SpTotals_FV[SpTotals_FV
                                           SpNames_H))
 
 IntLevel <- 0.5 #0.5 usually, 0.75 for Waitzia, shade
-is.list(PrelimPosteriors$beta_hat_ij)
+is.list(PrelimPosteriors$beta_ijk)
 #str(PrelimPosteriors$beta_hat_ijk)
 #str(PrelimPosteriors$alpha_hat_ij)
 #For plants as second actor
@@ -925,30 +901,21 @@ for(s in 1:length(SpNames_FV)){
 
 
 summary.interactions.n$n.competitors_plant_inclus <- sum(Inclusion_ij)
-if (sum(Inclusion_ij) >0){
-  summary.interactions.n$competitors_plant_inclus <- c(colnames(Inclusion_ij))[Inclusion_ij]
+if (sum(Inclusion_ij) > 0){
+  summary.interactions.n$competitors_plant_inclus <- paste(c(colnames(Inclusion_ij))[which(Inclusion_ij>=1)],collapse="_")
 }
-write.csv(Inclusion_ij,
-          paste0("results/Inclusion_ij_",years,"_",complexity.plant,
-                 "_",complexity.animal,"_",FocalPrefix,".csv"))
+
 
 summary.interactions.n$n.competitors_FV_inclus <- sum(Inclusion_FV)
 if (sum(Inclusion_FV)>0){
-  summary.interactions.n$competitors_FV_inclus <- c(colnames(Inclusion_FV))[which(Inclusion_FV >=1)]
+  summary.interactions.n$competitors_FV_inclus <- paste(c(colnames(Inclusion_FV))[which(Inclusion_FV >=1)],collapse="_")
 }
-write.csv(Inclusion_FV,
-          paste0("results/Inclusion_FV_",years,"_",complexity.plant,
-                 "_",complexity.animal,"_",FocalPrefix,".csv"))
 
 
 summary.interactions.n$n.competitors_H_inclus <- sum(Inclusion_H)
 if (sum(Inclusion_H)>0){
-  summary.interactions.n$competitors_H_inclus <- c(colnames(Inclusion_H))[which(Inclusion_H >=1)]
+  summary.interactions.n$competitors_H_inclus <- paste(c(colnames(Inclusion_H))[which(Inclusion_H >=1)],collapse="_")
 }
-write.csv(Inclusion_H,
-          paste0("results/Inclusion_H_",years,"_",complexity.plant,
-                 "_",complexity.animal,"_",FocalPrefix,".csv"))
-
 
 summary.interactions.n <- as_tibble(summary.interactions.n)
 for ( x in c("plant","H","FV","2FV","2H","FvH")){
@@ -959,19 +926,26 @@ for ( x in c("plant","H","FV","2FV","2H","FvH")){
     summary.interactions.n[,paste0("HOIs_",x,"_inclus")]  = paste(paste0(rownames(  matrix_x )[which(  matrix_x >=1, arr.in=TRUE)[,1]],sep="_",
                                                                          colnames(matrix_x )[which(  matrix_x >=1, arr.in=TRUE)[,2]]),collapse=",")
   } 
-  write.csv(matrix_x,
-            paste0("results/beta_Inclusion_",x,"_",years,"_",complexity.plant,
-                   "_",complexity.animal,"_",FocalPrefix,".csv"))
 }
 
+Inclusion_all <- list(summary,interaction = summary.interactions.n,
+                      N=N, S=S, H=H,FV=FV,Intra=Intra,Fecundity=Fecundity, SpMatrix=SpMatrix,
+                      SpMatrix_H=SpMatrix_H,SpMatrix_FV=SpMatrix_FV,
+                      matrix_HOIs_plant=matrix_HOIs_plant,matrix_HOIs_ijh=matrix_HOIs_ijh,
+                      matrix_HOIs_ijf=matrix_HOIs_ijf, matrix_HOIs_ihh=matrix_HOIs_ihh,
+                      matrix_HOIs_ifh=matrix_HOIs_ifh,matrix_HOIs_iff=matrix_HOIs_iff,
+                      Inclusion_ij=Inclusion_ij,Inclusion_FV=Inclusion_FV,Inclusion_H=Inclusion_H,
+                      beta_Inclusion_plant=beta_Inclusion_plant,beta_Inclusion_FV=beta_Inclusion_FV,beta_Inclusion_H=beta_Inclusion_H,
+                      beta_Inclusion_2FV=beta_Inclusion_2FV,beta_Inclusion_2H=beta_Inclusion_2H,beta_Inclusion_FvH=beta_Inclusion_FvH)
 
-
-
+save(Inclusion_all,
+     file=paste0("results/Inclusion",focal,"_",years,"_",complexity.plant,"_",complexity.animal,".RData"))
 
 
 summary.interactions <- bind_rows(summary.interactions,summary.interactions.n)
 
 write.csv(summary.interactions,"results/summary.interactions.csv")
+
 
 
 
@@ -989,15 +963,28 @@ DataVec <- c("N", "S", "H","FV","Intra",
 )
 #FinalFit <- stan(file =  "/home/lisavm/Simulations/code/Caracoles_BH_Final.stan", data = DataVec, iter = 1000, chains = 2)
 print("final fit begins")
+
 FinalFit <- stan(file = "Caracoles_BH_Final.stan", 
                  data = DataVec,
-                 iter = 100, 
-                 chains = 2)
+                 iter = 1000, 
+                 chains = 3)
+
+save(file=paste0("results/FinalFit",focal,"_",years,"_",complexity.plant,"_",complexity.animal,".RData"),
+     PrelimFit)
 
 FinalPosteriors <- extract(FinalFit)
 print("final fit is done")
 ##### Diagnostic plots
-# First check the distribution of Rhats and effective sample sizes 
+pdf(paste0("figure/FinalFit_",paste(focal,years,complexity.plant,complexity.animal,sep="_"),".pdf"))
+# Internal checks of the behaviour of the Bayes Modelsummary(PrelimFit)
+source("Test_simulation/stan_modelcheck_rem.R") # call the functions to check diagnistic plots
+
+# plot the corresponding graphs
+stan_model_check(PrelimFit,
+                 param =c('lambdas','alpha_generic_tilde',
+                          'beta_plant_generic_tilde','disp_dev'))
+
+# check the distribution of Rhats and effective sample sizes 
 # N.B. amount by which autocorrelation within the chains increases uncertainty in estimates can be measured
 hist(summary(FinalFit)$summary[,"Rhat"])
 hist(summary(FinalFit)$summary[,"n_eff"])
@@ -1017,7 +1004,7 @@ for (n in c("lambdas", "alpha_generic", "alpha_intra",
   print(acf(FinalPosteriors$n[1]))
 }  
 
-
+dev.off()
 
 #FileName <- paste("/home/lisavm/Simulations/", FocalPrefix, "_", "_FinalFit.rdata", sep = "")
 FileName <- paste("results/", years,"_",complexity,"_",FocalPrefix, "_FinalFit.rdata", sep = "")
@@ -1031,4 +1018,6 @@ save(FinalFit, SpNames, N,S,FV,H, Fecundity,year,complexity,FocalPrefix,
      beta_Inclusion_2H,beta_Inclusion_2FV,beta_Inclusion_FvH,
      tau0, slab_scale, slab_df,file = FileName)
 str(FinalFit)
+
+
 

@@ -84,10 +84,10 @@ herbivore_group <-stats::aggregate(number_animal ~ group + year + plot  + code.p
 
 herbivore_group  <-  spread(   herbivore_group,group, number_animal)
 
-herbivore_group[is.na( herbivore_group)] <- 0
+#herbivore_group[is.na( herbivore_group)] <- 0
 
 head(herbivore_group)
 length(which(!names(herbivore_group) %in% c("plot","year","subplot","code.plant")))
 
-view(herbivore_group)
+View(herbivore_group)
 
