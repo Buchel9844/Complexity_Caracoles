@@ -6,6 +6,11 @@ data{
   int<lower = 1> S; // Number of plant species
   int<lower = 1> H; // Number of herbivores species
   int<lower = 1> FV; // Number of floral visitors species
+  int<lower = 1> FvH_H; // Number of herbivores species
+  int<lower = 1> FvH_FV; // Number of floral visitors species
+    int RemoveFvH; // Remove Higher trophic level 
+
+  int<lower = 0> run_estimation;
 
   int Fecundity[N];  // Fecundity of the focal species in each plot
   matrix[N,S] SpMatrix;  // Matrix of abundances for each species (including abundances of non-focal individuals of the focal species)
@@ -20,7 +25,7 @@ data{
   
   matrix[FV,FV] matrix_HOIs_iff[N]; // Matrix of abundances for each floral visitors species with each floral visitors species
   matrix[H,H] matrix_HOIs_ihh[N]; // Matrix of abundances for each herbivores species with each herbivores species
-  matrix[FV,H]  matrix_HOIs_ifh[N]; // Matrix of abundances for each floral visitors species with each herbivores species
+  matrix[FvH_FV,FvH_H]  matrix_HOIs_ifh[N]; // Matrix of abundances for each floral visitors species with each herbivores species
 
    // vector telling which interactions to include
    
@@ -45,29 +50,29 @@ parameters{
   real<lower=-5,upper=5> alpha_intra_tilde[1];
   vector<lower=-5,upper=5>[S] alpha_hat_ij;
   
-  vector<lower = -5, upper = 5>[S] beta_plant_generic_tilde; // HOIs plants
+  vector<lower=-5,upper=5>[S] beta_plant_generic_tilde; // HOIs plants
   matrix<lower=-5,upper=5>[S,S] beta_plant_hat_ijk; // HOIs plants
 
   real<lower=-5,upper=5> gamma_H_generic_tilde[1]; // direct interaction plants - herbivores ; generic
-  vector[H] gamma_H_hat_ih; // direct interaction plants - herbivores ; species -specific term
+  vector<lower=-5,upper=5>[H] gamma_H_hat_ih; // direct interaction plants - herbivores ; species -specific term
 
   real<lower=-5,upper=5> gamma_FV_generic_tilde[1]; // direct interaction plants - FV ; generic
-  vector[FV] gamma_FV_hat_if; // direct interaction plants - FV ; species -specific term
+  vector<lower=-5,upper=5>[FV] gamma_FV_hat_if; // direct interaction plants - FV ; species -specific term
 
-  vector<lower = -5, upper = 5>[S] beta_H_generic_tilde; // HOIs herbivores
+  vector<lower=-5,upper=5>[S] beta_H_generic_tilde; // HOIs herbivores
   matrix<lower=-5,upper=5>[S,H] beta_H_hat_ijh; // HOIs herbivores 
 
-  vector<lower = -5, upper = 5>[S] beta_FV_generic_tilde; // HOIs floral visitors
-  matrix<lower=-5,upper=5>[S,FV] beta_FV_hat_ijf; // HOIs floral visitors
+  vector[S] beta_FV_generic_tilde; // HOIs floral visitors
+  matrix[S,FV] beta_FV_hat_ijf; // HOIs floral visitors
 
-  vector<lower = -5, upper = 5>[FV] beta_2FV_generic_tilde; // HOIs 2 floral visitors
+  vector<lower=-5,upper=5>[FV] beta_2FV_generic_tilde; // HOIs 2 floral visitors
   matrix<lower=-5,upper=5>[FV,FV] beta_2FV_hat_iff; // HOIs 2 floral visitors
 
-  vector<lower = -5, upper = 5>[H] beta_2H_generic_tilde; // HOIs 2 herbivores
+  vector<lower=-5,upper=5>[H] beta_2H_generic_tilde; // HOIs 2 herbivores
   matrix<lower=-5,upper=5>[H,H] beta_2H_hat_ihh; // HOIs 2 herbivores 
 
-  vector<lower = -5, upper = 5>[FV] beta_FvH_generic_tilde; // HOIs 1 floral visitor & 1 herbivore
-  matrix<lower=-5,upper=5>[FV,H] beta_FvH_hat_ifh; // HOIs 1 floral visitor & 1 herbivore
+  vector<lower=-5,upper=5>[FvH_FV] beta_FvH_generic_tilde; // HOIs 1 floral visitor & 1 herbivore
+  matrix<lower=-5,upper=5>[FvH_FV,FvH_H] beta_FvH_hat_ifh; // HOIs 1 floral visitor & 1 herbivore
 
 
   real<lower=0> disp_dev; // species-specific dispersion deviation parameter,
@@ -104,8 +109,8 @@ transformed parameters{
     matrix[N,FV] matrix_beta_2FV_iff;
   matrix[H,H] beta_2H_ihh; 
     matrix[N,H] matrix_beta_2H_ihh;
-  matrix[FV,H] beta_FvH_ifh; 
-    matrix[N,FV] matrix_beta_FvH_ifh;
+  matrix[FvH_FV,FvH_H] beta_FvH_ifh; 
+    matrix[N,FvH_FV] matrix_beta_FvH_ifh;
     
   // scale  values
   vector[1] alpha_intra;
@@ -117,7 +122,7 @@ transformed parameters{
   vector[S] beta_FV_generic; //HOIs FV
   vector[FV] beta_2FV_generic; //HOIs 2 floral visitors
   vector[H] beta_2H_generic; //HOIs 2 herbivores
-  vector[FV] beta_FvH_generic; //HOIs 1 floral visitor & 1 herbivore
+  vector[FvH_FV] beta_FvH_generic; //HOIs 1 floral visitor & 1 herbivore
   
   alpha_generic[1] = alpha_generic_tilde[1]; 
     alpha_intra[1] = alpha_intra_tilde[1]; 
@@ -141,20 +146,21 @@ transformed parameters{
         beta_ijk[s,k] = beta_plant_generic[s] + beta_Inclusion_plant[s,k]* beta_plant_hat_ijk[s,k];
         }
       matrix_beta_ijk[i,s] = sum(beta_ijk[s,].* matrix_HOIs_plant[i,s]);
-      
+       if(RemoveFvH ==1){
         for(h in 1:H){// for one herbivore species h in beta_H_ijh, here h = herbivor species h and j = plant species
         beta_H_ijh[s,h] = beta_H_generic[s] + beta_Inclusion_H[s,h]*beta_H_hat_ijh[s,h];
         }
       matrix_beta_H_ijh[i,s] = sum(beta_H_ijh[s,].* matrix_HOIs_ijh[i,s]);
-    
+   
         for(fv in 1:FV){
         beta_F_ijf[s,fv] = exp(beta_FV_generic[s] + beta_Inclusion_FV[s,fv]*beta_FV_hat_ijf[s,fv]);
         }
         matrix_beta_F_ijf[i,s] = sum(beta_F_ijf[s,].* matrix_HOIs_ijf[i,s]);
+       }
         }
-  
+  if(RemoveFvH ==1){
     for(h in 1:H){ // for one herbivore species h in gamma_H_ih, here h = species h
-        gamma_H_eih[i,h] = gamma_H[1] + Inclusion_H[h]*gamma_H_hat_ih[h];
+        gamma_H_eih[i,h] = gamma_H[1] + Inclusion_H[1,h]*gamma_H_hat_ih[h];
         
         // for two herbivores inbeta_ihh, here h = herbivore species h
         for(h2 in 1:H){
@@ -165,7 +171,7 @@ transformed parameters{
       }
       
     for(fv in 1:FV){ // for  floral visitor species f in gamma_FV_if, here f = species f
-        gamma_FV_eif[i,fv] = gamma_FV[1] + Inclusion_FV[fv]*gamma_FV_hat_if[fv];
+        gamma_FV_eif[i,fv] = gamma_FV[1] + Inclusion_FV[1,fv]*gamma_FV_hat_if[fv];
         
           // for two floral visitor species fv inbeta_iff, here f = floral visitor species f
         for(fv2 in 1:FV){
@@ -173,18 +179,26 @@ transformed parameters{
           }
         matrix_beta_2FV_iff[i,fv] = sum(beta_2F_iff[fv,].* matrix_HOIs_iff[i,fv]);
     
-              // for one floral visitor species fv and one herbivore inbeta_ifh, here f = floral visitor species f and h= herbivore species h
-        for(h in 1:H){
-            beta_FvH_ifh[fv,h] = beta_FvH_generic[fv] + beta_Inclusion_2FvH[fv,h]*beta_FvH_hat_ifh[fv,h];
+    }
+    
+    // for one floral visitor species fv and one herbivore inbeta_ifh, here f = floral visitor species f and h= herbivore species h
+         for(fv in 1:FvH_FV){
+           for(h in 1:FvH_H){
+            beta_FvH_ifh[fv,h] = beta_FvH_generic[fv] + beta_Inclusion_FvH[fv,h]*beta_FvH_hat_ifh[fv,h];
         }
             matrix_beta_FvH_ifh[i,fv] = sum(beta_FvH_ifh[fv,].* matrix_HOIs_ifh[i,fv]);
     }
+  
 
-
+    HOI_effects[i] = sum(matrix_beta_ijk[i,]);
+     
+    interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]);
+     
+    }else{
     HOI_effects[i] = sum(matrix_beta_ijk[i,]) + sum(matrix_beta_F_ijf[i,]) +  sum(matrix_beta_H_ijh[i,])  + sum(matrix_beta_2H_ihh[i,]) +  sum(matrix_beta_FvH_ifh[i,]) + sum(matrix_beta_2FV_iff[i,]);
      
     interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]) +  sum(gamma_H_eih[i,] .* SpMatrix_H[i,]) + sum( gamma_FV_eif[i,] .* SpMatrix_FV[i,]);
-     
+    }
  
           F_hat[i] = exp(lambda_ei[i] + interaction_effects[i] + HOI_effects[i]);
 
@@ -216,18 +230,19 @@ model{
   }
   for (h in 1:H){
       beta_2H_generic_tilde[h] ~ normal(0,1);
-      beta_2H_hat_ihh[h,] ~ normal(0,1)
+      beta_2H_hat_ihh[h,] ~ normal(0,1);
     }
     
   for (fv in 1:FV){
     beta_2FV_generic_tilde[fv] ~ normal(0,1);
     beta_2FV_hat_iff[fv,] ~ normal(0,1);
+    }
     
+    for (fv in 1:FvH_FV){
     beta_FvH_generic_tilde[fv] ~ normal(0,1);
     beta_FvH_hat_ifh[fv,] ~ normal(0,1);
     }
-  
-
+    
  for(i in 1:N){
   Fecundity[i] ~ neg_binomial_2(F_hat[i],(disp_dev^2)^(-1)); 
    }
@@ -237,8 +252,10 @@ generated quantities{
   vector[N] F_sim;
     if(run_estimation==1){
  for(i in 1:N){
-    if(Fecundity[i] <= 0) break ;
-    F_sim[i] = neg_binomial_2_rng(Fecundity[i],(disp_dev^2)^(-1));
+    if(Fecundity[i] <= 0){
+      F_sim[i] = 0;
+    }
+    F_sim[i] = neg_binomial_2_rng(  Fecundity[i],(disp_dev^2)^(-1));
               }
     }
 }

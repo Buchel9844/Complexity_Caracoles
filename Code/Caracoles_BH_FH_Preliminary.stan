@@ -6,6 +6,9 @@ data{
   int<lower = 1> S; // Number of plant species
   int<lower = 1> H; // Number of herbivores species
   int<lower = 1> FV; // Number of floral visitors species
+  int<lower = 1> FvH_h; // Number of herbivores species
+  int<lower = 1> FvH_Fv; // Number of floral visitors species
+  int RemoveFvH; // Remove Higher trophic level 
 
   int Fecundity[N];  // Fecundity of the focal species in each plot
   matrix[N,S] SpMatrix;  // Matrix of abundances for each species (including abundances of non-focal individuals of the focal species)
@@ -13,15 +16,13 @@ data{
   matrix[N,FV] SpMatrix_FV; // Matrix of abundances for each floral visitors species
   int<lower = 0> Intra[S];  // Indicator boolean variable to identify the focal species (0 for non-focal and 1 for focal). Included for easier calculations
 
-  
   matrix[S,S] matrix_HOIs_plant[N]; // Matrix of abundances for each plant species with each other plant species
   matrix[S,H] matrix_HOIs_ijh[N]; // Matrix of abundances for each herbivores species and competitor
   matrix[S,FV] matrix_HOIs_ijf[N]; // Matrix of abundances for each herbivores species and competitor
   
   matrix[FV,FV] matrix_HOIs_iff[N]; // Matrix of abundances for each floral visitors species with each floral visitors species
   matrix[H,H] matrix_HOIs_ihh[N]; // Matrix of abundances for each herbivores species with each herbivores species
-  matrix[FV,H]  matrix_HOIs_ifh[N]; // Matrix of abundances for each floral visitors species with each herbivores species
-
+  matrix[FvH_Fv,FvH_h] matrix_HOIs_ifh[N]; // Matrix of abundances for each floral visitors species with each herbivores species
 
   // The below values define the regularized horseshoe priors used for species-specific parameters
   real tau0; 		// determines the scale of the global shrinkage parameter (tau)
@@ -41,40 +42,40 @@ parameters{
   real<lower=-5,upper=5> alpha_intra_tilde[1]; // direct interaction intra plants - plants;
     
   real<lower=-5,upper=5> alpha_generic_tilde[1];
-  vector[S] alpha_hat_ij_tilde; // direct interaction inter plants - plants ; species -specific term 
+  vector<lower=-5,upper=5>[S] alpha_hat_ij_tilde; // direct interaction inter plants - plants ; species -specific term 
   vector<lower = 0>[S] local_shrinkage_ij; // direct interaction inter plants - plants, shrinkage
    
   real<lower=-5,upper=5> gamma_H_generic_tilde[1]; // direct interaction plants - herbivores ; generic
-  vector[H] gamma_H_hat_ih_tilde; // direct interaction plants - herbivores ; species -specific term
+  vector<lower=-5,upper=5>[H] gamma_H_hat_ih_tilde; // direct interaction plants - herbivores ; species -specific term
   vector<lower = 0>[H] gamma_H_local_shrinkage_ih; // direct interaction plants - herbivores ; shrinkage
   
   real<lower=-5,upper=5> gamma_FV_generic_tilde[1]; // direct interaction plants - FV ; generic
-  vector[FV] gamma_FV_hat_if_tilde; // direct interaction plants - FV ; species -specific term
+  vector<lower=-5,upper=5>[FV] gamma_FV_hat_if_tilde; // direct interaction plants - FV ; species -specific term
   vector<lower = 0>[FV] gamma_FV_local_shrinkage_if; // direct interaction plants - FV ; shrinkage
   
-  vector<lower = -5, upper = 5>[S] beta_plant_generic_tilde; // HOIs plants
+  vector<lower=-5,upper=5>[S] beta_plant_generic_tilde; // HOIs plants
   matrix<lower=-5,upper=5>[S,S] beta_plant_hat_ijk_tilde; // HOIs plants
   matrix<lower = 0>[S,S] beta_plant_local_shrinkage_ijk; // HOIs plants
   
-  vector<lower = -5, upper = 5>[S] beta_H_generic_tilde; // HOIs herbivores
+  vector<lower=-5,upper=5>[S] beta_H_generic_tilde; // HOIs herbivores
   matrix<lower=-5,upper=5>[S,H] beta_H_hat_ijh_tilde; // HOIs herbivores 
   matrix<lower = 0>[S,H] beta_H_local_shrinkage_ijh; // HOIs herbivores
   
-  vector<lower = -5, upper = 5>[S] beta_FV_generic_tilde; // HOIs floral visitors
+  vector<lower=-5,upper=5>[S] beta_FV_generic_tilde; // HOIs floral visitors
   matrix<lower=-5,upper=5>[S,FV] beta_FV_hat_ijf_tilde; // HOIs floral visitors
   matrix<lower = 0>[S,FV] beta_FV_local_shrinkage_ijf; // HOIs floral visitors
   
-  vector<lower = -5, upper = 5>[FV] beta_2FV_generic_tilde; // HOIs 2 floral visitors
+  vector<lower=-5,upper=5>[FV] beta_2FV_generic_tilde; // HOIs 2 floral visitors
   matrix<lower=-5,upper=5>[FV,FV] beta_2FV_hat_iff_tilde; // HOIs 2 floral visitors
   matrix<lower = 0>[FV,FV] beta_2FV_local_shrinkage_iff; // HOIs 2 floral visitors
   
-  vector<lower = -5, upper = 5>[H] beta_2H_generic_tilde; // HOIs 2 herbivores
+  vector<lower=-5,upper=5>[H] beta_2H_generic_tilde; // HOIs 2 herbivores
   matrix<lower=-5,upper=5>[H,H] beta_2H_hat_ihh_tilde; // HOIs 2 herbivores 
   matrix<lower = 0>[H,H] beta_2H_local_shrinkage_ihh; // HOIs 2 herbivores
   
-  vector<lower = -5, upper = 5>[FV] beta_FvH_generic_tilde; // HOIs 1 floral visitor & 1 herbivore
-  matrix<lower=-5,upper=5>[FV,H] beta_FvH_hat_ifh_tilde; // HOIs 1 floral visitor & 1 herbivore
-  matrix<lower = 0>[FV,H] beta_FvH_local_shrinkage_ifh; // HOIs 1 floral visitor & 1 herbivore
+  vector<lower=-5,upper=5>[FvH_Fv] beta_FvH_generic_tilde; // HOIs 1 floral visitor & 1 herbivore
+  matrix<lower=-5,upper=5>[FvH_Fv,FvH_h] beta_FvH_hat_ifh_tilde; // HOIs 1 floral visitor & 1 herbivore
+  matrix<lower = 0>[FvH_Fv,FvH_h] beta_FvH_local_shrinkage_ifh; // HOIs 1 floral visitor & 1 herbivore
  
   
   real<lower = 0> c2_tilde;
@@ -114,8 +115,8 @@ transformed parameters{
     matrix[H,H] beta_2H_hat_ihh; // HOIs 2 herbivores
   matrix[H,H] beta_2H_local_shrinkage_ihh_tilde; // HOIs 2 herbivores
  
-    matrix[FV,H] beta_FvH_hat_ifh; // HOIs 1 floral visitor & 1 herbivore
-  matrix[FV,H] beta_FvH_local_shrinkage_ifh_tilde; // HOIs 1 floral visitor & 1 herbivore
+    matrix[FvH_Fv,FvH_h] beta_FvH_hat_ifh; // HOIs 1 floral visitor & 1 herbivore
+  matrix[FvH_Fv,FvH_h] beta_FvH_local_shrinkage_ifh_tilde; // HOIs 1 floral visitor & 1 herbivore
  
 // Declare objects necessary for the rest of the model, including: a vector of expected fecundity values (F_hat),
   //a matrix of the species specific alpha values for each species and plot (interaction_effects), and a matrix
@@ -144,8 +145,8 @@ transformed parameters{
     matrix[N,FV] matrix_beta_2FV_iff;
   matrix[H,H] beta_2H_ihh; 
     matrix[N,H] matrix_beta_2H_ihh;
-  matrix[FV,H] beta_FvH_ifh; 
-    matrix[N,FV] matrix_beta_FvH_ifh;
+  matrix[FvH_Fv,FvH_h] beta_FvH_ifh; 
+    matrix[N,FvH_Fv] matrix_beta_FvH_ifh;
   
 
   // scale  values
@@ -158,15 +159,15 @@ transformed parameters{
   vector[S] beta_FV_generic; //HOIs FV
   vector[FV] beta_2FV_generic; //HOIs 2 floral visitors
   vector[H] beta_2H_generic; //HOIs 2 herbivores
-  vector[FV] beta_FvH_generic; //HOIs 1 floral visitor & 1 herbivore
+  vector[FvH_Fv] beta_FvH_generic; //HOIs 1 floral visitor & 1 herbivore
   
-  alpha_generic[1] = alpha_generic_tilde[1]; 
-    alpha_intra[1] = alpha_intra_tilde[1]; 
-  gamma_H[1] = gamma_H_generic_tilde[1]; 
-    gamma_FV[1] = gamma_FV_generic_tilde[1]; 
-  beta_plant_generic = beta_plant_generic_tilde; 
+  alpha_generic[1] = 3*alpha_generic_tilde[1]-6; 
+    alpha_intra[1] = 3*alpha_intra_tilde[1]-6;
+  gamma_H[1] = 3*gamma_H_generic_tilde[1]-6;
+    gamma_FV[1] = 3*gamma_FV_generic_tilde[1]-6; 
+  beta_plant_generic = beta_plant_generic_tilde;
     beta_H_generic = beta_H_generic_tilde; 
-      beta_FV_generic = beta_FV_generic_tilde; 
+      beta_FV_generic = beta_FV_generic_tilde;
         beta_2FV_generic = beta_2FV_generic_tilde;
           beta_2H_generic = beta_2H_generic_tilde;
             beta_FvH_generic = beta_FvH_generic_tilde;
@@ -217,16 +218,19 @@ transformed parameters{
         beta_2FV_hat_iff[fv,fv2] = tau * beta_2FV_local_shrinkage_iff_tilde[fv,fv2] * beta_2FV_hat_iff_tilde[fv,fv2];
          }
        
-        for(h in 1:H){ //HOIs plant-FV-H 
+      }
+       for(fv in 1:FvH_Fv){ 
+              for(h in 1:FvH_h){ //HOIs plant-FV-H 
         beta_FvH_local_shrinkage_ifh_tilde[fv,h] = sqrt( c2 * square(beta_FvH_local_shrinkage_ifh[fv,h]) / (c2 + square(tau) * square(beta_FvH_local_shrinkage_ifh[fv,h])) );
         beta_FvH_hat_ifh[fv,h] = tau * beta_FvH_local_shrinkage_ifh_tilde[fv,h] * beta_FvH_hat_ifh_tilde[fv,h];
           }
-      }
+       }
+          
  // implement the biological model
   for(i in 1:N){
     lambda_ei[i] = lambdas[1];
     for(s in 1:S){
-      alpha_eij[i,s] = (1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + alpha_hat_ij[s];
+      alpha_eij[i,s] = (1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + (1-Intra[s])* alpha_hat_ij[s];
         
         for(k in 1:S){ // for all third competing species k in HOIs_ijk, here k = plant species  
         beta_ijk[s,k] = beta_plant_generic[s] + beta_plant_hat_ijk[s,k];
@@ -264,18 +268,25 @@ transformed parameters{
           }
         matrix_beta_2FV_iff[i,fv] = sum(beta_2F_iff[fv,].* matrix_HOIs_iff[i,fv]);
     
-              // for one floral visitor species fv and one herbivore inbeta_ifh, here f = floral visitor species f and h= herbivore species h
-        for(h in 1:H){
+    }
+                  // for one floral visitor species fv and one herbivore inbeta_ifh, here f = floral visitor species f and h= herbivore species h
+    for(fv in 1:FvH_Fv){ // for  floral visitor species f in gamma_FV_if, here f = species f
+           for(h in 1:FvH_h){
             beta_FvH_ifh[fv,h] = beta_FvH_generic[fv] + beta_FvH_hat_ifh[fv,h];
         }
             matrix_beta_FvH_ifh[i,fv] = sum(beta_FvH_ifh[fv,].* matrix_HOIs_ifh[i,fv]);
     }
 
-
+    if(RemoveFvH ==1){
+    HOI_effects[i] = sum(matrix_beta_ijk[i,]);
+     
+    interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]);
+     
+    }else{
     HOI_effects[i] = sum(matrix_beta_ijk[i,]) + sum(matrix_beta_F_ijf[i,]) +  sum(matrix_beta_H_ijh[i,])  + sum(matrix_beta_2H_ihh[i,]) +  sum(matrix_beta_FvH_ifh[i,]) + sum(matrix_beta_2FV_iff[i,]);
      
     interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]) +  sum(gamma_H_eih[i,] .* SpMatrix_H[i,]) + sum( gamma_FV_eif[i,] .* SpMatrix_FV[i,]);
-     
+    }
  
           F_hat[i] = exp(lambda_ei[i] + interaction_effects[i] + HOI_effects[i]);
 
@@ -337,7 +348,9 @@ model{
     beta_2FV_generic_tilde[fv] ~ normal(0,1);
     beta_2FV_hat_iff_tilde[fv,] ~ normal(0,1);
     beta_2FV_local_shrinkage_iff[fv,] ~ cauchy(0,1);
-    
+    }  
+
+    for (fv in 1:FvH_Fv){ 
     beta_FvH_generic_tilde[fv] ~ normal(0,1);
     beta_FvH_hat_ifh_tilde[fv,] ~ normal(0,1);
     beta_FvH_local_shrinkage_ifh[fv,] ~ cauchy(0,1);

@@ -42,7 +42,7 @@ floral_visitor_group[is.na(floral_visitor_group)] <- 0
 
 head(floral_visitor_group)
 length(which(!names( floral_visitor_group) %in% c("plot","year","subplot","code.plant")))
-View( floral_visitor_group)
+#View( floral_visitor_group)
 
 #---- herbivor ----
 
@@ -84,10 +84,10 @@ herbivore_group <-stats::aggregate(number_animal ~ group + year + plot  + code.p
 
 herbivore_group  <-  spread(   herbivore_group,group, number_animal)
 
-#herbivore_group[is.na( herbivore_group)] <- 0
+herbivore_group[is.na( herbivore_group)] <- 0
 
 head(herbivore_group)
 length(which(!names(herbivore_group) %in% c("plot","year","subplot","code.plant")))
 
-View(herbivore_group)
+#view(herbivore_group)
 
