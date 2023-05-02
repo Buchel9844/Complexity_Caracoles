@@ -1,277 +1,279 @@
-// This script fits a Beverton-Holt generalized competition model using a Finnish (regularized) horseshoe prior (Piironen and Vehtari 2017) 
-// 	following the stan implementation demonstrated on https://betanalpha.github.io/assets/case_studies/bayes_sparse_regression.html
+# This script will run the empirical model fits for each focal species and each
+#       environmental covariate. A separate script will then make the empirical
+#       figures for the manuscript
+# https://mc-stan.org/docs/2_29/functions-reference/index.html#overview
 
-data{
-  int<lower = 1> N; // Number of plots
-  int<lower = 1> S; // Number of plant species
-  int<lower = 1> H; // Number of herbivores species
-  int<lower = 1> FV; // Number of floral visitors species
-  int<lower = 1> FvH_h; // Number of herbivores species 
-  int<lower = 1> FvH_Fv; // Number of floral visitors species
-  int RemoveFvH; // Remove Higher trophic level 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 1. SET UP: Import data, create df with abundances ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#rm(list = ls())
+
+#---- 1.1. Import packages ----
+#install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)
+#system.file("~/home/lbuche/R/x86_64-pc-linux-gnu-library/4.1/rstan",package='rstan')
+#installed.packages('~/home/lbuche/R/x86_64-pc-linux-gnu-library/4.1/rstan') 
+library(rstan)
+#install.packages("matrixStats", dependency =T)
+#install.packages("HDInterval")
+#system.file("~/home/lbuche/R/x86_64-pc-linux-gnu-library/4.1/HDInterval",package='HDInterval')
+#installed.packages('~/home/lbuche/R/x86_64-pc-linux-gnu-library/4.1/HDInterval')
+library(HDInterval)
+#library("HDInterval")
+#install.packages("tidyverse")
+#system.file("~/home/lbuche/R/x86_64-pc-linux-gnu-library/4.1/tidyverse",package='tidyverse')
+#installed.packages('~/home/lbuche/R/x86_64-pc-linux-gnu-library/4.1/tidyverse')
+library(tidyverse)
+#library(tidyverse)
+#install.packages("dplyr")
+#system.file("~/home/lbuche/R/x86_64-pc-linux-gnu-library/4.1/dplyr",package='dplyr')
+#installed.packages('~/home/lbuche/R/x86_64-pc-linux-gnu-library/4.1/dply')
+library(dplyr)
+#library(dplyr)
+#system.file("~/usr/local/easybuild-2019/easybuild/software/mpi/gcc/10.2.0/openmpi/4.0.5/r/4.1.0/lib64/R/library/ggplot2",package='ggplot2')
+#installed.packages('~/usr/local/easybuild-2019/easybuild/software/mpi/gcc/10.2.0/openmpi/4.0.5/r/4.1.0/lib64/R/library/ggplot2')
+library(ggplot2) 
+#library(ggplot2)
+options(mc.cores = parallel::detectCores()) # to use the core at disposition 
+
+rstan_options(auto_write = TRUE) 
+#---- 1.2. Import the Data ----
+#setwd("~/Eco_Bayesian/Complexity_caracoles")
+home.dic <- "/home/lbuche/Eco_Bayesian/Complexity_caracoles/"
+project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
+
+#rm(list = ls())
+abundance.plant <- read.csv(paste0(home.dic,"data/abundance.csv"), sep=",")
+
+competition.plant <- read.csv(paste0(home.dic,"data/competition.csv"), sep=",")
+
+plant.class <- read.csv(paste0(home.dic,"data/plant_code.csv"),sep=",")
+
+herbivorypredator <- read.csv(paste0(home.dic,"data/herbivorypredator.csv"), sep=",")
+
+floral_visitor <- read.csv(paste0(home.dic,"data/floral_visitor.csv"), sep=",")
+
+# Run UploadData.R 2. and 3. or uncomment the following lines 
+plant.class <- read.csv(paste0(home.dic,"data/plant_code.csv"), sep=",")
+
+
+
+#---- 1.3. Set parameters ----
+summary.interactions <- data.frame()
+years <- "2020"
+focal <- "CHFU"
+FocalPrefix<- "CHFU"
+complexity.plant  <- "family"
+complexity.animal <- "family"
+
+#Extract argument from slurms
+args <- commandArgs(trailingOnly = TRUE)
+run.prelimfit <- as.numeric(args[1])
+run.finalfit <- as.numeric(args[2])
+#"2017",'2018',
+#for ( focal in c("LEMA","HOMA","CHFU","CETE")){
+#for (years in c('2018',"2019","2020","2021")){
+#    for( complexity.level in c(1:2)){
+#     complexity.animal <- c("group","family","species")[complexity.level]
+#     complexity.plant <-c("class","family","code.plant")[complexity.level]
+#  if(c(years == "2018") & focal == "CHFU") next
+#if(c(years == "2020") & focal == "HOMA") next
+
+#   }
+#  }
+#}
+#{
+#  {
+#    {
+
+#---- 1.IMPORT DATA -----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+summary.interactions.n <- data.frame()
+print(paste(focal,complexity.plant,complexity.animal,years))
+SpData <- read.csv(paste0(home.dic,"data/SpData.csv"))
+
+#---- 2.EXTRACT MATRIXES OF ABUNDANCES -----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+source(paste0(home.dic,"code/ExtractMatrix_fct.R"))
+extract.matrix(focal,year=years,
+               complexity.plant ,
+               complexity.animal,
+               plant.class,SpData)
+#Returns two elemens
+#view(summary.interactions.n)
+#view(DataVec) #contains 21 elements
+
+#---- 3. PRELIMINARY FIT -----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 3.1. Set up summary interactions df and parameters ---- 
+#Create summary data frame to see all the potential interactions
+
+
+# Set the parameters defining the regularized horseshoe prior, as described in
+#       the "Incorporating sparsity-inducing priors" section of the manuscript.
+tau0 <- 1
+slab_scale <- sqrt(2)
+slab_df <- 4
+
+#---- 3.2. Run  preliminary fit ----
+
+# Now run a preliminary fit of the model to assess parameter shrinkage
+print("preliminary fit beginning")
+options(mc.cores=parallel::detectCores())
+#install.packages("codetools")
+library("codetools")
+library("rstan")
+init.list = list(lambdas=rnorm(1,log(min(DataVec$Fecundity)),1))
+rstan_options(auto_write = TRUE) 
+if(run.prelimfit == T){
+  PrelimFit <- stan(paste0(home.dic,"code/Caracoles_BH_FH_Preliminary.stan"), 
+                    data = DataVec,
+                    init = "random", # all initial values are 0 
+                    control=list(max_treedepth=15),
+                    warmup  = 500, 
+                    iter = 1000,
+                    #init_r=2,
+                    chains = 8,
+                    seed= 1616)
   
-  int Fecundity[N];  // Fecundity of the focal species in each plot
-  matrix[N,S] SpMatrix;  // Matrix of abundances for each species (including abundances of non-focal individuals of the focal species)
-  matrix[N,H] SpMatrix_H; // Matrix of abundances for each herbivores species 
-  matrix[N,FV] SpMatrix_FV; // Matrix of abundances for each floral visitors species
-  int<lower = 0> Intra[S];  // Indicator boolean variable to identify the focal species (0 for non-focal and 1 for focal). Included for easier calculations
-  
-  
-  matrix[S,S] matrix_HOIs_plant[N]; // Matrix of abundances for each plant species with each other plant species
-  matrix[S,H] matrix_HOIs_ijh[N]; // Matrix of abundances for each herbivores species and competitor
-  matrix[S,FV] matrix_HOIs_ijf[N]; // Matrix of abundances for each herbivores species and competitor
-  
-  matrix[FV,FV] matrix_HOIs_iff[N]; // Matrix of abundances for each floral visitors species with each floral visitors species
-  matrix[H,H] matrix_HOIs_ihh[N]; // Matrix of abundances for each herbivores species with each herbivores species
-  matrix[FvH_Fv,FvH_h]  matrix_HOIs_ifh[N]; // Matrix of abundances for each floral visitors species with each herbivores species
-  
-  // vector telling which interactions to include
-  
-  int Inclusion_ij[1,S];  // Boolean indicator variables to identify the plant species
-  int Inclusion_FV[1,FV]; // Boolean indicator variables to identify the floral visitor species
-  int Inclusion_H[1,H]; // Boolean indicator variables to identify the herbivore species
-  
-  int beta_Inclusion_plant[S,S];  // Boolean indicator variables to identify the HOIs plant-plant
-  int beta_Inclusion_FV[S,FV];  // Boolean indicator variables to identify the HOIs 2 plants-FV
-  int beta_Inclusion_H[S,H];  // Boolean indicator variables to identify the HOIs 2 plants- H
-  
-  int beta_Inclusion_2FV[FV,FV];  // Boolean indicator variables to identify the HOIs 1 plant - 2 FV
-  int beta_Inclusion_2H[H,H];  // Boolean indicator variables to identify the HOIs 1 plant - 2 H
-  int beta_Inclusion_FvH[FvH_Fv,FvH_h];  // Boolean indicator variables to identify the HOIs 1 plant - 2 H
-  
+  save(file=paste0(project.dic,"results/PrelimFit",FocalPrefix,years,"_",complexity.plant,"_",complexity.animal,".rds"),
+       PrelimFit)
+}
+
+#load(paste0(project.dic,"results/PrelimFit",FocalPrefix,"_",years,"_",complexity.plant,"_",complexity.animal,".rds"))
+
+
+PrelimPosteriors <- rstan::extract(PrelimFit)
+print("preliminary fit done")
+#---- 3.4. Extract the inclusion indice from the Preliminary Data----
+source(paste0(home.dic,"code/ExtractInclusion_fct.R"))
+extract.inclusion(summary.interactions.n, DataVec)
+view(summary.interactions)
+
+#---- 3.3. Preliminary fit posterior check and behavior checks---- 
+##### Diagnostic plots
+pdf(paste0(home.dic,"figure/Prelimfit_",paste(FocalPrefix,years,complexity.plant,complexity.animal,sep="_"),".pdf"))
+title= paste0("Diagnostic plots for Prelimfit of ",focal, " in ", years," \nwhen plant complexity is ",complexity.plant,
+              " \nand HTL complexity is ",complexity.animal)
+# Internal checks of the behaviour of the Bayes Modelsummary(PrelimFit)
+source("~/Eco_Bayesian/Test_simulation/code/stan_modelcheck_rem.R") # call the functions to check diagnistic plots
+# check the distribution of Rhats and effective sample sizes 
+stan_post_pred_check(PrelimPosteriors,"F_hat",DataVec$Fecundity, max(DataVec$Fecundity)+20)
+
+# N.B. amount by which autocorrelation within the chains increases uncertainty in estimates can be measured
+hist(summary(PrelimFit)$summary[,"Rhat"], 
+     main = paste("Prelim fit: Histogram of Rhat for",
+                  FocalPrefix, " in ", years," \nwhen plant complexity is ",complexity.plant,
+                  " \nand HTL complexity is ",complexity.animal))
+hist(summary(PrelimFit)$summary[,"n_eff"],
+     main = paste("Prelim fit: Histogram of n_eff for",
+                  FocalPrefix, " in ", years," \nwhen plant complexity is ",complexity.plant,
+                  " \nand HTL complexity is ",complexity.animal))
+
+# Next check the correlation among key model parameters and identify any
+#       divergent transitions
+pairs(PrelimFit, pars = c("lambdas", "alpha_intra","alpha_generic_tilde",
+                          "gamma_H","gamma_FV"))
+
+for( i in 1:length(DataVec$SpNames)){
+  pairs(PrelimFit, pars = c(paste0("alpha_hat_ij_tilde[",i,"]"), 
+                            paste0("beta_plant_generic_tilde[",i,"]")))
   
 }
 
-parameters{
-  real<lower=0> lambdas[2];
-  real<lower=-5,upper=5> alpha_generic_tilde[2];
-  real<lower=-5,upper=5> alpha_intra_tilde[2];
-  vector<lower=-5,upper=5>[S] alpha_hat_ij;
-  
-  vector<lower=-5,upper=5>[S] beta_plant_generic_tilde; // HOIs plants
-  matrix<lower=-5,upper=5>[S,S] beta_plant_hat_ijk; // HOIs plants
-  
-  real<lower=-5,upper=5> gamma_H_generic_tilde[1]; // direct interaction plants - herbivores ; generic
-  vector<lower=-5,upper=5>[H] gamma_H_hat_ih; // direct interaction plants - herbivores ; species -specific term
-  
-  real<lower=-5,upper=5> gamma_FV_generic_tilde[1]; // direct interaction plants - FV ; generic
-  vector<lower=-5,upper=5>[FV] gamma_FV_hat_if; // direct interaction plants - FV ; species -specific term
-  
-  vector<lower=-5,upper=5>[S] beta_H_generic_tilde; // HOIs herbivores
-  matrix<lower=-5,upper=5>[S,H] beta_H_hat_ijh; // HOIs herbivores 
-  
-  vector<lower=-5,upper=5>[S] beta_FV_generic_tilde; // HOIs floral visitors
-  matrix<lower=-5,upper=5>[S,FV] beta_FV_hat_ijf; // HOIs floral visitors
-  
-  vector<lower=-5,upper=5>[FV] beta_2FV_generic_tilde; // HOIs 2 floral visitors
-  matrix<lower=-5,upper=5>[FV,FV] beta_2FV_hat_iff; // HOIs 2 floral visitors
-  
-  vector<lower=-5,upper=5>[H] beta_2H_generic_tilde; // HOIs 2 herbivores
-  matrix<lower=-5,upper=5>[H,H] beta_2H_hat_ihh; // HOIs 2 herbivores 
-  
-  vector<lower=-5,upper=5>[FvH_Fv] beta_FvH_generic_tilde; // HOIs 1 floral visitor & 1 herbivore
-  matrix<lower=-5,upper=5>[FvH_Fv,FvH_h] beta_FvH_hat_ifh; // HOIs 1 floral visitor & 1 herbivore
-  
-  
-  real<lower=0> disp_dev[2]; // species-specific dispersion deviation parameter,
-  // defined for the negative binomial distribution used to reflect seed production (perform)
-  // disp_dev = 1/sqrt(phi)
-  
-}
+# plot the traceplot and distribution graphs
+stan_model_check(PrelimFit,
+                 param =c('lambdas','alpha_generic_tilde',"alpha_hat_ij_tilde",
+                          'beta_plant_generic_tilde','disp_dev'))
 
-transformed parameters{
-  
-  // Declare objects necessary for the rest of the model, including: a vector of expected fecundity values (F_hat),
-  //     a matrix of the species specific alpha values for each species and plot (interaction_effects), and a matrix
-  //     of the the alpha*N values for each species.
-  vector[N] F_hat;
-  vector[N] interaction_effects;
-  vector[N] HOI_effects;
-  //vector[N] pollinator_effects;
-  
-  
-  // loop parameters
-  vector[N] lambda_ei;
-  matrix[N,S] alpha_eij;
-  matrix[N,H] gamma_H_eih; //gamma herbivores of focal i
-  matrix[N,FV] gamma_FV_eif; //gamma floral visitors of focal i
-  
-  
-  // the matrix of interaction of plant-plant-plant HOIs was not created prior to the script
-  matrix[S,S] beta_ijk; // HOIs plant 
-  matrix[N,S] matrix_beta_ijk;
-  matrix[S,FV] beta_F_ijf;
-  matrix[N,S] matrix_beta_F_ijf;
-  matrix[S,H] beta_H_ijh; 
-  matrix[N,S] matrix_beta_H_ijh;
-  matrix[FV,FV] beta_2F_iff;
-  matrix[N,FV] matrix_beta_2FV_iff;
-  matrix[H,H] beta_2H_ihh; 
-  matrix[N,H] matrix_beta_2H_ihh;
-  matrix[FvH_Fv,FvH_h] beta_FvH_ifh; 
-  matrix[N,FvH_Fv] matrix_beta_FvH_ifh;
-  
-  // scale  values
-  vector[1] alpha_intra;
-  vector[1] alpha_generic;
-  vector[1] gamma_H;  // direct interaction plants - H
-  vector[1] gamma_FV;  // direct interaction plants - FV
-  vector[S] beta_plant_generic; //HOIs plant 
-  vector[S] beta_H_generic; //HOIs herbivore
-  vector[S] beta_FV_generic; //HOIs FV
-  vector[FV] beta_2FV_generic; //HOIs 2 floral visitors
-  vector[H] beta_2H_generic; //HOIs 2 herbivores
-  vector[FvH_Fv] beta_FvH_generic; //HOIs 1 floral visitor & 1 herbivore
-  
-  alpha_generic[1] = alpha_generic_tilde[1]; 
-  alpha_intra[1] = alpha_intra_tilde[1]; 
-  gamma_H[1] = gamma_H_generic_tilde[1]; 
-  gamma_FV[1] = gamma_FV_generic_tilde[1]; 
-  beta_plant_generic = beta_plant_generic_tilde; 
-  beta_H_generic = beta_H_generic_tilde; 
-  beta_FV_generic = beta_FV_generic_tilde; 
-  beta_2FV_generic = beta_2FV_generic_tilde;
-  beta_2H_generic = beta_2H_generic_tilde;
-  beta_FvH_generic = beta_FvH_generic_tilde;
-  
-  
-  // implement the biological model
-  for(i in 1:N){
-    lambda_ei[i] = lambdas[1];
-    for(s in 1:S){
-      alpha_eij[i,s] = (1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + (1-Intra[s]) *alpha_hat_ij[s]*Inclusion_ij[1,s];
-      
-      for(k in 1:S){ // for all third competing species k in HOIs_ijk, here k = plant species  
-      beta_ijk[s,k] = beta_plant_generic[s] + beta_Inclusion_plant[s,k]* beta_plant_hat_ijk[s,k];
-      }
-      matrix_beta_ijk[i,s] = sum(beta_ijk[s,].* matrix_HOIs_plant[i,s]);
-      
-    }
-    if(RemoveFvH ==0){
-      for(s in 1:S){
-        for(h in 1:H){// for one herbivore species h in beta_H_ijh, here h = herbivor species h and j = plant species
-        beta_H_ijh[s,h] = beta_H_generic[s] + beta_Inclusion_H[s,h]*beta_H_hat_ijh[s,h];
-        }
-        matrix_beta_H_ijh[i,s] = sum(beta_H_ijh[s,].* matrix_HOIs_ijh[i,s]);
-        
-        for(fv in 1:FV){
-          beta_F_ijf[s,fv] = exp(beta_FV_generic[s] + beta_Inclusion_FV[s,fv]*beta_FV_hat_ijf[s,fv]);
-        }
-        matrix_beta_F_ijf[i,s] = sum(beta_F_ijf[s,].* matrix_HOIs_ijf[i,s]);
-      }
-      
-      //print("matrix_beta_ijk: ",  beta_H_hat_ijh);
-      //  print("matrix_beta_F_ijf: ",  beta_FV_hat_ijf);
-      
-      for(h in 1:H){ // for one herbivore species h in gamma_H_ih, here h = species h
-      gamma_H_eih[i,h] = gamma_H[1] + Inclusion_H[1,h]*gamma_H_hat_ih[h];
-      
-      // for two herbivores inbeta_ihh, here h = herbivore species h
-      for(h2 in 1:H){
-        beta_2H_ihh[h,h2] = beta_2H_generic[h] + beta_Inclusion_2H[h,h2].*beta_2H_hat_ihh[h,h2];
-      }
-      matrix_beta_2H_ihh[i,h] = sum(beta_2H_ihh[h,].* matrix_HOIs_ihh[i,h]);
-      
-      }
-      
-      for(fv in 1:FV){ // for  floral visitor species f in gamma_FV_if, here f = species f
-      gamma_FV_eif[i,fv] = gamma_FV[1] + Inclusion_FV[1,fv]*gamma_FV_hat_if[fv];
-      
-      // for two floral visitor species fv inbeta_iff, here f = floral visitor species f
-      for(fv2 in 1:FV){
-        beta_2F_iff[fv,fv2] = beta_2FV_generic[fv] + beta_Inclusion_2FV[fv,fv2]*beta_2FV_hat_iff[fv,fv2];
-      }
-      matrix_beta_2FV_iff[i,fv] = sum(beta_2F_iff[fv,].* matrix_HOIs_iff[i,fv]);
-      
-      }
-      
-      // for one floral visitor species fv and one herbivore inbeta_ifh, here f = floral visitor species f and h= herbivore species h
-      for(fv in 1:FvH_Fv){
-        for(h in 1:FvH_h){
-          beta_FvH_ifh[fv,h] = beta_FvH_generic[fv] + beta_Inclusion_FvH[fv,h]*beta_FvH_hat_ifh[fv,h];
-        }
-        matrix_beta_FvH_ifh[i,fv] = sum(beta_FvH_ifh[fv,].* matrix_HOIs_ifh[i,fv]);
-      }
-      
-      HOI_effects[i] = sum(matrix_beta_ijk[i,]) + sum(matrix_beta_F_ijf[i,]) +  sum(matrix_beta_H_ijh[i,])  + sum(matrix_beta_2H_ihh[i,]) +  sum(matrix_beta_FvH_ifh[i,]) + sum(matrix_beta_2FV_iff[i,]);
-      
-      interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]) +  sum(gamma_H_eih[i,] .* SpMatrix_H[i,]) + sum( gamma_FV_eif[i,] .* SpMatrix_FV[i,]);
-      
-    }else{
-      HOI_effects[i] = sum(matrix_beta_ijk[i,]);
-      
-      interaction_effects[i] = sum(alpha_eij[i,] .* SpMatrix[i,]);
-    }
-    
-    F_hat[i] = exp(lambda_ei[i] + interaction_effects[i] + HOI_effects[i]);
-    //print("matrix_beta_ijk: ",  sum(matrix_beta_ijk[i,]));
-    //print("matrix_beta_F_ijf: ",  sum(matrix_beta_F_ijf[i,]));
-    //print("matrix_beta_H_ijh: ",  sum(matrix_beta_H_ijh[i,]));
-    //print("matrix_beta_2H_ihh: ",  sum(matrix_beta_2H_ihh[i,]));
-    //print("matrix_beta_2FV_iff: ",  sum(matrix_beta_2FV_iff[i,]));
-    //print("matrix_beta_FvH_ifh: ",  sum(matrix_beta_FvH_ifh[i,]));
-    
-    
-  }
-  
-  print("lambdas: ",lambdas[1]);
-  print("disp_dev: ",disp_dev);
-  print("alpha_generic_tilde: ", alpha_generic_tilde[1]);
-  print("alpha_intra_tilde: ",  alpha_intra_tilde[1]);
-  print("alpha_hat_ij: ",  alpha_hat_ij);
-  print("beta_plant_generic_tilde: ", beta_plant_generic_tilde);
-  print("gamma_H_generic_tilde: ",  gamma_H_generic_tilde);
-  print("gamma_FV_generic_tilde: ",  gamma_FV_generic_tilde);
-  print("beta_plant_generic_tilde: ", beta_plant_generic_tilde);
-  print("beta_H_generic_tilde : ",  beta_H_generic_tilde );
-  print("beta_FV_generic_tilde: ",  beta_FV_generic_tilde);
-  print("beta_2FV_generic_tilde: ", beta_2FV_generic_tilde);
-  print("beta_2H_generic_tilde : ",  beta_2H_generic_tilde);
-  print("beta_FvH_generic_tilde: ",  beta_FvH_generic_tilde);
-  // print("fecundity: ",  F_hat);
-  //print("lambda_ei: ",  lambda_ei);
-  //  print("interaction_effects: ",  interaction_effects);
-  //  print("HOI_effects: ",  HOI_effects);
-}
 
-model{
-  // set regular priors
-  alpha_generic_tilde ~ normal(0,1);
-  alpha_intra_tilde ~ normal(0,1);
-  //gamma_generic_tilde ~ normal(0,1);
+dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 4. FINAL FIT----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#---- 4.1. Set up parameters ---- 
+
+DataVec.final <- append(DataVec,DataVec.final)
+
+#FinalFit <- stan(file =  "/home/lisavm/Simulations/code/Caracoles_BH_Final.stan", data = DataVec, iter = 1000, chains = 2)
+
+
+#---- 4.2. Run final fit ---- 
+print("final fit begins")
+rstan_options(auto_write = TRUE) 
+options(mc.cores=parallel::detectCores())
+list.init <- function(...)list(lambdas= as.numeric(rnorm(2,mean = mean(PrelimPosteriors$lambdas),
+                                                         sd= var(PrelimPosteriors$lambdas)^2)),
+                               alpha_generic_tilde = as.numeric(rnorm(2,mean = mean(PrelimPosteriors$alpha_generic_tilde),
+                                                                      sd= var(PrelimPosteriors$alpha_generic_tilde)^2)),
+                               alpha_intra_tilde =as.numeric(rnorm(2,mean = mean(PrelimPosteriors$alpha_intra_tilde),
+                                                                   sd= var(PrelimPosteriors$alpha_intra_tilde)^2)),
+                               disp_dev =as.numeric(rnorm(2,mean = mean(PrelimPosteriors$disp_dev),
+                                                          sd= var(PrelimPosteriors$disp_dev)^2)))
+
+if(run.finalfit == T){
+  FinalFit <- stan(file = paste0(home.dic,"code/Caracoles_BH_Final.stan") ,
+                   #fit= PrelimFit, 
+                   data = DataVec.final,
+                   init =list.init, # all initial values are 0 
+                   control=list(max_treedepth=15),
+                   warmup = 500,
+                   iter = 1000, 
+                   init_r = 2,
+                   chains = 8) 
   
-  lambdas ~ normal(0, 1);
-  alpha_hat_ij ~ normal(0,1);
-  gamma_FV_hat_if ~ normal(0,1);
-  gamma_H_hat_ih ~ normal(0,1);
-  disp_dev ~ cauchy(0, 1);  // safer to place prior on disp_dev than on phi
-  
-  for(s in 1:S){
-    beta_plant_generic_tilde[s] ~ normal(0,1);
-    beta_plant_hat_ijk[,s] ~ normal(0,1); // the ensemble of the species-specific beta related to one generic beta follow a normal distribution
-    
-    beta_FV_generic_tilde[s] ~ normal(0,1);
-    beta_FV_hat_ijf[s,] ~ normal(0,1);
-    
-    beta_H_generic_tilde[s] ~ normal(0,1); 
-    beta_H_hat_ijh[s,] ~ normal(0,1);
-  }
-  for (h in 1:H){
-    beta_2H_generic_tilde[h] ~ normal(0,1);
-    beta_2H_hat_ihh[h,] ~ normal(0,1);
-  }
-  
-  for (fv in 1:FV){
-    beta_2FV_generic_tilde[fv] ~ normal(0,1);
-    beta_2FV_hat_iff[fv,] ~ normal(0,1);
-  }
-  
-  for (fv in 1:FvH_Fv){
-    beta_FvH_generic_tilde[fv] ~ normal(0,1);
-    beta_FvH_hat_ifh[fv,] ~ normal(0,1);
-  }
-  
-  for(i in 1:N){
-    Fecundity[i] ~ neg_binomial_2(F_hat[i],(disp_dev[1]^2)^(-1)); 
-  }
+  save(file=paste0(project.dic,"results/FinalFit",FocalPrefix,"_",years,"_",complexity.plant,"_",complexity.animal,".rds"),
+       FinalFit)
 }
+load(paste0(project.dic,"results/FinalFit",FocalPrefix,"_",years,"_",complexity.plant,"_",complexity.animal,".rds")) 
+
+FinalPosteriors <- rstan::extract(FinalFit)
+print("final fit is done")
+#---- 4.3. Final fit posterior check and behavior checks---- 
+
+##### Diagnostic plots and post prediction 
+pdf(paste0("figure/FinalFit_",paste(FocalPrefix,years,complexity.plant,complexity.animal,sep="_"),".pdf"))
+# Internal checks of the behaviour of the Bayes Modelsummary(PrelimFit)
+source("~/Eco_Bayesian/Test_simulation/code/stan_modelcheck_rem.R") # call the functions to check diagnistic plots
+# check the distribution of Rhats and effective sample sizes 
+##### Posterior check
+
+stan_post_pred_check(FinalPosteriors,"F_hat",Fecundity,max(Fecundity)+20) 
+
+# N.B. amount by which autocorrelation within the chains increases uncertainty in estimates can be measured
+hist(summary(FinalFit)$summary[,"Rhat"],
+     main = paste("Finat Fit: Histogram of Rhat for",
+                  FocalPrefix, " in ", years," \nwhen plant complexity is ",complexity.plant,
+                  " \nand HTL complexity is ",complexity.animal))
+hist(summary(FinalFit)$summary[,"n_eff"],
+     main = paste("Finat Fit: Histogram of Rhat for",
+                  FocalPrefix, " in ", years," \nwhen plant complexity is ",complexity.plant,
+                  " \nand HTL complexity is ",complexity.animal))
+
+# plot the corresponding graphs
+stan_model_check(FinalFit,
+                 param =c('lambdas','alpha_generic_tilde','gamma_H_generic_tilde','gamma_FV_generic_tilde',
+                          'beta_plant_generic_tilde','disp_dev'))
+
+# Next check the correlation among key model parameters and identify any
+pairs(FinalFit, pars = c("lambdas", "alpha_generic", "alpha_intra",
+                         "gamma_FV","gamma_H"))
+
+pairs(FinalFit, pars = c("alpha_generic", "alpha_intra","beta_plant_generic"))
+pairs(FinalFit, pars = c("gamma_FV", "beta_FV_generic","beta_2FV_generic","beta_FvH_generic"))
+pairs(FinalFit, pars = c("gamma_H", "beta_H_generic","beta_2H_generic","beta_FvH_generic"))
+
+
+dev.off()
+
+#---- 4.4. Final fit analysis---
+
+#FileName <- paste("/home/lisavm/Simulations/", FocalPrefix, "_", "_FinalFit.rdata", sep = "")
+FileName <- paste("results/", years,"_",complexity.plant,complexity.animal,"_",FocalPrefix, "_FinalFit.rdata", sep = "")
+
+save(append(FinalFit, DataVec.final),file = FileName)
+
+
+
