@@ -22,7 +22,7 @@ data{
   
   matrix[FV,FV] matrix_HOIs_iff[N]; // Matrix of abundances for each floral visitors species with each floral visitors species
   matrix[H,H] matrix_HOIs_ihh[N]; // Matrix of abundances for each herbivores species with each herbivores species
-  matrix[FvH_Fv,FvH_h] matrix_HOIs_ifh[N]; // Matrix of abundances for each floral visitors species with each herbivores species
+  matrix[FvH_Fv,FvH_h]  matrix_HOIs_ifh[N]; // Matrix of abundances for each floral visitors species with each herbivores species
 
   // The below values define the regularized horseshoe priors used for species-specific parameters
   real tau0; 		// determines the scale of the global shrinkage parameter (tau)
