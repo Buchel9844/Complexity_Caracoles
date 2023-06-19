@@ -202,11 +202,11 @@ extract.inclusion <- function(summary.interactions.n, DataVec){
   Inclusion_all <- append(Inclusion_all,DataVec)
   
   save(Inclusion_all,
-       file=paste0("results/Inclusion",FocalPrefix,"_",years,"_",complexity.plant,"_",complexity.animal,".RData"))
+       file=paste0(home.dic,"results/Inclusion",FocalPrefix,"_",years,"_",complexity.plant,"_",complexity.animal,".RData"))
   
   summary.interactions <- bind_rows(summary.interactions,summary.interactions.n)
   
-  write.csv(summary.interactions,"results/summary.interactions.csv")
+  write.csv(summary.interactions,paste0(home.dic,"results/summary.interactions.csv"))
   assign("summary.interactions",summary.interactions,1)
   
   DataVec.final <- list(Inclusion_ij = Inclusion_ij,
