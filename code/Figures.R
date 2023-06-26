@@ -176,8 +176,7 @@ for( focal in c("CETE","CHFU","HOMA","LEMA")){
       complexity.plant <-c("class","family","code.plant")[complexity.level]
       
       if(year == "2018" & focal == "CHFU") next
-      if(year == "2020" & focal == "HOMA" & complexity.level == 2) next
-      load(paste0(project.dic,"results/Inclusion",focal,"_",
+      load(paste0(home.dic,"results/Inclusion",focal,"_",
                   year,"_",complexity.plant,"_",complexity.animal,".RData"))
       
       assign(paste0("Inclusion",focal,"_",
@@ -196,9 +195,9 @@ for( focal in c("CETE","CHFU","HOMA","LEMA")){
   }
 }
 
-summary.interactions <- read.csv("results/Chapt1_Inclusion_parameters.csv")
+summary.interactions <- read.csv(paste0(home.dic,"results/Chapt1_Inclusion_parameters.csv"))
 write.csv(df_inclusion_nat,
-          file = "~/Eco_Bayesian/Complexity_caracoles/results/Chapt1_Inclusion_parameters.csv")
+          file = paste0(home.dic,"results/Chapt1_Inclusion_parameters.csv"))
 df_inclusion_nat <- summary.interactions 
 n.inclus <- c("n.competitors_plant_inclus","n.competitors_FV_inclus","n.competitors_H_inclus",
               "n.HOIs_plant_inclus","n.HOIs_H_inclus",
@@ -262,7 +261,7 @@ ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/df_inclusion_plot_rati
        dpi="retina",scale=1, 
        df_inclusion_nat_heatmap )
 
-#---- 3.1 Figure of pairwise interactions distribution ----
+#---- 3.1  Figure of pairwise interactions distributions and Intra Vs Inter ----
 
 df_alpha_nat <- data.frame()
 
@@ -283,8 +282,8 @@ for( focal in c("CETE","CHFU","HOMA","LEMA")){
       df_alpha_n <- get(paste0("FinalFit",focal,"_",
                                year,"_",complexity.plant,"_",complexity.animal)) %>% 
         as.data.frame() %>% 
-        dplyr::select("alpha_generic[1]")
-      names(df_alpha_n) <-c("alpha")
+        dplyr::select("alpha_generic[1]","alpha_intra[1]")
+      names(df_alpha_n) <-c("alpha","alpha_intra")
       df_alpha_n$focal <- focal
       df_alpha_n$year <- as.integer(year)
       df_alpha_n$complexity.plant <- complexity.plant
@@ -304,27 +303,30 @@ library(ggthemes)
 gr <- colorRampPalette(c("dark green"))(200)                      
 re <- colorRampPalette(c( "red2"))(200)
 
-df_alpha_nat <- df_alpha_nat[which(df_alpha_nat$alpha > -1 & df_alpha_nat$alpha < 1),]
+df_alpha_nat <- df_alpha_nat[which(df_alpha_nat$alpha > -1 & df_alpha_nat$alpha < 1 &
+                                     df_alpha_nat$alpha_intra > -1 & df_alpha_nat$alpha_intra < 1),]
+
+df_alpha_nat <- df_alpha_nat[,-3]
 
 
-plot_alpha_nat <- ggplot(df_alpha_nat,aes(x=alpha, y=as.factor(year),
-                                          fill = stat(x),group = year)) +
-  geom_density_ridges_gradient(scale = 1.4,alpha=0.5, 
+
+plot_alpha_nat <- ggplot(df_alpha_nat) +
+  geom_density_ridges_gradient(aes(x= alpha, y=as.factor(year),
+                                   fill = stat(x),group = year),
+                               scale = 1.4,alpha=0.5, 
                                rel_min_height = 0.01,
                                quantile_lines = TRUE, quantiles = 2) +
-  scale_fill_gradientn(
-    colours=c(re,"white",gr),limits = c(-1, 1),
-    #midpoint = 0,
-    #space = "Lab",
-    na.value = "grey50",
-    guide = "none",
-    aesthetics = "fill"
-  ) +
+  scale_fill_gradientn(colours=c(re,"white",gr),limits = c(-1, 1),
+                       #midpoint = 0,
+                       #space = "Lab",
+                       na.value = "grey50",
+                       guide = "none",
+                       aesthetics = "fill") +
   geom_vline(xintercept = 0, color="darkgrey") +
   scale_y_discrete(expand=c(0.01, 0), #limits=c('2018','2021'),
                    breaks = c('2018','2019','2020','2021')) +
   scale_x_continuous(name = NULL,expand=c(0.01, 0)) +
-  facet_wrap( focal~complexity.plant, ncol = 2, scales= "free_x")+
+  facet_wrap( focal~complexity.plant, ncol = 2, scales= "free_x") +
   #scale_colour_manual(values=alpha(color_li[1:8],0.7)) +
   labs(title =paste0("Plant generic pairwise interaction distributions"),
        x="Plant generic pairwise interaction",
@@ -332,13 +334,45 @@ plot_alpha_nat <- ggplot(df_alpha_nat,aes(x=alpha, y=as.factor(year),
   theme_bw() +
   theme(axis.text=element_text(size=18)) 
 
-ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/",focal,"_GenericAlpha.pdf"),
+ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/GenericAlpha.pdf"),
        dpi="retina",scale=1, 
        plot_alpha_nat
 )
-#---- 3.2. Figure of pairwise interactions POINTs ----
 
-df_alphas <- data.frame()
+df_alpha_nat_long <- gather(df_alpha_nat, alpha,alpha_intra,
+                            key="alphas",value="estimates")
+plot_alpha_nat_intra <- ggplot(df_alpha_nat_long) +
+  geom_density_ridges_gradient(aes(x= estimates, y=as.factor(year),
+                                   fill = factor(alphas)),
+                               scale = 1.4,alpha=0.5, 
+                               rel_min_height = 0.01,
+                               quantile_lines = TRUE, quantiles = 2) +
+  scale_fill_manual(name="Plant-plant direct interactions",
+                    labels=c("alpha" = "interspecific interactions", 
+                             "alpha_intra" = "intraspecific interactions"), 
+                    values = c("alpha" = "#BEBEBE", 
+                               "alpha_intra" = "orange")) +
+  geom_vline(xintercept = 0, color="darkgrey") +
+  scale_y_discrete(expand=c(0.01, 0), #limits=c('2018','2021'),
+                   breaks = c('2018','2019','2020','2021')) +
+  scale_x_continuous(name = NULL,expand=c(0.01, 0)) +
+  facet_wrap( focal~complexity.plant, ncol = 2, scales= "free_x") +
+  #scale_colour_manual(values=alpha(color_li[1:8],0.7)) +
+  labs(title =paste0("Plant intraspecific and generic pairwise interaction distributions"),
+       x="Plant generic pairwise interaction",
+       y="density") +
+  theme_bw() +
+  theme(axis.text=element_text(size=18)) 
+plot_alpha_nat_intra
+
+ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/InterVsIntra.pdf"),
+       dpi="retina",scale=1, 
+       plot_alpha_nat_intra
+)
+
+
+#---- 3.3. Figure of intrinsic growth rate  ----
+df_lambda_nat <- data.frame()
 
 for( focal in c("CETE","CHFU","HOMA","LEMA")){
   for( year in c("2018","2019",'2020','2021')){
@@ -347,98 +381,42 @@ for( focal in c("CETE","CHFU","HOMA","LEMA")){
       complexity.plant <-c("class","family","code.plant")[complexity.level]
       
       if(year == "2018" & focal == "CHFU") next
-      if(year == "2020" & focal == "CHFU") next
-      
-      load(paste0(project.dic,"/results/FinalFit",focal,"_",
+      load(paste0(project.dic,"results/FinalFit",focal,"_",
                   year,"_",complexity.plant,"_",complexity.animal,".rds"))
-      
-      df_alpha_n <- as.data.frame(FinalFit) %>% 
-        dplyr::select("alpha_generic[1]") %>% 
-        apply(2, summary) %>% 
-        as.data.frame() %>%
-        rownames_to_column(var="stats")%>%
-        spread(key="stats",value="alpha_generic[1]")
-      
-      
-      
       assign(paste0("FinalFit",focal,"_",
                     year,"_",complexity.plant,"_",complexity.animal),FinalFit)
       rm(FinalFit)
       
-      df_alpha_n$focal <- focal
-      df_alpha_n$year <- as.numeric(year)
-      df_alpha_n$complexity.plant <- complexity.plant
-      df_alpha_n$complexity.animal <- complexity.animal
-      df_alphas <- bind_rows(df_alphas,df_alpha_n)
+      
+      df_lambda_n <- get(paste0("FinalFit",focal,"_",
+                                year,"_",complexity.plant,"_",complexity.animal)) %>% 
+        as.data.frame() %>% 
+        dplyr::select("lambdas[1]")
+      names(df_lambda_n) <-c("lambda")
+      df_lambda_n$focal <- focal
+      df_lambda_n$year <- as.numeric(year)
+      df_lambda_n$complexity.plant <- complexity.plant
+      df_lambda_n$complexity.animal <- complexity.animal
+      
+      df_lambda_nat <- bind_rows(df_lambda_nat,df_lambda_n)
     }
   }
 }
-
-df_alphas[which(df_alphas$focal == "LEMA"),c(3,4)] <- df_alphas[which(df_alphas$focal == "LEMA"),c("X1st.Qu..1","X3rd.Qu..1")] 
-df_alphas <- df_alphas[,-c(1,2)]
-df_alphas <- df_alphas[,-c(11,12)]
-names(df_alphas) <- c("FirstQ","ThirdQ", "Max","Mean","Median","Min","focal","year",           
-                      "complexity.plant","complexity.animal")
-
-write.csv(  df_alphas,
-            file = "~/Eco_Bayesian/Complexity_caracoles/results/Chapt1_df_alphas.csv")
-df_alphas <- read.csv("~/Eco_Bayesian/Complexity_caracoles/results/Chapt1_df_alphas.csv")
-
-assign(paste0("df_param_",focal),df)
-
-ggplot(df_alphas,aes(x=Mean, y = year, group=complexity.plant)) + 
-  geom_point(aes(shape=complexity.plant, 
-                 color=cut(Mean, c(-Inf,0, 3))),
-             size = 5) +
-  geom_errorbarh(aes(xmin=FirstQ,
-                     xmax=ThirdQ,
-                     color=cut(Mean, c(-Inf,0, 3))),
-                 height=0.1,linewidth=0.5) +
-  geom_vline(xintercept=0,color="black") +
-  scale_color_manual(name = "",
-                     values = c("(-Inf,0]" = "red",
-                                "(0,3]" = "dark green"),
-                     labels = c("competition", "facilitation")) +
-  facet_grid(.~focal,scales="free") +
-  labs(title ="Generic pairwise interaction distributions", 
-       x="Plants generic pairwise interaction") +
-  theme_bw() 
-
-
-
-
-
-
-#---- 3.3. Figure of intrinsic growth rate  ----
-df_lambda_nat <- data.frame()
-
-for( year in c("2019",'2020','2021')){
-  for( complexity.plant in c("class","family")){
-    
-    df_lambda_n <- get(paste0("FinalFit",focal,"_",
-                              year,"_",complexity.plant,"_",complexity.animal)) %>% 
-      as.data.frame() %>% 
-      dplyr::select("lambdas[1]")
-    names(df_lambda_n) <-c("lambda")
-    df_lambda_n$focal <- focal
-    df_lambda_n$year <- year
-    df_lambda_n$complexity.plant <- complexity.plant
-    df_lambda_n$complexity.animal <- complexity.animal
-    
-    df_lambda_nat <- bind_rows(df_lambda_nat,df_lambda_n)
-  }
-}
+write.csv(   df_lambda_nat ,
+             file = "~/Eco_Bayesian/Complexity_caracoles/results/Chapt1_df_lambda_nat.csv")
+df_lambda_nat <- read.csv("~/Eco_Bayesian/Complexity_caracoles/results/Chapt1_df_lambda_nat.csv")
 
 color_li <-  colorblind_pal()(8)
 
-
-plot_lambda_nat <- ggplot(df_lambda_nat, aes(x=lambda, y=year))+
-  geom_joy(scale = 2, alpha=0.5) +
-  scale_y_discrete(name = NULL,expand=c(0.01, 0)) +
-  scale_x_continuous(name = NULL,expand=c(0.01, 0)) +
-  facet_grid(.~complexity.plant) +
+plot_lambda_nat <- ggplot(df_lambda_nat, aes(x=lambda, y=as.factor(year)))+
+  geom_density_ridges_gradient(scale = 1.4,alpha=0.5, 
+                               rel_min_height = 0.01,
+                               quantile_lines = TRUE, quantiles = 2) +
+  #scale_y_discrete(name = NULL,expand=c(0.01, 0)) +
+  scale_x_continuous(name = NULL,limits=c(0,10)) +
+  facet_grid(focal ~ complexity.plant) +
   labs(title =paste0("Intrinsic fecundity distributions of ",focal), 
-       x="Intrinsic fecundity",y="density") +  theme_joy() +
+       x="Intrinsic fecundity",y="density") + 
   theme(axis.text=element_text(size=10))
 
 #---- 3.4. Figure of pollinator interactions distribution ----
@@ -530,15 +508,15 @@ ggsave("~/Eco_Bayesian/Complexity_caracoles/figure/Coeff_parameters.pdf",
 
 #---- 4.1 Figure of pairwise interactions ----
 
-focal <- "LEMA"
+focal <- "CHFU"
 
 df <- data.frame()
 
-for( year in c("2018","2019",'2020','2021')){
-  for( complexity.level in 1:2){
+for( year in c("2018","2019","2020","2021")){
+  for( complexity.level in c(1:2)){
     complexity.animal <- c("group","family","species")[complexity.level]
     complexity.plant <-c("class","family","code.plant")[complexity.level]
-    
+    if(focal == "CHFU" & year =="2018") next
     load(paste0(project.dic,"results/FinalFit",focal,"_",
                 year,"_",complexity.plant,"_",complexity.animal,".rds"))
     
@@ -549,9 +527,11 @@ for( year in c("2018","2019",'2020','2021')){
     df_alpha_n <- get(paste0("FinalFit",focal,"_",
                              year,"_",complexity.plant,"_",complexity.animal)) %>% 
       as.data.frame() %>% 
-      dplyr::select("lambdas[1]","alpha_generic[1]","gamma_H[1]","gamma_FV[1]")
+      dplyr::select(#"lambdas[1]",
+        "alpha_generic[1]","gamma_H[1]","gamma_FV[1]")
     
-    names(df_alpha_n) <-c("lambda","alpha","gamma_H","gamma_FV")
+    names(df_alpha_n) <-c(#"lambda",
+      "alpha","gamma_H","gamma_FV")
     df_alpha_n$focal <- focal
     df_alpha_n$year <- year
     df_alpha_n$complexity.plant <- complexity.plant
@@ -568,19 +548,18 @@ df <- read.csv(paste0("~/Eco_Bayesian/Complexity_caracoles/results/Chapt1_df_alp
 assign(paste0("df_param_",focal),df)
 
 
-
-
 gr <- colorRampPalette(c("dark green"))(200)                      
 re <- colorRampPalette(c( "red2"))(200)
 
-df_param_LEMA <- df_param_LEMA[,-1]
-df_param_LEMA_vert <- gather(df_param_LEMA,lambda,alpha,gamma_H,gamma_FV, 
-                             key="parameter", value="estimation")
+#df <- df[,-1]
+df_vert <- gather(df,#lambda,
+                  alpha,gamma_H,gamma_FV, 
+                  key="parameter", value="estimation")
 
-df_param_LEMA_vert <- df_param_LEMA_vert[which((!df_param_LEMA_vert$parameter == "lambda" & df_param_LEMA_vert$estimation > -1 & df_param_LEMA_vert$estimation < 1) |  df_param_LEMA_vert$parameter == "lambda"),]
+#df_vert <- df_vert[which((!df_vert$parameter == "lambda" & df_vert$estimation > -1 & df_vert$estimation < 1) |  df_vert$parameter == "lambda"),]
 
-plot_parameters_nat <-   ggplot(df_param_LEMA_vert,aes(x=estimation, y=year,height=after_stat(density),
-                                                       fill = after_stat(x),group = year))+
+plot_parameters_nat <-   ggplot(df_vert,aes(x=estimation, y=year,height=after_stat(density),
+                                            fill = after_stat(x),group = year))+
   geom_density_ridges_gradient(scale = 1.5,alpha=0.9,
                                rel_min_height = 0.001,
                                quantile_lines = TRUE, quantiles = 2) +
@@ -593,8 +572,88 @@ plot_parameters_nat <-   ggplot(df_param_LEMA_vert,aes(x=estimation, y=year,heig
     aesthetics = "fill"
   ) +
   scale_y_discrete(name = NULL,expand=c(0.01, 0)) +
+  scale_x_continuous(limit=c(-2,2)) +
   geom_vline(xintercept=0,color="darkgrey") +
-  #scale_x_continuous(name = NULL,expand=c(0.01, 0),lim=c(-1,1)) +
+  facet_wrap(parameter ~ complexity.plant, scales = "free_x", ncol=2) +
+  #scale_colour_manual(values=alpha(color_li[1:8],0.7)) +
+  labs(title =paste0("Plant generic pairwise interaction distributions of ",focal),
+       x="Plant generic pairwise interaction",
+       y="density") +
+  theme_bw()+
+  theme(axis.text=element_text(size=10))
+
+ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/Coeff_parameters_",focal,".pdf"),
+       dpi="retina",scale=1, plot_parameters_nat )    
+
+
+
+
+focal <- "CHFU"
+
+df <- data.frame()
+
+for( year in c("2018","2019",'2020','2021')){
+  for( complexity.level in 1:2){
+    complexity.animal <- c("group","family","species")[complexity.level]
+    complexity.plant <-c("class","family","code.plant")[complexity.level]
+    if(focal == "CHFU" & year =="2018") next
+    load(paste0(project.dic,"results/FinalFit",focal,"_",
+                year,"_",complexity.plant,"_",complexity.animal,".rds"))
+    
+    assign(paste0("FinalFit",focal,"_",
+                  year,"_",complexity.plant,"_",complexity.animal),FinalFit)
+    rm(FinalFit)
+    
+    df_alpha_n <- get(paste0("FinalFit",focal,"_",
+                             year,"_",complexity.plant,"_",complexity.animal)) %>% 
+      as.data.frame() %>% 
+      dplyr::select(#"lambdas[1]",
+        starts_with("beta_plant_generic["))
+    
+    names(df_alpha_n) <-c(#"lambda",
+      "alpha","gamma_H","gamma_FV")
+    df_alpha_n$focal <- focal
+    df_alpha_n$year <- year
+    df_alpha_n$complexity.plant <- complexity.plant
+    df_alpha_n$complexity.animal <- complexity.animal
+    df<- bind_rows(df,df_alpha_n)
+    
+  }
+}
+
+write.csv(df,
+          file = paste0("~/Eco_Bayesian/Complexity_caracoles/results/Chapt1_df_alpha",focal,".csv"))
+df <- read.csv(paste0("~/Eco_Bayesian/Complexity_caracoles/results/Chapt1_df_alpha",focal,".csv"))
+
+assign(paste0("df_param_",focal),df)
+
+
+gr <- colorRampPalette(c("dark green"))(200)                      
+re <- colorRampPalette(c( "red2"))(200)
+
+#df <- df[,-1]
+df_vert <- gather(df,#lambda,
+                  alpha,gamma_H,gamma_FV, 
+                  key="parameter", value="estimation")
+
+#df_vert <- df_vert[which((!df_vert$parameter == "lambda" & df_vert$estimation > -1 & df_vert$estimation < 1) |  df_vert$parameter == "lambda"),]
+
+plot_parameters_nat <-   ggplot(df_vert,aes(x=estimation, y=year,height=after_stat(density),
+                                            fill = after_stat(x),group = year))+
+  geom_density_ridges_gradient(scale = 1.5,alpha=0.9,
+                               rel_min_height = 0.001,
+                               quantile_lines = TRUE, quantiles = 2) +
+  scale_fill_gradientn(
+    colours=c(re,"white",gr),limits = c(-2, 2),
+    #midpoint = 0,
+    #space = "Lab",
+    na.value = "grey50",
+    guide = "none",
+    aesthetics = "fill"
+  ) +
+  scale_y_discrete(name = NULL,expand=c(0.01, 0)) +
+  scale_x_continuous(limit=c(-2,2)) +
+  geom_vline(xintercept=0,color="darkgrey") +
   facet_wrap(parameter~ complexity.plant, scales = "free_x", ncol=2) +
   #scale_colour_manual(values=alpha(color_li[1:8],0.7)) +
   labs(title =paste0("Plant generic pairwise interaction distributions of ",focal),
@@ -603,8 +662,168 @@ plot_parameters_nat <-   ggplot(df_param_LEMA_vert,aes(x=estimation, y=year,heig
   theme_bw()+
   theme(axis.text=element_text(size=10))
 
-ggsave("~/Eco_Bayesian/Complexity_caracoles/figure/Coeff_parameters_LEMA.pdf",
-       dpi="retina",scale=1, plot_parameters_nat 
-)    
+ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/Coeff_parameters_",focal,".pdf"),
+       dpi="retina",scale=1, plot_parameters_nat )    
 
+
+
+
+#---- 5.0. Figure for manuscripts ----
+#---- 5.1. Fig.2. Distribution direct interactions
+
+focal <- "CHFU"
+
+df <- data.frame()
+df_alpha_n
+summary.interactions.n$competitors_plant_inclus <- paste(c(colnames(Inclusion_ij))[which(Inclusion_ij>=1)],collapse="_")
+
+
+for( year in c("2020")){
+  for( complexity.level in c(1)){
+    complexity.animal <- c("group","family","species")[complexity.level]
+    complexity.plant <-c("class","family","code.plant")[complexity.level]
+    if(focal == "CHFU" & year =="2018") next
+    load(paste0("results/Inclusion",focal,"_",
+                year,"_",complexity.plant,"_",complexity.animal,".RData"))
+    which(Inclusion_all$Inclusion_ij==1)
+    
+    load(paste0("results/FinalFit",focal,"_",
+                year,"_",complexity.plant,"_",complexity.animal,".rds"))
+    
+    assign(paste0("FinalFit",focal,"_",
+                  year,"_",complexity.plant,"_",complexity.animal),FinalFit)
+    rm(FinalFit)
+    
+    df_alpha_n <- get(paste0("FinalFit",focal,"_",
+                             year,"_",complexity.plant,"_",complexity.animal)) %>% 
+      as.data.frame() %>% 
+      dplyr::select(#"lambdas[1]",
+        "alpha_generic[1]","gamma_H_generic[1]","gamma_FV_generic[1]",
+        paste0("alpha_hat_ij[",which(Inclusion_all$Inclusion_ij==1),"]"))
+    
+    rm(Inclusion_all)
+    names(df_alpha_n) <-c(#"lambda",
+      "alpha","gamma_H","gamma_FV","alpha_ij")
+    df_alpha_n$focal <- focal
+    df_alpha_n$year <- year
+    df_alpha_n$complexity.plant <- complexity.plant
+    df_alpha_n$complexity.animal <- complexity.animal
+    df<- bind_rows(df,df_alpha_n)
+    
+  }
+}
+gr <- colorRampPalette(c("dark green"))(200)                      
+re <- colorRampPalette(c( "red2"))(200)
+df$alphasum <- df$alpha + df$alpha_ij
+
+plot.alpha <- ggplot(gather(df,alpha,
+              key="alpha",value="estimate")) +  
+  geom_density_ridges_gradient(aes(x=estimate, y=alpha,
+                                             fill= after_stat(x)),
+                               scale = 5) + theme_bw() +
+  scale_fill_gradientn(
+    colours=c(re,"white",gr),limits = c(-2, 2),
+    #midpoint = 0,
+    #space = "Lab",
+    na.value = "grey50",
+    guide = "none",
+    aesthetics = "fill"
+  ) +   geom_boxplot(aes(y=2,x=alpha_ij),width=2) +
+  geom_boxplot(aes(y=4,x=alphasum),width=2)+ xlim(-0.6,0.6)
+  
+  
+plot.gamma.H <-  ggplot(gather(df,gamma_H,
+                             key="gamma_H",value="estimate")) +  
+  geom_density_ridges_gradient(aes(x=estimate, y=gamma_H,
+                                   fill= after_stat(x)),
+                               scale = 5) + theme_bw() +
+  scale_fill_gradientn(
+    colours=c(re,"white",gr),limits = c(-2, 2),
+    #midpoint = 0,
+    #space = "Lab",
+    na.value = "grey50",
+    guide = "none",
+    aesthetics = "fill"
+  ) + xlim(-0.6,0.6)
+
+plot.gamma.FV <-  ggplot(gather(df,gamma_FV,
+                             key="gamma_FV",value="estimate")) +  
+  geom_density_ridges_gradient(aes(x=estimate, y=gamma_FV,
+                                   fill= after_stat(x)),
+                               scale = 5) + theme_bw() +
+  scale_fill_gradientn(
+    colours=c(re,"white",gr),limits = c(-2, 2),
+    #midpoint = 0,
+    #space = "Lab",
+    na.value = "grey50",
+    guide = "none",
+    aesthetics = "fill"
+  ) + xlim(-0.6,0.6)
+
+
+ggsave( "figures/Chapt1Fig2.pdf", 
+        ggarrange(plot.alpha, plot.gamma.H,plot.gamma.FV,ncol=1,nrow=3, 
+                  align = c("v"))
+) 
+
+#---- 5.2. Fig.3. Variation intrinsic parameters ----
+
+df_lambda <- read.csv("results/Chapt1_df_lambda_nat.csv")
+df_lambda<- df_lambda[,-c(1:4)]
+head(df_lambda)
+plot_lambda_violin <- ggplot(df_lambda[which(df_lambda$complexity.plant=="family"),],
+                             aes(y=lambda, x=as.factor(year),
+                                 fill=as.factor(focal)))+
+  geom_violin(position = position_dodge(width = 0.3),
+              width=3) + 
+  theme_bw() + guides(fill="none") + 
+  labs(y="Intrinsic fecundity (log)", x="year") 
+
+plot_lambda_density <- ggplot(df_lambda[which(df_lambda$complexity.plant=="family"),],
+                              aes(y=lambda,fill=as.factor(focal)))+
+  geom_density(alpha=0.5) +
+  theme_bw() + labs(y="",x="distributions")
+
+ggarrange(plot_lambda_violin,plot_lambda_density, widths=(c(2,1)))
+
+
+df_alpha <- read.csv("results/Chapt1_df_alpha_nat.csv")
+df_alpha <- df_alpha[,-c(1:3)]
+
+
+plot_alpha_intra_violin <- ggplot(df_alpha[which(df_alpha$complexity.plant=="family"),],
+                             aes(y=alpha_intra, x=as.factor(year),
+                                 fill=as.factor(focal)))+
+  geom_hline(yintercept = 0, color="grey") +
+  geom_violin(position = position_dodge(width = 0.3),
+              width=3) + 
+  theme_bw() + guides(fill="none") +  ylim(-2,2) +
+  labs(y="Intra-specific interactions", x="year") 
+
+plot_alpha_intra_density <- ggplot(df_alpha[which(df_alpha$complexity.plant=="family"),],
+                              aes(y=alpha_intra,fill=as.factor(focal)))+
+  geom_density(alpha=0.5) + ylim(-2,2) +
+  theme_bw() + labs(y="",x="distributions")
+
+plot_alpha_violin <- ggplot(df_alpha[which(df_alpha$complexity.plant=="family"),],
+                            aes(y=alpha, x=as.factor(year),
+                                fill=as.factor(focal)))+
+  geom_hline(yintercept = 0, color="grey") +
+  geom_violin(position = position_dodge(width = 0.3),
+              width=3) +
+  theme_bw() + guides(fill="none") + ylim(-2,2) +
+  labs(y="Inter-specific interactions", x="year") 
+
+plot_alpha_density <- ggplot(df_alpha[which(df_alpha$complexity.plant=="family"),],
+                             aes(y=alpha,fill=as.factor(focal)))+
+  geom_density(alpha=0.5) + ylim(-2,2) +
+  theme_bw() + labs(y="",x="distributions")
+
+ggsave( "figures/Chapt1Fig3.pdf", 
+        ggarrange(plot_lambda_violin,plot_lambda_density,
+          plot_alpha_intra_violin,plot_alpha_intra_density,
+          plot_alpha_violin,plot_alpha_density,
+          ncol=2,nrow=3,
+          widths=(c(2,1)))
+        ) 
 
