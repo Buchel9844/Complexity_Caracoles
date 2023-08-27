@@ -2,13 +2,13 @@
 // 	following the stan implementation demonstrated on https://betanalpha.github.io/assets/case_studies/bayes_sparse_regression.html
 
 data{
+  int RemoveFvH; // Remove Higher trophic level 
   int<lower = 1> N; // Number of plots
   int<lower = 1> S; // Number of plant species
   int<lower = 1> H; // Number of herbivores species
   int<lower = 1> FV; // Number of floral visitors species
   int<lower = 1> FvH_h; // Number of herbivores species
   int<lower = 1> FvH_Fv; // Number of floral visitors species
-  int RemoveFvH; // Remove Higher trophic level 
 
   int Fecundity[N];  // Fecundity of the focal species in each plot
   matrix[N,S] SpMatrix;  // Matrix of abundances for each species (including abundances of non-focal individuals of the focal species)

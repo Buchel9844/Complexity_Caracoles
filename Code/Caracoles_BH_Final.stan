@@ -6,9 +6,6 @@ data{
   int<lower = 1> S; // Number of plant species
   int<lower = 1> H; // Number of herbivores species
   int<lower = 1> FV; // Number of floral visitors species
-  int<lower = 1> FvH_h; // Number of herbivores species 
-  int<lower = 1> FvH_Fv; // Number of floral visitors species
-    int RemoveFvH; // Remove Higher trophic level 
     
   int Fecundity[N];  // Fecundity of the focal species in each plot
   matrix[N,S] SpMatrix;  // Matrix of abundances for each species (including abundances of non-focal individuals of the focal species)
@@ -20,10 +17,6 @@ data{
   matrix[S,S] matrix_HOIs_plant[N]; // Matrix of abundances for each plant species with each other plant species
   matrix[S,H] matrix_HOIs_ijh[N]; // Matrix of abundances for each herbivores species and competitor
   matrix[S,FV] matrix_HOIs_ijf[N]; // Matrix of abundances for each herbivores species and competitor
-  
-  matrix[FV,FV] matrix_HOIs_iff[N]; // Matrix of abundances for each floral visitors species with each floral visitors species
-  matrix[H,H] matrix_HOIs_ihh[N]; // Matrix of abundances for each herbivores species with each herbivores species
-  matrix[FvH_Fv,FvH_h]  matrix_HOIs_ifh[N]; // Matrix of abundances for each floral visitors species with each herbivores species
 
    // vector telling which interactions to include
    
@@ -35,17 +28,12 @@ data{
   int beta_Inclusion_FV[S,FV];  // Boolean indicator variables to identify the HOIs 2 plants-FV
   int beta_Inclusion_H[S,H];  // Boolean indicator variables to identify the HOIs 2 plants- H
 
-  int beta_Inclusion_2FV[FV,FV];  // Boolean indicator variables to identify the HOIs 1 plant - 2 FV
-  int beta_Inclusion_2H[H,H];  // Boolean indicator variables to identify the HOIs 1 plant - 2 H
-  int beta_Inclusion_FvH[FvH_Fv,FvH_h];  // Boolean indicator variables to identify the HOIs 1 plant - 2 H
-
-
 }
 
 parameters{
-  real<lower=0> lambdas[2];
-  real<lower=-5,upper=5> alpha_generic_tilde[2];
-  real<lower=-5,upper=5> alpha_intra_tilde[2];
+  vector<lower=0>[1] lambdas;
+  vector<lower=-5,upper=5>[1] alpha_generic_tilde;
+  vector<lower=-5,upper=5>[1] alpha_intra_tilde;
   vector<lower=-5,upper=5>[S] alpha_hat_ij;
   
   vector<lower=-5,upper=5>[S] beta_plant_generic_tilde; // HOIs plants
@@ -73,7 +61,7 @@ parameters{
   matrix<lower=-5,upper=5>[FvH_Fv,FvH_h] beta_FvH_hat_ifh; // HOIs 1 floral visitor & 1 herbivore
 
 
-  real<lower=0> disp_dev[2]; // species-specific dispersion deviation parameter,
+  vector<lower=0>[1] disp_dev; // species-specific dispersion deviation parameter,
   // defined for the negative binomial distribution used to reflect seed production (perform)
   // disp_dev = 1/sqrt(phi)
 
@@ -214,20 +202,20 @@ transformed parameters{
 
   }
 
-  print("lambdas: ",lambdas[1]);
-  print("disp_dev: ",disp_dev);
-  print("alpha_generic_tilde: ", alpha_generic_tilde[1]);
-  print("alpha_intra_tilde: ",  alpha_intra_tilde[1]);
-  print("alpha_hat_ij: ",  alpha_hat_ij);
-  print("beta_plant_generic_tilde: ", beta_plant_generic_tilde);
-  print("gamma_H_generic_tilde: ",  gamma_H_generic_tilde);
-  print("gamma_FV_generic_tilde: ",  gamma_FV_generic_tilde);
-  print("beta_plant_generic_tilde: ", beta_plant_generic_tilde);
-  print("beta_H_generic_tilde : ",  beta_H_generic_tilde );
-  print("beta_FV_generic_tilde: ",  beta_FV_generic_tilde);
-  print("beta_2FV_generic_tilde: ", beta_2FV_generic_tilde);
-  print("beta_2H_generic_tilde : ",  beta_2H_generic_tilde);
-  print("beta_FvH_generic_tilde: ",  beta_FvH_generic_tilde);
+  //print("lambdas: ",lambdas[1]);
+  //print("disp_dev: ",disp_dev);
+  //print("alpha_generic_tilde: ", alpha_generic_tilde[1]);
+  //print("alpha_intra_tilde: ",  alpha_intra_tilde[1]);
+    //print("alpha_hat_ij: ",  alpha_hat_ij);
+  //print("beta_plant_generic_tilde: ", beta_plant_generic_tilde);
+  //print("gamma_H_generic_tilde: ",  gamma_H_generic_tilde);
+  //print("gamma_FV_generic_tilde: ",  gamma_FV_generic_tilde);
+  //print("beta_plant_generic_tilde: ", beta_plant_generic_tilde);
+  //print("beta_H_generic_tilde : ",  beta_H_generic_tilde );
+    //print("beta_FV_generic_tilde: ",  beta_FV_generic_tilde);
+  //print("beta_2FV_generic_tilde: ", beta_2FV_generic_tilde);
+  //print("beta_2H_generic_tilde : ",  beta_2H_generic_tilde);
+  //print("beta_FvH_generic_tilde: ",  beta_FvH_generic_tilde);
   // print("fecundity: ",  F_hat);
       //print("lambda_ei: ",  lambda_ei);
         //  print("interaction_effects: ",  interaction_effects);
