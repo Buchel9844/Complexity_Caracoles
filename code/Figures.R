@@ -17,6 +17,16 @@ library(ggpattern)
 home.dic <- "/home/lbuche/Eco_Bayesian/Complexity_caracoles/"
 project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
 
+
+home.dic <- ""
+project.dic <- ""
+load("results/inclusion/InclusionLEMA_2018_class_group.RData")
+assign(paste0("InclusionLEMA_2018_class_group"),Inclusion_all)
+
+view(bind_rows(InclusionLEMA_2021_class_group$interaction,
+               InclusionLEMA_2020_class_group$interaction,
+               InclusionLEMA_2018_class_group$interaction))
+
 #---- 3. Natural data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 3.0 CSV for inclusion----
@@ -33,7 +43,7 @@ for( year in c("2018","2019",'2020','2021')){
     complexity.plant <-c("class","family","code.plant")[complexity.level]
     
     if(year == "2018" & focal == "CHFU") next
-    load(paste0(home.dic,"results/Inclusion",focal,"_",
+    load(paste0(home.dic,"results/inclusion/Inclusion",focal,"_",
                 year,"_",complexity.plant,"_",complexity.animal,".RData"))
 
     assign(paste0("Inclusion",focal,"_",
@@ -242,12 +252,12 @@ for ( i in 1:nrow(df_inclusion_nat_short)){
                                  parameter=="alpha_generic" ~ "Plant-Plant"))
   df_param_all <- full_join(df_param_vert,df_param_hat)
   
-  plot.alphas <- ggplot(df_param_all) +  
+  plot.alphas <- ggplot(  df_param_vert) +  
     geom_density_ridges_gradient(aes(x=estimate, y=parameter,
                                      fill= after_stat(x)),
                                  scale = 1) + 
-    geom_boxplot(aes(x=estimate + estimate_hat, y=4, color=parameter_hat ),
-                 width=0.3,alpha=0.4,outlier.shape = NA) +
+    #geom_boxplot(aes(x=estimate + estimate_hat, y=4, color=parameter_hat ),
+    #             width=0.3,alpha=0.4,outlier.shape = NA) +
     facet_wrap(as.factor(focal)~as.factor(year), 
                 ncol = 4,nrow=4) +
     #scale_x_continuous(limits=c(-0.5,0.5)) + 

@@ -50,8 +50,8 @@ rstan_options(auto_write = TRUE)
   #focal <- args[3]
   #FocalPrefix <- focal 
   complexity.level <- as.numeric(args[3])
-  complexity.plant <-c("class","family","code.plant")[as.numeric(args[3])]
-  complexity.animal <- c("group","family","species")[as.numeric(args[3])]
+  complexity.plant <-c("class","family","code.plant")[ complexity.level]
+  complexity.animal <- c("group","family","species")[ complexity.level]
   #print(paste(focal,complexity.plant,complexity.animal,year))
  # FocalPrefix <- focal
   #Extract argument from slurms
@@ -76,8 +76,8 @@ rstan_options(auto_write = TRUE)
   #---- 1.2. Import the raw data ----
   
   #setwd("~/Eco_Bayesian/Complexity_caracoles")
-  home.dic <- "/home/lbuche/Eco_Bayesian/Complexity_caracoles/"
-  project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
+  home.dic <- ""#"/home/lbuche/Eco_Bayesian/Complexity_caracoles/"
+  project.dic <- ""#"/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
   
   #rm(list = ls())
   abundance.plant <- read.csv(paste0(home.dic,"data/abundance.csv"), sep=",")
@@ -107,7 +107,7 @@ extract.matrix(focal,year=year,
                plant.class,SpData)
 #Returns two elemens
 #view(summary.interactions.n)
-#view(DataVec) #contains 21 elements
+#str(DataVec) #contains 21 elements
 
 #---- 3. PRELIMINARY FIT -----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
