@@ -16,7 +16,8 @@ data{
   matrix[N,H] SpMatrix_H; // Matrix of abundances for each herbivores species 
   matrix[N,FV] SpMatrix_FV; // Matrix of abundances for each floral visitors species
   int<lower = 0> Intra[S];  // Indicator boolean variable to identify the focal species (0 for non-focal and 1 for focal). Included for easier calculations
-
+  int<lower = 1> U;  // Upper bound lambda
+  
   matrix[S,S] matrix_HOIs_plant[N]; // Matrix of abundances for each plant species with each other plant species
   matrix[S,H] matrix_HOIs_ijh[N]; // Matrix of abundances for each herbivores species and competitor
   matrix[S,FV] matrix_HOIs_ijf[N]; // Matrix of abundances for each herbivores species and competitor
@@ -34,7 +35,7 @@ transformed data{
 }
 
 parameters{
-  real<lower=0> lambdas[1];
+  real<lower=0,upper=1> lambdas[1];
 
   real<lower=-1,upper=1> alpha_intra[1]; // direct interaction intra plants - plants;
     
@@ -158,7 +159,7 @@ transformed parameters{
           
  // implement the biological model
   for(i in 1:N){
-    lambda_ei[i] = lambdas[1];
+         lambda_ei[i] = U*lambdas[1];
     for(s in 1:S){
       alpha_eij[i,s] = (1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + (1-Intra[s])* alpha_hat_ij[s];
         
@@ -227,7 +228,7 @@ model{
   gamma_FV_generic  ~ normal(0,0.1);
   //gamma_generic_tilde ~ normal(0,1);
     
-  lambdas ~ cauchy(0,10);
+  lambdas ~ normal(0, 1);
   //alpha_hat_ij ~ normal(0,1);
   //gamma_hat_if ~ normal(0,1);
   disp_dev ~ cauchy(0, 1);  // safer to place prior on disp_dev than on phi
@@ -264,5 +265,4 @@ model{
  for(i in 1:N){
   Fecundity[i] ~ neg_binomial_2(F_hat[i],(disp_dev^2)^(-1)); 
    }
-
 }

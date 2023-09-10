@@ -10,7 +10,8 @@ data{
   int<lower = 1> S; // Number of plant species
   int<lower = 1> H; // Number of herbivores species
   int<lower = 1> FV; // Number of floral visitors species
-    
+  int<lower = 1> U;  // Upper bound lambda
+  
   int Fecundity[N];  // Fecundity of the focal species in each plot
   matrix[N,S] SpMatrix;  // Matrix of abundances for each species (including abundances of non-focal individuals of the focal species)
   matrix[N,H] SpMatrix_H; // Matrix of abundances for each herbivores species 
@@ -34,7 +35,7 @@ data{
 }
 
 parameters{
-  vector<lower=0>[1] lambdas;
+  vector<lower=0,upper =1>[1] lambdas;
   vector<lower=-1,upper=1>[1] alpha_generic;
   vector<lower=-1,upper=1>[1] alpha_intra;
   vector<lower=-1,upper=1>[S] alpha_hat_ij;
@@ -87,7 +88,7 @@ transformed parameters{
  
   for(i in 1:N){
     //Common paramneters in all scenarios - that is regardless of pollinator and/or herbivores presence or absence
-    lambda_ei[i] = lambdas[1];
+     lambda_ei[i] = U*lambdas[1];
         for(s in 1:S){
       alpha_eij[i,s] = (1-Intra[s]) * alpha_generic[1] + Intra[s] * alpha_intra[1] + (1-Intra[s]) *alpha_hat_ij[s]*Inclusion_ij[1,s];
       
@@ -171,7 +172,7 @@ model{
   gamma_FV_generic ~ normal(0,0.1);
   gamma_H_generic ~ normal(0,0.1);
     
-  lambdas ~ cauchy(0, 10);
+  lambdas ~ normal(0, 1);
   alpha_hat_ij ~ normal(0,0.1);
   gamma_FV_hat_if ~ normal(0,0.1);
   gamma_H_hat_ih ~ normal(0,0.1);

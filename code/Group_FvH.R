@@ -21,6 +21,7 @@ floral_visitor_species <- subset(floral_visitor_species, id_final %in% FVtoKeep_
 
 
 floral_visitor_species <-  spread( floral_visitor_species,id_final, number_visits)
+
 floral_visitor_species[is.na(floral_visitor_species)] <- 0
 head(floral_visitor_species)
 

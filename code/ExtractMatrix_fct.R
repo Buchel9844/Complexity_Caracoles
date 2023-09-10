@@ -1,10 +1,10 @@
 # extraction of matrixes
 
 extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
-         year=c('2018',"2019","2020","2021"),
-         complexity.plant =c("class","family","code.plant"),
-         complexity.animal= c("group","family","species"),
-         plant.class,SpData){
+                           year=c('2018',"2019","2020","2021"),
+                           complexity.plant =c("class","family","code.plant"),
+                           complexity.animal= c("group","family","species"),
+                           plant.class,SpData){
   
   #---- 1.4. Import df of abundances----    
   # view complexity levels
@@ -36,7 +36,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   if (complexity.minimize == T){
     levels.of.focal <- plant.class[which(plant.class$code.plant==FocalPrefix),complexity.plant]
     SpDataFocal[,levels.of.focal] <- SpDataFocal[,levels.of.focal] - SpDataFocal[,FocalPrefix]
-    }else{
+  }else{
     SpDataFocal <- rename(SpDataFocal, c(focal_neighbour = focal[1]))
     complexitylevel.plant <- complexitylevel.plant[which(!complexitylevel.plant %in% focal )]
     focal <- "focal_neighbour"}
@@ -61,7 +61,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   
   SpData_H <- SpData_H[which(SpData_H$year == as.integer(year) & 
                                SpData_H$code.plant == FocalPrefix),]
-                           
+  
   
   SpData_H <- SpDataFocal %>%
     select(c("day","month","year","plot","subplot","focal")) %>%
@@ -73,9 +73,10 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   SpData_H[is.na(SpData_H)] <- 0
   
   SpData_FV <- get(paste0("floral_visitor","_",complexity.animal))
+  SpData_FV <- SpData_FV[which(SpData_FV$year == as.integer(year)),]
   
   SpData_FV <- SpData_FV[which(SpData_FV$year == as.integer(year) & 
-                               SpData_FV$code.plant == FocalPrefix),]
+                                 SpData_FV$code.plant == FocalPrefix),]
   
   
   SpData_FV <- SpDataFocal %>%
@@ -185,7 +186,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   SpToKeep_H  <- SpTotals_H  > 0
   H <- sum(SpToKeep_H)
   if(H==0){RemoveH = 1}else{RemoveH = 0}
-
+  
   SpMatrix_H  <- matrix(NA, nrow = N, ncol = H)
   i <- 1
   for(h in 1:length(SpToKeep_H)){
@@ -202,7 +203,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     SpMatrix_H  <- matrix(NA, nrow = N, ncol = 1)
     SpMatrix_H[,1] <- rep(0,times=nrow(SpMatrix_H))
   }
-
+  
   #---- 2.3. Interaction (direct) matrix of floral visitors with FOCAL ----
   
   AllSpAbunds_FV<- SpData_FV %>% 
@@ -237,9 +238,9 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   #---- 2.4. Interaction (HOIs) matrix of floral visitors with COMPETITORS ----
   
   SpData_FV_comp <- dplyr::right_join(SpData_FV,SpDataFocal,
-                              multiple = "all",
-                              #relationship ="many-to-many",
-                              by=c("day","month","year","plot","subplot","focal")) %>%
+                                      multiple = "all",
+                                      #relationship ="many-to-many",
+                                      by=c("day","month","year","plot","subplot","focal")) %>%
     unique() %>%
     gather( all_of(c(complexitylevel.plant,focal)),
             key = "plant.comp", value = "abundance.plant.comp") %>%
@@ -263,8 +264,8 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   SpData_FV_comp <- SpDataFocal %>%
     select(c("day","month","year","plot","subplot","seed","fruit")) %>%
     left_join(SpData_FV_comp,by=c("day","month","year","plot","subplot","seed","fruit"),
-                              multiple = "all",
-                              copy=FALSE)
+              multiple = "all",
+              copy=FALSE)
   
   if( !nrow(SpData_FV_comp) == N){
     print("problem in the numbr of observation, they don't match, 
@@ -326,14 +327,14 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     m=1
     if(FV_comp ==0){
       matrix_i <- matrix(nrow=S,ncol=1, data=rep(0,times=S))}else{
-      for (fv in 1:FV_comp) {
-        if(fv == vector_FV_comp[n] + 1){
-          n = n+1
-          m = 1 }
-        matrix_i[n,m] = SpMatrix_FV_comp[i,fv]
-        m = m+1 
+        for (fv in 1:FV_comp) {
+          if(fv == vector_FV_comp[n] + 1){
+            n = n+1
+            m = 1 }
+          matrix_i[n,m] = SpMatrix_FV_comp[i,fv]
+          m = m+1 
+        }
       }
-    }
     matrix_i[is.na(matrix_i)]<- 0
     matrix_HOIs_ijf[[i]]  <- matrix_i
     if(sum(rowSums(is.na(matrix_i)))==T){
@@ -374,8 +375,8 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   SpData_H_comp <- SpDataFocal %>%
     select(c("day","month","year","plot","subplot","seed","fruit")) %>%
     left_join(SpData_H_comp,by=c("day","month","year","plot","subplot","seed","fruit"),
-                             multiple = "all",
-                             SpData_H_comp)
+              multiple = "all",
+              SpData_H_comp)
   
   if( !nrow(SpData_H_comp) == N){
     print("problem in the numbr of observation, they don't match, 
@@ -437,14 +438,14 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     m=1
     if(H_comp ==0){
       matrix_i <- matrix(nrow=S,ncol=1, data=rep(0,times=S)) }else{
-      for (h_comp in 1:H_comp) {
-        if(h_comp == vector_H_comp[n] + 1){
-          n = n+1
-          m = 1 }
-        matrix_i[n,m] = SpMatrix_H_comp[i,h_comp]
-        m = m+1 
+        for (h_comp in 1:H_comp) {
+          if(h_comp == vector_H_comp[n] + 1){
+            n = n+1
+            m = 1 }
+          matrix_i[n,m] = SpMatrix_H_comp[i,h_comp]
+          m = m+1 
+        }
       }
-    }
     matrix_i[is.na(matrix_i)] <- 0
     matrix_HOIs_ijh[[i]] <-  matrix_i
     if(sum(rowSums(is.na(matrix_i)))==T){
@@ -455,7 +456,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   
   
   
-   #---- 3. Return object ----
+  #---- 3. Return object ----
   run_estimation <- 1
   # rfemove interaction of Herbivore and floral visitors vector 
   if(sum(colSums(SpMatrix_H))==0|sum(colSums(SpMatrix_FV))==0){
@@ -464,7 +465,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   H <- length(names(SpTotals_H[SpToKeep_H]))
   FV <- length(names(SpTotals_FV[SpToKeep_FV]))
   }
-
+  
   
   summary.interactions.n <- tibble(focal= focal,year=as.integer(year),
                                    complexity_plant=complexity.plant,
@@ -497,34 +498,38 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   }
   assign('summary.interactions.n',  summary.interactions.n,1)
   
-
+  
   # Set the parameters defining the regularized horseshoe prior, as described in
   #       the "Incorporating sparsity-inducing priors" section of the manuscript.
+  # Upper bound intrinsic fecundity
+  U <- ceiling(log(max(Fecundity)))
   
-    tau0 <- 1
-    slab_scale <- sqrt(2)
-    slab_df <- 4
   
-    DataVec <- list(N=N, 
-                    SpNames = SpNames,
-                    S=S,
-                    RemoveFvH= RemoveFvH,
-                    RemoveH = RemoveH,
-                    RemoveFV= RemoveFV,
-                    Fecundity=Fecundity, 
-                    SpMatrix=SpMatrix,
-                    matrix_HOIs_plant=matrix_HOIs_plant,
-                    Intra=Intra, tau0=tau0, 
-                    slab_scale=slab_scale, slab_df=slab_df,
-                    H=H,
-                    matrix_HOIs_ijh=matrix_HOIs_ijh,
-                    SpMatrix_H=SpMatrix_H,FV=FV,
-                    SpMatrix_FV=SpMatrix_FV,
-                    matrix_HOIs_ijf=matrix_HOIs_ijf)
-    
-    
+  tau0 <- 1
+  slab_scale <- sqrt(2)
+  slab_df <- 4
+  
+  DataVec <- list(N=N, 
+                  SpNames = SpNames,
+                  S=S,
+                  U=U,
+                  RemoveFvH= RemoveFvH,
+                  RemoveH = RemoveH,
+                  RemoveFV= RemoveFV,
+                  Fecundity=Fecundity, 
+                  SpMatrix=SpMatrix,
+                  matrix_HOIs_plant=matrix_HOIs_plant,
+                  Intra=Intra, tau0=tau0, 
+                  slab_scale=slab_scale, slab_df=slab_df,
+                  H=H,
+                  matrix_HOIs_ijh=matrix_HOIs_ijh,
+                  SpMatrix_H=SpMatrix_H,FV=FV,
+                  SpMatrix_FV=SpMatrix_FV,
+                  matrix_HOIs_ijf=matrix_HOIs_ijf)
+  
+  
   assign('DataVec',DataVec,1)
   assign("complexitylevel.H",complexitylevel.H,1)
   assign("complexitylevel.FV",complexitylevel.FV,1)
   
-  }
+}
