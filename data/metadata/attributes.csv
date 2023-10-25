@@ -1,0 +1,177 @@
+fileName,variableName,description,unitText
+abundance.csv,species,code of the plant species,character
+abundance.csv,year,year of collection,year
+abundance.csv,month,month of collection,month
+abundance.csv,day,day of collection,day
+abundance.csv,plot,plot of collection,"plot [1,9]"
+abundance.csv,subplot,subplot of collection,"subplot [A-F,1-6]"
+abundance.csv,individuals,number of indiviuals counted,integer
+competition.csv,day,day of collection,day
+competition.csv,month,month of collection,month
+competition.csv,year,year of collection,year
+competition.csv,plot,plot of collection,"plot [1,9]"
+competition.csv,subplot,subplot of collection,"subplot [A-F,1-6]"
+competition.csv,focal,code of the plant species,character
+competition.csv,fruit,number of fruit on that focal individual,integer
+competition.csv,seed,"number of seed on that focal individual, computed from the number of fruit",integer
+competition.csv,BEMA,Number of BEMA in the local neighbouhood,integer
+competition.csv,CHFU,Number of CHFUin the local neighbouhood,integer
+competition.csv,CHMI,Number of CHMI in the local neighbouhood,integer
+competition.csv,CETE,Number of CETE in the local neighbouhood,integer
+competition.csv,HOMA,Number of HOMA in the local neighbouhood,integer
+competition.csv,LEMA,Number of LEMA in the local neighbouhood,integer
+competition.csv,PAIN,Number of PAIN in the local neighbouhood,integer
+competition.csv,PLCO,Number of PLCO in the local neighbouhood,integer
+competition.csv,POMA,Number of POMA in the local neighbouhood,integer
+competition.csv,POMO,Number of POMO in the local neighbouhood,integer
+competition.csv,PUPA,Number of PUPA in the local neighbouhood,integer
+competition.csv,SASO,Number of SASO in the local neighbouhood,integer
+competition.csv,SCLA,Number of SCLA in the local neighbouhood,integer
+competition.csv,SPRU,Number of SPRU in the local neighbouhood,integer
+competition.csv,MESU,Number of MESU in the local neighbouhood,integer
+competition.csv,MEEL,Number of MEEL in the local neighbouhood,integer
+competition.csv,SOAS,Number of SOAS in the local neighbouhood,integer
+competition.csv,FRPU,Number of FRPU in the local neighbouhood,integer
+competition.csv,SUSP,Number of SUSP in the local neighbouhood,integer
+competition.csv,COSQ,Number of COSQ in the local neighbouhood,integer
+competition.csv,CRCR,Number of CRCR in the local neighbouhood,integer
+competition.csv,DA,Number of DA in the local neighbouhood,integer
+competition.csv,LYTR,Number of LYTR in the local neighbouhood,integer
+competition.csv,MEPO,Number of MEPO in the local neighbouhood,integer
+competition.csv,RAPE,Number of RAPE in the local neighbouhood,integer
+competition.csv,ANAR,Number of ANAR in the local neighbouhood,integer
+competition.csv,ACHI,Number of ACHI in the local neighbouhood,integer
+competition.csv,ARTE,Number of ARTE in the local neighbouhood,integer
+competition.csv,NEWGRASS,Number of Newgrass in the local neighbouhood,integer
+competition.csv,observers,people who observed the local neighbourhood,character
+competition.csv,comments,any comments about the observation,character
+floral_visitor.csv,day,day of collection,day
+floral_visitor.csv,month,month of collection,month
+floral_visitor.csv,year,year of collection,year
+floral_visitor.csv,plot,plot of collection,"plot [1,9]"
+floral_visitor.csv,subplot,subplot of collection,"subplot [A-F,1-6]"
+floral_visitor.csv,raw_species_id,"id of floral visitor observed, can be a nickname",character
+floral_visitor.csv,number_visits,number of flowers visited,integer
+floral_visitor.csv,jar,specify if a specimen was collected for detailed identification,binary yes or no
+floral_visitor.csv,plant,code of the plant species with which the floral visitor interacted with,character
+floral_visitor.csv,time,time of observation,time
+floral_visitor.csv,observers,people who observed the interaction,character
+floral_visitor.csv,weather,weather at the time of observation,character
+floral_visitor.csv,comments,any comments about the observation,character
+floral_visitor.csv,id_final,"final id after identification and check with past record, same as species_id",character
+floral_visitor.csv,type,"type of insect, either floral visitor or/and herbivore such as beetle",character
+floral_visitor.csv,group,"group of floral visitor e.g., bee, fly",character
+floral_visitor.csv,order,"order of floral visitor e.g., Hymenoptera, Diptera",character
+floral_visitor.csv,family,"family of floral visitor e.g.,Apidae, Syrphidae",character
+floral_visitor.csv,genus,"genus of floral visitor e.g., Apis, Episyrphus",character
+floral_visitor.csv,species,"species of floral visitor e.g., mellifera, balteatus",character
+floral_visitor.csv,species_id,"condensed species id e.g., Apis_mellifera, to the highest level of detail possible, minimum is the order",character
+floral_visitor.csv,stage,"stage of the individual e.g., butterfly, larvae (if necessary)",character
+floral_visitor.csv,morpho_sp,"name relataed to it appearance e.g., white_moth (if available)",character
+floral_visitor.csv,nickname,nickname commonly used on the field (if necessary),character
+groupinglevels.csv,order,number of the row,integer
+groupinglevels.csv,complexity,"levels of grouping complexity i.e., species, family or functional group",character
+groupinglevels.csv,grouping,id of the species,character
+groupinglevels.csv,HTL,"higher trophic level it belong to, either floral visitor or herbivore",character
+groupinglevels.csv,YesNo,"determine it inclusion in the model yes, no or maybe",character
+groupinglevels.csv,Observations,any comments about the observation,character
+herbivorypredator.csv,day,day of collection,day
+herbivorypredator.csv,month,month of collection,month
+herbivorypredator.csv,year,year of collection,year
+herbivorypredator.csv,plot,plot of collection,"plot [1,9]"
+herbivorypredator.csv,subplot,subplot of collection,"subplot [A-F,1-6]"
+herbivorypredator.csv,raw_species_id,"id of floral visitor observed, can be a nickname",character
+herbivorypredator.csv,number_animal,number of individual,integer
+herbivorypredator.csv,aspect,"aspect of the individual(s) e.g., spider web, cocoon",character
+herbivorypredator.csv,stage,"stage of the individual e.g., larvae (if necessary)",character
+herbivorypredator.csv,jar,specify if a specimen was collected for detailed identification,binary yes or no
+herbivorypredator.csv,comments,any comments about the observation,character
+herbivorypredator.csv,plant,code of the plant species with which the herbivore interacted with,character
+herbivorypredator.csv,time,time of observation,time
+herbivorypredator.csv,observers,people who observed the interaction,character
+herbivorypredator.csv,weather,weather at the time of observation,character
+herbivorypredator.csv,id_final,"final id after identification and check with past record, same as species_id",character
+herbivorypredator.csv,type,"type of insect, either floral visitor or/and herbivore such as beetle",character
+herbivorypredator.csv,group,"group of herbivore e.g., snail",character
+herbivorypredator.csv,order,"order of herbivore e.g., Gastropoda",character
+herbivorypredator.csv,family,"family of herbivore.g., Geomitridae",character
+herbivorypredator.csv,genus,"genus of herbivore e.g., Cochlicella",character
+herbivorypredator.csv,species,"species of herbivore e.g., barbara",character
+herbivorypredator.csv,species_id,"condensed species id e.g., Cochlicella_barbara, to the highest level of detail possible, minimum is the order",character
+herbivorypredator.csv,morpho_sp,"name relataed to it appearance e.g., white_moth (if available)",character
+herbivorypredator.csv,nickname,nickname commonly used on the field (if necessary),character
+plant_code.csv,number,number of the row,character
+plant_code.csv,species,"species of the plant, e.g., Leontodon maroccanus",character
+plant_code.csv,family,"family of the plant e.g., Asteraceae",character
+plant_code.csv,code.plant,"code of the plant e.g., LEMA",character
+plant_code.csv,class,"class or functional group of the plant e.g., Forb",character
+plant_code.csv,Native.sp,"specify if the plant is native e.g., Native Annual Forb",character
+plant_code.csv,rareORabundant,"specify if the plant is consistenly abundant e.g.,abundant",character
+SpData.csv,day,day of collection,day
+SpData.csv,month,month of collection,month
+SpData.csv,year,year of collection,year
+SpData.csv,plot,plot of collection,"plot [1,9]"
+SpData.csv,subplot,subplot of collection,"subplot [A-F,1-6]"
+SpData.csv,focal,code of the plant species,character
+SpData.csv,fruit,number of fruit on that focal individual,integer
+SpData.csv,seed,"number of seed on that focal individual, computed from the number of fruit",integer
+SpData.csv,BEMA,Number of BEMA in the local neighbouhood,integer
+SpData.csv,CHFU,Number of CHFUin the local neighbouhood,integer
+SpData.csv,CHMI,Number of CHMI in the local neighbouhood,integer
+SpData.csv,CETE,Number of CETE in the local neighbouhood,integer
+SpData.csv,HOMA,Number of HOMA in the local neighbouhood,integer
+SpData.csv,LEMA,Number of LEMA in the local neighbouhood,integer
+SpData.csv,PAIN,Number of PAIN in the local neighbouhood,integer
+SpData.csv,PLCO,Number of PLCO in the local neighbouhood,integer
+SpData.csv,POMA,Number of POMA in the local neighbouhood,integer
+SpData.csv,POMO,Number of POMO in the local neighbouhood,integer
+SpData.csv,PUPA,Number of PUPA in the local neighbouhood,integer
+SpData.csv,SASO,Number of SASO in the local neighbouhood,integer
+SpData.csv,SCLA,Number of SCLA in the local neighbouhood,integer
+SpData.csv,SPRU,Number of SPRU in the local neighbouhood,integer
+SpData.csv,MESU,Number of MESU in the local neighbouhood,integer
+SpData.csv,MEEL,Number of MEEL in the local neighbouhood,integer
+SpData.csv,SOAS,Number of SOAS in the local neighbouhood,integer
+SpData.csv,FRPU,Number of FRPU in the local neighbouhood,integer
+SpData.csv,SUSP,Number of SUSP in the local neighbouhood,integer
+SpData.csv,COSQ,Number of COSQ in the local neighbouhood,integer
+SpData.csv,CRCR,Number of CRCR in the local neighbouhood,integer
+SpData.csv,DA,Number of DA in the local neighbouhood,integer
+SpData.csv,LYTR,Number of LYTR in the local neighbouhood,integer
+SpData.csv,MEPO,Number of MEPO in the local neighbouhood,integer
+SpData.csv,RAPE,Number of RAPE in the local neighbouhood,integer
+SpData.csv,ANAR,Number of ANAR in the local neighbouhood,integer
+SpData.csv,ACHI,Number of ACHI in the local neighbouhood,integer
+SpData.csv,ARTE,Number of ARTE in the local neighbouhood,integer
+SpData.csv,NEWGRASS,Number of Newgrass in the local neighbouhood,integer
+SpData.csv,Amaranthaceae,Number of Amaranthaceae in the local neighbouhood,integer
+SpData.csv,Asteraceae,Number of Asteraceae in the local neighbouhood,integer
+SpData.csv,Brassicaceae,Number of Brassicaceae in the local neighbouhood,integer
+SpData.csv,Caryophyllaceae,Number of Caryophyllaceae in the local neighbouhood,integer
+SpData.csv,Convolvulaceae,Number of Convolvulaceae in the local neighbouhood,integer
+SpData.csv,Fabaceae,Number of Fabaceae in the local neighbouhood,integer
+SpData.csv,Frankeniaceae,Number of Frankeniaceae in the local neighbouhood,integer
+SpData.csv,Gentianaceae,Number of Gentianaceae in the local neighbouhood,integer
+SpData.csv,Lythraceae,Number of Lythraceae in the local neighbouhood,integer
+SpData.csv,Plantaginaceae,Number of Plantaginaceaein the local neighbouhood,integer
+SpData.csv,Poaceae,Number of Poaceae in the local neighbouhood,integer
+SpData.csv,Primulacea,Number of Primulacea in the local neighbouhood,integer
+SpData.csv,Ranunculuc,Number of Ranunculuc in the local neighbouhood,integer
+SpData.csv,Forb,Number of Forb in the local neighbouhood,integer
+SpData.csv,Grass,Number of Grass in the local neighbouhood,integer
+SpData.csv,abundant,Number of abundant species in the local neighbouhood,integer
+SpData.csv,rare,Number of rare species in the local neighbouhood,integer
+SpData.csv,comments,comments about the observation,character
+SpData.csv,observers,people who observed the local neighbourhood,character
+tesaurus_clean.csv,type,"type of higher trophic level e.g., floral visitor or herbivore",character
+tesaurus_clean.csv,group,"class or functional group of the species e.g., Forb",character
+tesaurus_clean.csv,order,"order of the species e.g., Hymenoptera",character
+tesaurus_clean.csv,family,"family of the species e.g., Apidae",character
+tesaurus_clean.csv,genus,"genus of the species e.g., Apis",character
+tesaurus_clean.csv,species,"species, e.g., mellifera",character
+tesaurus_clean.csv,species_id,"species_id of the species e.g., Apis_mellifera",character
+tesaurus_clean.csv,id_final,"final species_id of the species e.g., Apis_mellifera",character
+tesaurus_clean.csv,stage,"stage of the individual e.g., butterfly, larvae (if necessary)",character
+tesaurus_clean.csv,morpho_sp,"name relataed to it appearance e.g., white_moth (if available)",character
+tesaurus_clean.csv,nickname,nickname commonly used on the field (if necessary),character
+tesaurus_clean.csv,raw_species_id,"final species_id of the species with just the highest level of classification e.g., Apis_mellifera",character

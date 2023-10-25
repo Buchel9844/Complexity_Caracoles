@@ -1,0 +1,9 @@
+fileName,name,contentUrl,encodingFormat
+abundance.csv,abundance,https://github.com/Buchel9844/Complexity_Caracoles,csv
+competition.csv,competition,https://github.com/Buchel9844/Complexity_Caracoles,csv
+floral_visitor.csv,floral_visitor,https://github.com/Buchel9844/Complexity_Caracoles,csv
+groupinglevels.csv,groupinglevels,https://github.com/Buchel9844/Complexity_Caracoles,csv
+herbivorypredator.csv,herbivorypredator,https://github.com/Buchel9844/Complexity_Caracoles,csv
+plant_code.csv,plant_code,https://github.com/Buchel9844/Complexity_Caracoles,csv
+SpData.csv,SpData,https://github.com/Buchel9844/Complexity_Caracoles,csv
+tesaurus_clean.csv,tesaurus_clean,https://github.com/Buchel9844/Complexity_Caracoles,csv

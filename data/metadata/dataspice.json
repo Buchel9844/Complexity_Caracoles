@@ -1,0 +1,762 @@
+{
+  "@context": "http://schema.org",
+  "type": "Dataset",
+  "name": "Caracoles Dataset",
+  "creator": [
+    {
+      "type": "Person",
+      "id": "0000-0001-8004-2670",
+      "email": "buchel9844@gmail.com",
+      "affiliation": "University of Melbourne",
+      "name": "Lisa Buche"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0001-7893-4389",
+      "email": "nacho.bartomeus@gmail.com",
+      "affiliation": "Stación Biológica de Doñana (EBD-CSIC)",
+      "name": "Ignasi Bartomeus"
+    },
+    {
+      "type": "Person",
+      "id": null,
+      "email": null,
+      "affiliation": null,
+      "name": "Christopher Weiss lehman"
+    },
+    {
+      "type": "Person",
+      "id": null,
+      "email": null,
+      "affiliation": "University of Melbourne",
+      "name": "Margaret Mayfield"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0003-4988-6626",
+      "email": "ogodoy.re@gmail.com",
+      "affiliation": "Instituto Universitario de Investigación Marina (INMAR)",
+      "name": "Oscar Godoy"
+    }
+  ],
+  "description": "For each subplot we collected community abundance at peak flowering, within guild interaction observations (flower production related to the neighbourhood), and weekly higher trophic information.",
+  "datePublished": "https://github.com/Buchel9844/Complexity_Caracoles",
+  "keywords": ["Mediterranean grassland community", "annual plant interaction", "plant fitness", "multi-trophic interactions", "network"],
+  "funder": "xx",
+  "temporalCoverage": "2019-03-01/2021-10-01",
+  "license": "xx",
+  "spatialCoverage": {
+    "type": "Place",
+    "name": "Caracoles Ranch (2680 ha), an annual grassland system located in Doñana National Park, southwest Spain. The plant community is dominated by annuals from the Poaceae, Asteraceae and Chenopodaceae families, with no perennial species present. The climate is Mediterranean, with mild winters and an average 50-year annual rainfall of 550–570 mm with high interannual oscillations. Soils are sodic saline (electric conductivity > 4 dS/m and pH < 8.5).",
+    "geo": {
+      "type": "GeoShape",
+      "box": "37.050556 -6.455278 37.050556 -6.455278"
+    }
+  },
+  "variableMeasured": [
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "code of the plant species"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "year",
+      "name": "year",
+      "description": "year of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "month",
+      "name": "month",
+      "description": "month of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "day",
+      "name": "day",
+      "description": "day of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "plot [1,9]",
+      "name": "plot",
+      "description": "plot of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "subplot [A-F,1-6]",
+      "name": "subplot",
+      "description": "subplot of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "individuals",
+      "description": "number of indiviuals counted"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "focal",
+      "description": "code of the plant species"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "fruit",
+      "description": "number of fruit on that focal individual"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "seed",
+      "description": "number of seed on that focal individual, computed from the number of fruit"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "BEMA",
+      "description": "Number of BEMA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "CHFU",
+      "description": "Number of CHFUin the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "CHMI",
+      "description": "Number of CHMI in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "CETE",
+      "description": "Number of CETE in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "HOMA",
+      "description": "Number of HOMA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "LEMA",
+      "description": "Number of LEMA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "PAIN",
+      "description": "Number of PAIN in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "PLCO",
+      "description": "Number of PLCO in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "POMA",
+      "description": "Number of POMA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "POMO",
+      "description": "Number of POMO in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "PUPA",
+      "description": "Number of PUPA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SASO",
+      "description": "Number of SASO in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SCLA",
+      "description": "Number of SCLA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SPRU",
+      "description": "Number of SPRU in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "MESU",
+      "description": "Number of MESU in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "MEEL",
+      "description": "Number of MEEL in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SOAS",
+      "description": "Number of SOAS in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "FRPU",
+      "description": "Number of FRPU in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SUSP",
+      "description": "Number of SUSP in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "COSQ",
+      "description": "Number of COSQ in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "CRCR",
+      "description": "Number of CRCR in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "DA",
+      "description": "Number of DA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "LYTR",
+      "description": "Number of LYTR in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "MEPO",
+      "description": "Number of MEPO in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "RAPE",
+      "description": "Number of RAPE in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "ANAR",
+      "description": "Number of ANAR in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "ACHI",
+      "description": "Number of ACHI in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "ARTE",
+      "description": "Number of ARTE in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "NEWGRASS",
+      "description": "Number of Newgrass in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "observers",
+      "description": "people who observed the local neighbourhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "comments",
+      "description": "any comments about the observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "raw_species_id",
+      "description": "id of floral visitor observed, can be a nickname"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "number_visits",
+      "description": "number of flowers visited"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "binary yes or no",
+      "name": "jar",
+      "description": "specify if a specimen was collected for detailed identification"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "plant",
+      "description": "code of the plant species with which the floral visitor interacted with"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "time",
+      "name": "time",
+      "description": "time of observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "observers",
+      "description": "people who observed the interaction"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "weather",
+      "description": "weather at the time of observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "id_final",
+      "description": "final id after identification and check with past record, same as species_id"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "type",
+      "description": "type of insect, either floral visitor or/and herbivore such as beetle"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "group",
+      "description": "group of floral visitor e.g., bee, fly"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "order",
+      "description": "order of floral visitor e.g., Hymenoptera, Diptera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "family",
+      "description": "family of floral visitor e.g.,Apidae, Syrphidae"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "genus",
+      "description": "genus of floral visitor e.g., Apis, Episyrphus"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "species of floral visitor e.g., mellifera, balteatus"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species_id",
+      "description": "condensed species id e.g., Apis_mellifera, to the highest level of detail possible, minimum is the order"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "stage",
+      "description": "stage of the individual e.g., butterfly, larvae (if necessary)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "morpho_sp",
+      "description": "name relataed to it appearance e.g., white_moth (if available)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "nickname",
+      "description": "nickname commonly used on the field (if necessary)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "order",
+      "description": "number of the row"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "complexity",
+      "description": "levels of grouping complexity i.e., species, family or functional group"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "grouping",
+      "description": "id of the species"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "HTL",
+      "description": "higher trophic level it belong to, either floral visitor or herbivore"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "YesNo",
+      "description": "determine it inclusion in the model yes, no or maybe"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "Observations",
+      "description": "any comments about the observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "number_animal",
+      "description": "number of individual"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "aspect",
+      "description": "aspect of the individual(s) e.g., spider web, cocoon"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "stage",
+      "description": "stage of the individual e.g., larvae (if necessary)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "plant",
+      "description": "code of the plant species with which the herbivore interacted with"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "group",
+      "description": "group of herbivore e.g., snail"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "order",
+      "description": "order of herbivore e.g., Gastropoda"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "family",
+      "description": "family of herbivore.g., Geomitridae"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "genus",
+      "description": "genus of herbivore e.g., Cochlicella"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "species of herbivore e.g., barbara"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species_id",
+      "description": "condensed species id e.g., Cochlicella_barbara, to the highest level of detail possible, minimum is the order"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "number",
+      "description": "number of the row"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "species of the plant, e.g., Leontodon maroccanus"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "family",
+      "description": "family of the plant e.g., Asteraceae"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "code.plant",
+      "description": "code of the plant e.g., LEMA"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "class",
+      "description": "class or functional group of the plant e.g., Forb"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "Native.sp",
+      "description": "specify if the plant is native e.g., Native Annual Forb"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "rareORabundant",
+      "description": "specify if the plant is consistenly abundant e.g.,abundant"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Amaranthaceae",
+      "description": "Number of Amaranthaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Asteraceae",
+      "description": "Number of Asteraceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Brassicaceae",
+      "description": "Number of Brassicaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Caryophyllaceae",
+      "description": "Number of Caryophyllaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Convolvulaceae",
+      "description": "Number of Convolvulaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Fabaceae",
+      "description": "Number of Fabaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Frankeniaceae",
+      "description": "Number of Frankeniaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Gentianaceae",
+      "description": "Number of Gentianaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Lythraceae",
+      "description": "Number of Lythraceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Plantaginaceae",
+      "description": "Number of Plantaginaceaein the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Poaceae",
+      "description": "Number of Poaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Primulacea",
+      "description": "Number of Primulacea in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Ranunculuc",
+      "description": "Number of Ranunculuc in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Forb",
+      "description": "Number of Forb in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Grass",
+      "description": "Number of Grass in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "abundant",
+      "description": "Number of abundant species in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "rare",
+      "description": "Number of rare species in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "comments",
+      "description": "comments about the observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "type",
+      "description": "type of higher trophic level e.g., floral visitor or herbivore"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "group",
+      "description": "class or functional group of the species e.g., Forb"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "order",
+      "description": "order of the species e.g., Hymenoptera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "family",
+      "description": "family of the species e.g., Apidae"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "genus",
+      "description": "genus of the species e.g., Apis"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "species, e.g., mellifera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species_id",
+      "description": "species_id of the species e.g., Apis_mellifera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "id_final",
+      "description": "final species_id of the species e.g., Apis_mellifera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "raw_species_id",
+      "description": "final species_id of the species with just the highest level of classification e.g., Apis_mellifera"
+    }
+  ],
+  "distribution": [
+    {
+      "type": "DataDownload",
+      "name": "abundance",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "competition",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "floral_visitor",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "groupinglevels",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "herbivorypredator",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "plant_code",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "SpData",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "tesaurus_clean",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    }
+  ]
+}

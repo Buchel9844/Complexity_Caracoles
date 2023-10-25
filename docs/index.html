@@ -1,0 +1,1498 @@
+<html>
+  <head>
+    <title>Caracoles Dataset</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="application/ld+json">
+      {
+  "@context": "http://schema.org",
+  "type": "Dataset",
+  "name": "Caracoles Dataset",
+  "creator": [
+    {
+      "type": "Person",
+      "id": "0000-0001-8004-2670",
+      "email": "buchel9844@gmail.com",
+      "affiliation": "University of Melbourne",
+      "name": "Lisa Buche"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0001-7893-4389",
+      "email": "nacho.bartomeus@gmail.com",
+      "affiliation": "Stación Biológica de Doñana (EBD-CSIC)",
+      "name": "Ignasi Bartomeus"
+    },
+    {
+      "type": "Person",
+      "id": null,
+      "email": null,
+      "affiliation": null,
+      "name": "Christopher Weiss lehman"
+    },
+    {
+      "type": "Person",
+      "id": null,
+      "email": null,
+      "affiliation": "University of Melbourne",
+      "name": "Margaret Mayfield"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0003-4988-6626",
+      "email": "ogodoy.re@gmail.com",
+      "affiliation": "Instituto Universitario de Investigación Marina (INMAR)",
+      "name": "Oscar Godoy"
+    }
+  ],
+  "description": "For each subplot we collected community abundance at peak flowering, within guild interaction observations (flower production related to the neighbourhood), and weekly higher trophic information.",
+  "datePublished": "https://github.com/Buchel9844/Complexity_Caracoles",
+  "keywords": ["Mediterranean grassland community", "annual plant interaction", "plant fitness", "multi-trophic interactions", "network"],
+  "funder": "xx",
+  "temporalCoverage": "2019-03-01/2021-10-01",
+  "license": "xx",
+  "spatialCoverage": {
+    "type": "Place",
+    "name": "Caracoles Ranch (2680 ha), an annual grassland system located in Doñana National Park, southwest Spain. The plant community is dominated by annuals from the Poaceae, Asteraceae and Chenopodaceae families, with no perennial species present. The climate is Mediterranean, with mild winters and an average 50-year annual rainfall of 550–570 mm with high interannual oscillations. Soils are sodic saline (electric conductivity > 4 dS/m and pH < 8.5).",
+    "geo": {
+      "type": "GeoShape",
+      "box": "37.050556 -6.455278 37.050556 -6.455278"
+    }
+  },
+  "variableMeasured": [
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "code of the plant species"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "year",
+      "name": "year",
+      "description": "year of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "month",
+      "name": "month",
+      "description": "month of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "day",
+      "name": "day",
+      "description": "day of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "plot [1,9]",
+      "name": "plot",
+      "description": "plot of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "subplot [A-F,1-6]",
+      "name": "subplot",
+      "description": "subplot of collection"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "individuals",
+      "description": "number of indiviuals counted"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "focal",
+      "description": "code of the plant species"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "fruit",
+      "description": "number of fruit on that focal individual"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "seed",
+      "description": "number of seed on that focal individual, computed from the number of fruit"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "BEMA",
+      "description": "Number of BEMA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "CHFU",
+      "description": "Number of CHFUin the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "CHMI",
+      "description": "Number of CHMI in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "CETE",
+      "description": "Number of CETE in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "HOMA",
+      "description": "Number of HOMA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "LEMA",
+      "description": "Number of LEMA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "PAIN",
+      "description": "Number of PAIN in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "PLCO",
+      "description": "Number of PLCO in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "POMA",
+      "description": "Number of POMA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "POMO",
+      "description": "Number of POMO in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "PUPA",
+      "description": "Number of PUPA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SASO",
+      "description": "Number of SASO in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SCLA",
+      "description": "Number of SCLA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SPRU",
+      "description": "Number of SPRU in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "MESU",
+      "description": "Number of MESU in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "MEEL",
+      "description": "Number of MEEL in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SOAS",
+      "description": "Number of SOAS in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "FRPU",
+      "description": "Number of FRPU in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "SUSP",
+      "description": "Number of SUSP in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "COSQ",
+      "description": "Number of COSQ in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "CRCR",
+      "description": "Number of CRCR in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "DA",
+      "description": "Number of DA in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "LYTR",
+      "description": "Number of LYTR in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "MEPO",
+      "description": "Number of MEPO in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "RAPE",
+      "description": "Number of RAPE in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "ANAR",
+      "description": "Number of ANAR in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "ACHI",
+      "description": "Number of ACHI in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "ARTE",
+      "description": "Number of ARTE in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "NEWGRASS",
+      "description": "Number of Newgrass in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "observers",
+      "description": "people who observed the local neighbourhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "comments",
+      "description": "any comments about the observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "raw_species_id",
+      "description": "id of floral visitor observed, can be a nickname"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "number_visits",
+      "description": "number of flowers visited"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "binary yes or no",
+      "name": "jar",
+      "description": "specify if a specimen was collected for detailed identification"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "plant",
+      "description": "code of the plant species with which the floral visitor interacted with"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "time",
+      "name": "time",
+      "description": "time of observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "observers",
+      "description": "people who observed the interaction"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "weather",
+      "description": "weather at the time of observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "id_final",
+      "description": "final id after identification and check with past record, same as species_id"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "type",
+      "description": "type of insect, either floral visitor or/and herbivore such as beetle"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "group",
+      "description": "group of floral visitor e.g., bee, fly"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "order",
+      "description": "order of floral visitor e.g., Hymenoptera, Diptera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "family",
+      "description": "family of floral visitor e.g.,Apidae, Syrphidae"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "genus",
+      "description": "genus of floral visitor e.g., Apis, Episyrphus"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "species of floral visitor e.g., mellifera, balteatus"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species_id",
+      "description": "condensed species id e.g., Apis_mellifera, to the highest level of detail possible, minimum is the order"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "stage",
+      "description": "stage of the individual e.g., butterfly, larvae (if necessary)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "morpho_sp",
+      "description": "name relataed to it appearance e.g., white_moth (if available)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "nickname",
+      "description": "nickname commonly used on the field (if necessary)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "order",
+      "description": "number of the row"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "complexity",
+      "description": "levels of grouping complexity i.e., species, family or functional group"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "grouping",
+      "description": "id of the species"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "HTL",
+      "description": "higher trophic level it belong to, either floral visitor or herbivore"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "YesNo",
+      "description": "determine it inclusion in the model yes, no or maybe"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "Observations",
+      "description": "any comments about the observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "number_animal",
+      "description": "number of individual"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "aspect",
+      "description": "aspect of the individual(s) e.g., spider web, cocoon"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "stage",
+      "description": "stage of the individual e.g., larvae (if necessary)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "plant",
+      "description": "code of the plant species with which the herbivore interacted with"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "group",
+      "description": "group of herbivore e.g., snail"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "order",
+      "description": "order of herbivore e.g., Gastropoda"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "family",
+      "description": "family of herbivore.g., Geomitridae"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "genus",
+      "description": "genus of herbivore e.g., Cochlicella"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "species of herbivore e.g., barbara"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species_id",
+      "description": "condensed species id e.g., Cochlicella_barbara, to the highest level of detail possible, minimum is the order"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "number",
+      "description": "number of the row"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "species of the plant, e.g., Leontodon maroccanus"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "family",
+      "description": "family of the plant e.g., Asteraceae"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "code.plant",
+      "description": "code of the plant e.g., LEMA"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "class",
+      "description": "class or functional group of the plant e.g., Forb"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "Native.sp",
+      "description": "specify if the plant is native e.g., Native Annual Forb"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "rareORabundant",
+      "description": "specify if the plant is consistenly abundant e.g.,abundant"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Amaranthaceae",
+      "description": "Number of Amaranthaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Asteraceae",
+      "description": "Number of Asteraceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Brassicaceae",
+      "description": "Number of Brassicaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Caryophyllaceae",
+      "description": "Number of Caryophyllaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Convolvulaceae",
+      "description": "Number of Convolvulaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Fabaceae",
+      "description": "Number of Fabaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Frankeniaceae",
+      "description": "Number of Frankeniaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Gentianaceae",
+      "description": "Number of Gentianaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Lythraceae",
+      "description": "Number of Lythraceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Plantaginaceae",
+      "description": "Number of Plantaginaceaein the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Poaceae",
+      "description": "Number of Poaceae in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Primulacea",
+      "description": "Number of Primulacea in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Ranunculuc",
+      "description": "Number of Ranunculuc in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Forb",
+      "description": "Number of Forb in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "Grass",
+      "description": "Number of Grass in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "abundant",
+      "description": "Number of abundant species in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "integer",
+      "name": "rare",
+      "description": "Number of rare species in the local neighbouhood"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "comments",
+      "description": "comments about the observation"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "type",
+      "description": "type of higher trophic level e.g., floral visitor or herbivore"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "group",
+      "description": "class or functional group of the species e.g., Forb"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "order",
+      "description": "order of the species e.g., Hymenoptera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "family",
+      "description": "family of the species e.g., Apidae"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "genus",
+      "description": "genus of the species e.g., Apis"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species",
+      "description": "species, e.g., mellifera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "species_id",
+      "description": "species_id of the species e.g., Apis_mellifera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "id_final",
+      "description": "final species_id of the species e.g., Apis_mellifera"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "character",
+      "name": "raw_species_id",
+      "description": "final species_id of the species with just the highest level of classification e.g., Apis_mellifera"
+    }
+  ],
+  "distribution": [
+    {
+      "type": "DataDownload",
+      "name": "abundance",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "competition",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "floral_visitor",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "groupinglevels",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "herbivorypredator",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "plant_code",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "SpData",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "tesaurus_clean",
+      "contentUrl": "https://github.com/Buchel9844/Complexity_Caracoles",
+      "encodingFormat": "csv"
+    }
+  ]
+}
+
+    </script>
+    <style>
+      body {
+        font-size: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        margin: 0 auto;
+        padding: 1rem;
+        max-width: 800px;
+      }
+
+      #map {
+        height: 20rem;
+      }
+
+      #attributes-wrapper,
+      #jsonld-wrapper {
+        height: 20rem;
+        overflow-y: scroll;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      th {
+        border-bottom: 1px solid black;
+      }
+
+      th, td {
+        padding: 0.25rem;
+      }
+
+      table.listing td {
+        border: 1px solid #CCC;
+      }
+
+      table.listing tr td:first-child {
+          background-color: #EEE;
+      }
+
+      table.listing ul {
+        margin: 0 0 0 1.5rem;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Caracoles Dataset</h1>
+    <p><strong>Description:</strong> For each subplot we collected community abundance at peak flowering, within guild interaction observations (flower production related to the neighbourhood), and weekly higher trophic information.</p>
+
+    <h2>Bibliographic</h2>
+
+    <table class="listing">
+      <tr>
+        <td>Published</td>
+        <td>https://github.com/Buchel9844/Complexity_Caracoles</td>
+      </tr>
+      <tr>
+        <td>Keywords</td>
+        <td>
+          <ul>
+            <li>Mediterranean grassland community</li>
+            <li>annual plant interaction</li>
+            <li>plant fitness</li>
+            <li>multi-trophic interactions</li>
+            <li>network</li>
+        </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>Funder</td>
+        <td>xx</td>
+      </tr>
+      <tr>
+        <td>License</td>
+        <td>xx</td>
+      </tr>
+    </table>
+
+    <h2>Coverage</h2>
+
+    <h3>Temporal</h3>
+
+    <table class="listing">
+      <tr>
+        <td>Begin</td>
+        <td>2019-03-01</td>
+      </tr>
+      <tr>
+        <td>End</td>
+        <td>2021-10-01</td>
+      </tr>
+    </table>
+
+    <h3>Spatial</h3>
+    <pre><code></code></pre>
+    <div id="map"></div>
+
+    <h2>Attributes</h2>
+
+    <div id="attributes-wrapper">
+      <table id="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>species</code></td>
+            <td>code of the plant species</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>year</code></td>
+            <td>year of collection</td>
+            <td>year</td>
+          </tr>
+          <tr>
+            <td><code>month</code></td>
+            <td>month of collection</td>
+            <td>month</td>
+          </tr>
+          <tr>
+            <td><code>day</code></td>
+            <td>day of collection</td>
+            <td>day</td>
+          </tr>
+          <tr>
+            <td><code>plot</code></td>
+            <td>plot of collection</td>
+            <td>plot [1,9]</td>
+          </tr>
+          <tr>
+            <td><code>subplot</code></td>
+            <td>subplot of collection</td>
+            <td>subplot [A-F,1-6]</td>
+          </tr>
+          <tr>
+            <td><code>individuals</code></td>
+            <td>number of indiviuals counted</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>focal</code></td>
+            <td>code of the plant species</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>fruit</code></td>
+            <td>number of fruit on that focal individual</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>seed</code></td>
+            <td>number of seed on that focal individual, computed from the number of fruit</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>BEMA</code></td>
+            <td>Number of BEMA in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>CHFU</code></td>
+            <td>Number of CHFUin the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>CHMI</code></td>
+            <td>Number of CHMI in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>CETE</code></td>
+            <td>Number of CETE in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>HOMA</code></td>
+            <td>Number of HOMA in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>LEMA</code></td>
+            <td>Number of LEMA in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>PAIN</code></td>
+            <td>Number of PAIN in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>PLCO</code></td>
+            <td>Number of PLCO in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>POMA</code></td>
+            <td>Number of POMA in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>POMO</code></td>
+            <td>Number of POMO in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>PUPA</code></td>
+            <td>Number of PUPA in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>SASO</code></td>
+            <td>Number of SASO in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>SCLA</code></td>
+            <td>Number of SCLA in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>SPRU</code></td>
+            <td>Number of SPRU in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>MESU</code></td>
+            <td>Number of MESU in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>MEEL</code></td>
+            <td>Number of MEEL in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>SOAS</code></td>
+            <td>Number of SOAS in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>FRPU</code></td>
+            <td>Number of FRPU in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>SUSP</code></td>
+            <td>Number of SUSP in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>COSQ</code></td>
+            <td>Number of COSQ in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>CRCR</code></td>
+            <td>Number of CRCR in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>DA</code></td>
+            <td>Number of DA in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>LYTR</code></td>
+            <td>Number of LYTR in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>MEPO</code></td>
+            <td>Number of MEPO in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>RAPE</code></td>
+            <td>Number of RAPE in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>ANAR</code></td>
+            <td>Number of ANAR in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>ACHI</code></td>
+            <td>Number of ACHI in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>ARTE</code></td>
+            <td>Number of ARTE in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>NEWGRASS</code></td>
+            <td>Number of Newgrass in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>observers</code></td>
+            <td>people who observed the local neighbourhood</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>comments</code></td>
+            <td>any comments about the observation</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>raw_species_id</code></td>
+            <td>id of floral visitor observed, can be a nickname</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>number_visits</code></td>
+            <td>number of flowers visited</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>jar</code></td>
+            <td>specify if a specimen was collected for detailed identification</td>
+            <td>binary yes or no</td>
+          </tr>
+          <tr>
+            <td><code>plant</code></td>
+            <td>code of the plant species with which the floral visitor interacted with</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>time</code></td>
+            <td>time of observation</td>
+            <td>time</td>
+          </tr>
+          <tr>
+            <td><code>observers</code></td>
+            <td>people who observed the interaction</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>weather</code></td>
+            <td>weather at the time of observation</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>id_final</code></td>
+            <td>final id after identification and check with past record, same as species_id</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td>type of insect, either floral visitor or/and herbivore such as beetle</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>group</code></td>
+            <td>group of floral visitor e.g., bee, fly</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>order</code></td>
+            <td>order of floral visitor e.g., Hymenoptera, Diptera</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>family</code></td>
+            <td>family of floral visitor e.g.,Apidae, Syrphidae</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>genus</code></td>
+            <td>genus of floral visitor e.g., Apis, Episyrphus</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>species</code></td>
+            <td>species of floral visitor e.g., mellifera, balteatus</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>species_id</code></td>
+            <td>condensed species id e.g., Apis_mellifera, to the highest level of detail possible, minimum is the order</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>stage</code></td>
+            <td>stage of the individual e.g., butterfly, larvae (if necessary)</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>morpho_sp</code></td>
+            <td>name relataed to it appearance e.g., white_moth (if available)</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>nickname</code></td>
+            <td>nickname commonly used on the field (if necessary)</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>order</code></td>
+            <td>number of the row</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>complexity</code></td>
+            <td>levels of grouping complexity i.e., species, family or functional group</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>grouping</code></td>
+            <td>id of the species</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>HTL</code></td>
+            <td>higher trophic level it belong to, either floral visitor or herbivore</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>YesNo</code></td>
+            <td>determine it inclusion in the model yes, no or maybe</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>Observations</code></td>
+            <td>any comments about the observation</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>number_animal</code></td>
+            <td>number of individual</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>aspect</code></td>
+            <td>aspect of the individual(s) e.g., spider web, cocoon</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>stage</code></td>
+            <td>stage of the individual e.g., larvae (if necessary)</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>plant</code></td>
+            <td>code of the plant species with which the herbivore interacted with</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>group</code></td>
+            <td>group of herbivore e.g., snail</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>order</code></td>
+            <td>order of herbivore e.g., Gastropoda</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>family</code></td>
+            <td>family of herbivore.g., Geomitridae</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>genus</code></td>
+            <td>genus of herbivore e.g., Cochlicella</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>species</code></td>
+            <td>species of herbivore e.g., barbara</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>species_id</code></td>
+            <td>condensed species id e.g., Cochlicella_barbara, to the highest level of detail possible, minimum is the order</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>number</code></td>
+            <td>number of the row</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>species</code></td>
+            <td>species of the plant, e.g., Leontodon maroccanus</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>family</code></td>
+            <td>family of the plant e.g., Asteraceae</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>code.plant</code></td>
+            <td>code of the plant e.g., LEMA</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>class</code></td>
+            <td>class or functional group of the plant e.g., Forb</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>Native.sp</code></td>
+            <td>specify if the plant is native e.g., Native Annual Forb</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>rareORabundant</code></td>
+            <td>specify if the plant is consistenly abundant e.g.,abundant</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>Amaranthaceae</code></td>
+            <td>Number of Amaranthaceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Asteraceae</code></td>
+            <td>Number of Asteraceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Brassicaceae</code></td>
+            <td>Number of Brassicaceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Caryophyllaceae</code></td>
+            <td>Number of Caryophyllaceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Convolvulaceae</code></td>
+            <td>Number of Convolvulaceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Fabaceae</code></td>
+            <td>Number of Fabaceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Frankeniaceae</code></td>
+            <td>Number of Frankeniaceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Gentianaceae</code></td>
+            <td>Number of Gentianaceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Lythraceae</code></td>
+            <td>Number of Lythraceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Plantaginaceae</code></td>
+            <td>Number of Plantaginaceaein the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Poaceae</code></td>
+            <td>Number of Poaceae in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Primulacea</code></td>
+            <td>Number of Primulacea in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Ranunculuc</code></td>
+            <td>Number of Ranunculuc in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Forb</code></td>
+            <td>Number of Forb in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>Grass</code></td>
+            <td>Number of Grass in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>abundant</code></td>
+            <td>Number of abundant species in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>rare</code></td>
+            <td>Number of rare species in the local neighbouhood</td>
+            <td>integer</td>
+          </tr>
+          <tr>
+            <td><code>comments</code></td>
+            <td>comments about the observation</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td>type of higher trophic level e.g., floral visitor or herbivore</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>group</code></td>
+            <td>class or functional group of the species e.g., Forb</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>order</code></td>
+            <td>order of the species e.g., Hymenoptera</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>family</code></td>
+            <td>family of the species e.g., Apidae</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>genus</code></td>
+            <td>genus of the species e.g., Apis</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>species</code></td>
+            <td>species, e.g., mellifera</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>species_id</code></td>
+            <td>species_id of the species e.g., Apis_mellifera</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>id_final</code></td>
+            <td>final species_id of the species e.g., Apis_mellifera</td>
+            <td>character</td>
+          </tr>
+          <tr>
+            <td><code>raw_species_id</code></td>
+            <td>final species_id of the species with just the highest level of classification e.g., Apis_mellifera</td>
+            <td>character</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Distribution</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Format</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>abundance</code></td>
+          <td><code>csv</code></td>
+          <td><a href="https://github.com/Buchel9844/Complexity_Caracoles">Download</a></td>
+        </tr>
+        <tr>
+          <td><code>competition</code></td>
+          <td><code>csv</code></td>
+          <td><a href="https://github.com/Buchel9844/Complexity_Caracoles">Download</a></td>
+        </tr>
+        <tr>
+          <td><code>floral_visitor</code></td>
+          <td><code>csv</code></td>
+          <td><a href="https://github.com/Buchel9844/Complexity_Caracoles">Download</a></td>
+        </tr>
+        <tr>
+          <td><code>groupinglevels</code></td>
+          <td><code>csv</code></td>
+          <td><a href="https://github.com/Buchel9844/Complexity_Caracoles">Download</a></td>
+        </tr>
+        <tr>
+          <td><code>herbivorypredator</code></td>
+          <td><code>csv</code></td>
+          <td><a href="https://github.com/Buchel9844/Complexity_Caracoles">Download</a></td>
+        </tr>
+        <tr>
+          <td><code>plant_code</code></td>
+          <td><code>csv</code></td>
+          <td><a href="https://github.com/Buchel9844/Complexity_Caracoles">Download</a></td>
+        </tr>
+        <tr>
+          <td><code>SpData</code></td>
+          <td><code>csv</code></td>
+          <td><a href="https://github.com/Buchel9844/Complexity_Caracoles">Download</a></td>
+        </tr>
+        <tr>
+          <td><code>tesaurus_clean</code></td>
+          <td><code>csv</code></td>
+          <td><a href="https://github.com/Buchel9844/Complexity_Caracoles">Download</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+    <script>
+      var mymap = L.map('map').setView([37.050556, -6.455278], 1);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+        maxZoom: 18,
+      }).addTo(mymap);
+
+      var polygon = L.polygon([[ 37.050556, -6.455278], [ 37.050556, -6.455278], [ 37.050556, -6.455278], [ 37.050556, -6.455278]]).addTo(mymap);
+    </script>
+  </body>
+</html>

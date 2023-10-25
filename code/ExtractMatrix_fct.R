@@ -64,7 +64,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   
   
   SpData_H <- SpDataFocal %>%
-    select(c("day","month","year","plot","subplot","focal")) %>%
+    dplyr::select(c("day","month","year","plot","subplot","focal")) %>%
     left_join(SpData_H)
   
   if(levels(as.factor(SpData_H$focal)) != FocalPrefix & 
@@ -80,7 +80,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   
   
   SpData_FV <- SpDataFocal %>%
-    select(c("day","month","year","plot","subplot","focal")) %>%
+    dplyr::select(c("day","month","year","plot","subplot","focal")) %>%
     left_join(SpData_FV)
   
   if(levels(as.factor(SpData_FV$focal)) != FocalPrefix & 
@@ -262,7 +262,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   SpData_FV_comp <- unique(SpData_FV_comp)
   
   SpData_FV_comp <- SpDataFocal %>%
-    select(c("day","month","year","plot","subplot","seed","fruit")) %>%
+    dplyr::select(c("day","month","year","plot","subplot","seed","fruit")) %>%
     left_join(SpData_FV_comp,by=c("day","month","year","plot","subplot","seed","fruit"),
               multiple = "all",
               copy=FALSE)
@@ -373,7 +373,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   SpData_H_comp <-  spread(SpData_H_comp ,plant_H, comp.abund_presence)
   
   SpData_H_comp <- SpDataFocal %>%
-    select(c("day","month","year","plot","subplot","seed","fruit")) %>%
+    dplyr::select(c("day","month","year","plot","subplot","seed","fruit")) %>%
     left_join(SpData_H_comp,by=c("day","month","year","plot","subplot","seed","fruit"),
               multiple = "all",
               SpData_H_comp)
@@ -459,7 +459,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   #---- 3. Return object ----
   run_estimation <- 1
   # rfemove interaction of Herbivore and floral visitors vector 
-  if(sum(colSums(SpMatrix_H))==0|sum(colSums(SpMatrix_FV))==0){
+  if(sum(colSums(SpMatrix_H))==0 & sum(colSums(SpMatrix_FV))==0){
     RemoveFvH <- 1
   }else{RemoveFvH <- 0
   H <- length(names(SpTotals_H[SpToKeep_H]))
@@ -502,8 +502,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   # Set the parameters defining the regularized horseshoe prior, as described in
   #       the "Incorporating sparsity-inducing priors" section of the manuscript.
   # Upper bound intrinsic fecundity
-  U <- ceiling(log(max(Fecundity)))
-  
+  U <- ceiling(log(mean(Fecundity)))
   
   tau0 <- 1
   slab_scale <- sqrt(2)
