@@ -1,0 +1,4 @@
+"","levelparametercomplexity","grouping","plant","number.plant.interaction","floralvisitor","number.floralvisitor.interaction","herbivore","number.herbivore.interaction"
+"1","high","species","e.g., Beta macrocarpa",24,"e.g., Andrena_argentata",62,"e.g., Aiolopus_strepens",48
+"2","medium","family","e.g., Brassicaceae",12,"e.g., Apidae",21,"e.g., Aphididae",21
+"3","low","functional group","e.g., Forb",2,"e.g., butterfly",4,"e.g., grasshopper",8
