@@ -5,7 +5,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
                            complexity.plant =c("class","family","code.plant"),
                            complexity.animal= c("group","family","species"),
                            plant.class,SpData){
-  
+
   #---- 1.4. Import df of abundances----    
   # view complexity levels
   # determine the levels of complexity for plant 
@@ -54,7 +54,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   
   
   #import higher trophic levels data 
-  source(paste0(home.dic,"code/Group_FvH.R"))
+  source(paste0(home.dic,"code/2.1.Group_FvH.R"))
   
   # add H presences and floral visitor visits
   SpData_H <- get(paste0("herbivore","_",complexity.animal))

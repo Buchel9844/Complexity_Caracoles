@@ -95,7 +95,7 @@ for( focal in c("LEMA","CHFU","HOMA","CETE")){ # "CHFU","HOMA",
       complexity.animal <- c("group","family","species")[complexity.level]
       complexity.plant <-c("class","family","code.plant")[complexity.level]
       
-      load(paste0(home.dic,"results/Inclusion",focal,"_",
+      load(paste0(home.dic,"results/stan/Inclusion",focal,"_",
                   year,"_",complexity.plant,"_",complexity.animal,".RData"))
       
       assign(paste0("Inclusion",focal,"_",
@@ -139,6 +139,9 @@ potential <- c("competitors_plant","interactors_FV","interactors_H",
                "HOIs_FV")
 df_inclusion_nat_short <- df_inclusion_nat[which(rowSums(df_inclusion_nat[,n.inclus],na.rm = T)>0),]
 view(df_inclusion_nat_short)
+write.csv(df_inclusion_nat_short,
+          file = paste0(home.dic,"results/Chapt1_Inclusion_parameters_short.csv"))
+
 extract.vert <- function(mat,vec,keyname,value,vecname){
   mat.2 <- mat %>% 
     gather(all_of(vec), 
@@ -271,7 +274,14 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
 
 # species specific parameters
 df_param_hat <- NULL
-inclusion.interaction.type <- unique(df_inclusion_nat_vertical[,c("interaction","interactor")])
+
+inclusion.interaction.type <-unique(df_inclusion_nat_vertical[,c("interaction","interactor")]) %>%
+  separate(interactor, into=paste0("interactor", 1:max(df_inclusion_nat_vertical$n.number,na.rm=T)), sep=",")  %>%
+  gather(paste0("interactor", 1:max(df_inclusion_nat_vertical$n.number,na.rm=T)),key="to.remove",value="interactor") %>%
+  filter(!is.na(interactor)) %>%
+  select(interaction,interactor)
+
+
 for ( i in 1:nrow(df_inclusion_nat_short)){
   year <- df_inclusion_nat_short[i,'year']
   focal <- df_inclusion_nat_short[i,'focal']
@@ -286,12 +296,36 @@ for ( i in 1:nrow(df_inclusion_nat_short)){
                                                                                      "complexity.plant",
                                                                                      "complexity.animal" ))]
   
+  
+  name.species.specific_n <- sapply(  strsplit(name.species.specific, '_'), `[`, 5)
+  for(n in which(is.na(name.species.specific_n))){
+    name.species.specific_n[n] <- sapply(  strsplit(name.species.specific, '_'), `[`, 4)[n]
+    if(!is.na(sapply(strsplit(name.species.specific, '_'), `[`, 6)[n])){
+      name.species.specific_n[n] <- paste0(sapply(  strsplit(name.species.specific, '_'), `[`, 4)[n],"_",
+                                           sapply(strsplit(name.species.specific, '_'), `[`, 5)[n])
+      
+    }
+  }
+  
+  for (n in which(!is.na(sapply(strsplit(name.species.specific, '_'), `[`, 6)))){ # in case of HOIs we need to put bacj togetehr the two species together in the name of interactors
+    name.species.specific_n[n] <- paste0(sapply(  strsplit(name.species.specific, '_'), `[`, 5)[n],"_",
+                                         sapply(strsplit(name.species.specific, '_'), `[`, 6)[n])
+  }
+  
   df_param_hat_n <-   df_param_hat_n %>%
     gather(all_of(name.species.specific),
            key="parameter_hat",value="estimate_hat") %>%
-    mutate(parameter_hat =   sub(".*\\_", "", parameter_hat ))
-  type_n <- inclusion.interaction.type$interaction[which(inclusion.interaction.type$interactor %in% levels(as.factor(df_param_hat_n$parameter_hat)))]
-  df_param_hat_n$parameter <- rep(type_n, each= nrow(df_param_hat_n)/length(type_n))
+    mutate(parameter_hat =   rep(name.species.specific_n, each= nrow(.)/length(name.species.specific_n)))
+  
+  type_n <- data.frame(parameter_hat = rep(NA,nlevels(as.factor(df_param_hat_n$parameter_hat))),
+                       parameter = rep(NA,nlevels(as.factor(df_param_hat_n$parameter_hat))))
+  for(n in 1:nlevels(as.factor(df_param_hat_n$parameter_hat))){
+    type_n$parameter_hat[n] <- levels(as.factor(df_param_hat_n$parameter_hat))[n]
+    type_n$parameter[n] <- inclusion.interaction.type_allyears$interaction[which(inclusion.interaction.type_allyears$interactor == levels(as.factor(df_param_hat_n$parameter_hat))[n])][1]
+  }
+  
+  df_param_hat_n <- df_param_hat_n%>%
+    left_join(type_n)
   
   if(is.null(df_param_hat)){
     df_param_hat <- df_param_hat_n
@@ -432,7 +466,7 @@ ggsave(paste0("figures/Parameters_distribution_fam2020.pdf"),
        plot.alphas.small
 )
 
-#---- 4.2. Figure of pairwise interactions sign percentage ----
+#---- 4.2.Figure of pairwise interactions sign percentage ----
 df_param_perc  <- NULL
 for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
   for( year in c("2019",'2020','2021')){
@@ -671,7 +705,7 @@ ggsave(paste0(home.dic,"figures/Plot_param_perc_fam.pdf"),
        plot_param_perc_small_2 
 )
 
-#---- 4.3. Figure of species Strength ----
+#---- 4.3.Figure of species strength ----
 
 df_param_strength  <- NULL
 df_param_strength_hat  <- NULL
@@ -716,6 +750,37 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
   }
 }
 
+source("code/6.1.Mean.abudance.sp.R") 
+# make two dataframe for mean number of individuals observed per plot, per year, around each focal
+# join the data frame for group=specific parameters
+df_param_strength_hat_adj <-  df_param_strength_hat %>%
+  left_join(Hat.mean.df, by=c("parameter_hat","focal",
+                              "year","complexity.plant")) %>%
+  mutate(mean_hat_adjusted = estimate_hat_add * abund.sp.mean ) %>%
+  mutate( complexity.plant  = case_when(complexity.plant=="class"~ "Order",
+                                        complexity.plant=="family"~ "Family",
+                                        complexity.plant=="code.plant"~ "Species")) %>%
+  mutate(focal.name = case_when(focal == "CHFU" ~"Chamaemelum \nfuscatum",
+                                focal == "CETE" ~"Centaurium \ntenuiflorum",
+                                focal == "HOMA" ~"Hordeum \nmarinum",
+                                focal == "LEMA" ~"Leontodon \nmaroccanus"),
+         ParYear=paste0(parameter,"_",year)) %>%
+  mutate(ParYearInt=case_when(ParYear == "Plant - plant_2021" ~17,
+                              ParYear == "Plant - plant_2020"~16,
+                              ParYear == "Plant - plant_2019"~15,
+                              ParYear == "Intraspecific_2021"~12,
+                              ParYear ==  "Intraspecific_2020"~11,
+                              ParYear ==  "Intraspecific_2019"~10,
+                              ParYear == "Plant - herbivore_2021"~7,
+                              ParYear == "Plant - herbivore_2020"~ 6,
+                              ParYear == "Plant - herbivore_2019"~ 5,
+                              ParYear == "Plant - floral visitor_2021"~2,
+                              ParYear == "Plant - floral visitor_2020"~1,
+                              ParYear == "Plant - floral visitor_2019"~0)) %>%
+  mutate(parameter = fct_relevel(parameter,"Plant - plant","Plant - herbivore")) %>%
+  mutate(complexity.plant = fct_relevel(complexity.plant,"Order",
+                                        "Family","Species"))
+
 
 
 plot_param_strength <- df_param_strength %>%
@@ -747,9 +812,9 @@ plot_param_strength <- df_param_strength %>%
   geom_point(aes(shape=as.factor(year),fill=exp(mean.adjusted)),color="black",
              size=7) +
   geom_point( data=df_param_strength_hat_adj,
-              aes(x=exp(estimate_hat_add),y=as.factor(parameter),
+              aes(x=exp(mean_hat_adjusted),y=as.factor(parameter),
                  shape=as.factor(year),
-                 fill=exp(estimate_hat_add)),color="red",
+                 fill=exp(mean_hat_adjusted)),color="red",
              size=5) +
   geom_vline(xintercept=1,color="darkgrey") + 
   scale_fill_gradientn(colours=c("#E69F00","white","#009E73"),
@@ -792,35 +857,6 @@ ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figures/plot_param_strength.p
 )
 
 # SMALL
-
-df_param_strength_hat_adj <-  df_param_strength_hat %>%
-  left_join(Hat.mean.df, by=c("parameter_hat","focal",
-                              "year","complexity.plant")) %>%
-  mutate(mean_hat_adjusted = estimate_hat_add * abund.sp.mean ) %>%
-  mutate( complexity.plant  = case_when(complexity.plant=="class"~ "Order",
-                                        complexity.plant=="family"~ "Family",
-                                        complexity.plant=="code.plant"~ "Species")) %>%
-  mutate(focal.name = case_when(focal == "CHFU" ~"Chamaemelum \nfuscatum",
-                                focal == "CETE" ~"Centaurium \ntenuiflorum",
-                                focal == "HOMA" ~"Hordeum \nmarinum",
-                                focal == "LEMA" ~"Leontodon \nmaroccanus"),
-         ParYear=paste0(parameter,"_",year)) %>%
-  mutate(ParYearInt=case_when(ParYear == "Plant - plant_2021" ~17,
-                              ParYear == "Plant - plant_2020"~16,
-                              ParYear == "Plant - plant_2019"~15,
-                              ParYear == "Intraspecific_2021"~12,
-                              ParYear ==  "Intraspecific_2020"~11,
-                              ParYear ==  "Intraspecific_2019"~10,
-                              ParYear == "Plant - herbivore_2021"~7,
-                              ParYear == "Plant - herbivore_2020"~ 6,
-                              ParYear == "Plant - herbivore_2019"~ 5,
-                              ParYear == "Plant - floral visitor_2021"~2,
-                              ParYear == "Plant - floral visitor_2020"~1,
-                              ParYear == "Plant - floral visitor_2019"~0)) %>%
-  mutate(parameter = fct_relevel(parameter,"Plant - plant","Plant - herbivore")) %>%
-  mutate(complexity.plant = fct_relevel(complexity.plant,"Order",
-                                        "Family","Species"))
-  
 
 view(df_param_strength_hat_adj)
 plot_param_strength <- df_param_strength %>%
@@ -970,7 +1006,7 @@ ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/var.estimate.plot.pdf"
 )
 
 
-#---- 4.3 Figure of specific interaction appearring ----
+#---- 4.4.Figure of specific interaction appearing ----
 tesaurus.plant <- read.csv(paste0(home.dic,"data/plant_code.csv"),sep=",") %>%
   dplyr::select("family","code.plant","class")%>%
   mutate_all(.funs=tolower) %>%
@@ -1134,7 +1170,7 @@ var.estimate.plot <- ggplot(test.full.df,
 var.estimate.plot 
 
 
-#---- 4.4. Figure of gradient neighbors ----
+#---- 4.5.Figure of gradient neighbors ----
 herbivorypredator <- read.csv(paste0(home.dic,"data/herbivorypredator.csv"), sep=",")
 
 floral_visitor <- read.csv(paste0(home.dic,"data/floral_visitor.csv"), sep=",")
@@ -1259,7 +1295,7 @@ ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/plant.neigh.density.pd
        #units = c("cm"),
        plant.neigh.density)
 
-#---- 4.5. Figure of gradient neighbors related to strength ----
+#---- 4.6.Figure of gradient neighbors related to strength ----
 head(df_param_perc)
 test.df <- plant.neigh.df %>%
   filter(focal %in% c("CETE","HOMA","CHFU","LEMA"))%>%

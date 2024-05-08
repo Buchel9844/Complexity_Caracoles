@@ -43,6 +43,12 @@ run.prelimfit <- as.numeric(args[1])
 run.finalfit <- as.numeric(args[2])
 #focal = "HOMA"
 #year="2019"
+#---- 1.2. Tidy the observation data in .csv----
+# no need to run, .csv are all ready present in "/data"
+# code here only to inform how observations were match with seed count
+#source(paste0(home.dic,"code/1.1.Group_Seedprod_Plantinteraction.R"))
+
+#---- 1.3. Make look for all years and focals and levels of grouping----
 summary.interactions <- data.frame() 
 for( focal in c("HOMA")){ # "CHFU","HOMA","CHFU","HOMA","CETE"
   for( year in c('2020','2021')){ # '2020','2021'"2018" "2019",'2020','2021'
@@ -88,7 +94,7 @@ for( focal in c("HOMA")){ # "CHFU","HOMA","CHFU","HOMA","CETE"
     #---- 2.EXTRACT MATRIXES OF ABUNDANCES -----
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    source(paste0(home.dic,"code/ExtractMatrix_fct.R"))
+    source(paste0(home.dic,"code/2.ExtractMatrix_fct.R"))
     extract.matrix(focal,year=year,
                    complexity.plant ,
                    complexity.animal,
@@ -119,7 +125,7 @@ for( focal in c("HOMA")){ # "CHFU","HOMA","CHFU","HOMA","CETE"
     options(mc.cores = parallel::detectCores()) # to use the core at disposition 
     
     if(run.prelimfit == T){
-      PrelimFit <- stan(paste0(home.dic,"code/Short_Caracoles_BH_FH_Preliminary.stan"), 
+      PrelimFit <- stan(paste0(home.dic,"code/Caracoles_R_Preliminary.stan"), 
                         data = DataVec,
                         init = "random", 
                         control =list(max_treedepth=15),
@@ -141,7 +147,7 @@ for( focal in c("HOMA")){ # "CHFU","HOMA","CHFU","HOMA","CETE"
     PrelimPosteriors <- rstan::extract(PrelimFit)
     print("preliminary fit done")
     #---- 3.4. Extract the inclusion indice from the Preliminary Data----
-    source(paste0(home.dic,"code/ExtractInclusion_fct.R"))
+    source(paste0(home.dic,"code/3.ExtractInclusion_fct.R"))
     extract.inclusion(summary.interactions.n, DataVec)
     view(summary.interactions)
     
@@ -212,7 +218,7 @@ for( focal in c("HOMA")){ # "CHFU","HOMA","CHFU","HOMA","CETE"
     
     if(run.finalfit == T){
       options(mc.cores = parallel::detectCores()) # to use the core at disposition 
-      FinalFit <- stan(file = paste0(home.dic,"code/Short_Caracoles_BH_Final.stan") ,
+      FinalFit <- stan(file = paste0(home.dic,"code/Caracoles_R_Final.stan") ,
                        #fit= PrelimFit, 
                        data = DataVec.final,
                        init =list.init, # all initial values are 0 
@@ -281,7 +287,7 @@ for( focal in c("HOMA")){ # "CHFU","HOMA","CHFU","HOMA","CETE"
     
     #save(DataVec.final,file = FileName)
     
-    source(paste0(home.dic,"code/ExtractEstimates.R"))
+    source(paste0(home.dic,"code/4.ExtractEstimates.R"))
     
     print(paste("ALL done for",FocalPrefix,year,
                 complexity.plant,complexity.animal,sep=" "))
