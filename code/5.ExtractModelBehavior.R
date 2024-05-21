@@ -125,15 +125,24 @@ for( focal in c("LEMA","CHFU","HOMA","CETE")){ # "CHFU","HOMA",
     print(parplot)
     pairsplot <-  pairs(FinalFit,pars=par)
     print(pairsplot)
+    # Next check the Rsquarred of fitted data
     
-  # Next check the correlation among key model parameters and identify any
+    bayes_R2 <- function(mu, sigma){
+      var_mu <- apply(mu, 1, var)
+      sigma2 <- sigma^2
+      var_mu / (var_mu + sigma2)
+    }
+    
+    Rsquarred <- bayes_R2(FinalPosteriors$F_hat,FinalPosteriors$disp_dev) %>% mean
+    
     
     # make data frame with rhat 
     mc <- data.frame(focal =FocalPrefix, 
                      year =year,
                      complexity = complexity.plant,
                      Rhat = max(summary(FinalFit)$summary[,"Rhat"],na.rm =T),
-                     Neff = min(summary(FinalFit)$summary[,"n_eff"],na.rm = T))
+                     Neff = min(summary(FinalFit)$summary[,"n_eff"],na.rm = T),
+                     Rsquarred=Rsquarred)
     ModelCheck <- bind_rows(ModelCheck,mc)
     remove(FinalFit)
     
@@ -142,6 +151,10 @@ for( focal in c("LEMA","CHFU","HOMA","CETE")){ # "CHFU","HOMA",
  }
 }
 dev.off()
+
+write.csv(ModelCheck, 
+          paste0(home.dic ,"results/ModelCheck.csv"))
+
 #---- 4. Shiny App for specific model -----
 library(shinystan)
 

@@ -34,7 +34,7 @@ scales::show_col(safe_colorblind_palette)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #---- 3.0.0 All potential interactions----
-
+plant.class <- read.csv(paste0(home.dic,"data/plant_code.csv"), sep=",")
 SpData <- read.csv(paste0(home.dic,"data/SpData.csv")) 
 
 complexitylevel.plant.species <- levels(as.factor(plant.class$species))
@@ -65,10 +65,10 @@ summary.potential.interaction <- data.frame(levelparametercomplexity=c("high","m
                                             "number\nplant\ninteraction" = c(length(complexitylevel.plant.species),
                                                                              length(complexitylevel.plant.family),
                                                                              length(complexitylevel.plant.class)),
-                                            floralvisitor = c(paste0("e.g., ",FVtoKeep_species[2]),
+                                            pollinator = c(paste0("e.g., ",FVtoKeep_species[2]),
                                                               paste0("e.g., ",FVtoKeep_family[2]),
                                                               paste0("e.g., ",FVtoKeep_group[2])),
-                                            "number\nfloralvisitor\ninteraction" = c(length(FVtoKeep_species),
+                                            "number\npollinator\ninteraction" = c(length(FVtoKeep_species),
                                                                                      length(FVtoKeep_family),
                                                                                      length(FVtoKeep_group)),
                                             herbivore = c(paste0("e.g., ",HtoKeep_species[3]),
@@ -115,8 +115,9 @@ for( focal in c("LEMA","CHFU","HOMA","CETE")){ # "CHFU","HOMA",
 }
 write.csv(df_inclusion_nat,
           file = paste0(home.dic,"results/Chapt1_Inclusion_parameters.csv"))
+df_inclusion_nat <- read.csv( paste0(home.dic,"results/Chapt1_Inclusion_parameters.csv"))
 
-summary.interactions <- read.csv(paste0(home.dic,"results/Chapt1_Inclusion_parameters.csv"))
+summary.interactions <- read.csv(paste0(home.dic,"results/inclusion/Chapt1_Inclusion_parameters.csv"))
 df_inclusion_nat <- summary.interactions 
 #n.inclus <- grep(pattern = '^n.*inclus$', x = colnames(df_inclusion_nat), value = T)
 
@@ -359,16 +360,18 @@ df_param_all <- read.csv(paste0(home.dic,"results/parameters/Chapt1_Parameters_v
 str(df_param_all)
 #df_param_all <- df_param_all[,-1]
 
-df_param_all <- df_param_all %>%
-  mutate(parameter = factor(parameter,
-                            levels = rev(c("Plant - plant", "Intraspecific",
-                                           "Plant - floral visitor","Plant - herbivore"
-                            ))))
+
 gr <- colorRampPalette(c("#009E73"))(200)                      
 re <- colorRampPalette(c("#E69F00"))(200)
 plot.alphas <- df_param_all %>%
-  filter(!(focal =="HOMA" & parameter== "Plant - floral visitor")) %>%
-  filter(complexity.plant=="class") %>%
+  filter(!(focal =="HOMA" & parameter == "Plant - floral visitor")) %>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
+  mutate(parameter = factor(parameter,
+                            levels = rev(c("Plant - plant", "Intraspecific",
+                                           "Plant - pollinator","Plant - herbivore"
+                            )))) %>%
+  filter(complexity.plant == "class") %>%
   ggplot() +  
   geom_density_ridges_gradient(aes(x=estimate, y=parameter,
                                    fill= after_stat(x)),
@@ -381,7 +384,7 @@ plot.alphas <- df_param_all %>%
   #scale_y_discrete(labels=c("Generic Inter-specific",
   #                          "Intra-specific")) + 
   labs(y="Interactions", x= "Estimated distribution",
-       color = "Species-specific \n parameters") + 
+       color = "Functional group-specific \n parameters") + 
   scale_color_manual(values=safe_colorblind_palette) +
   scale_fill_gradientn(
     colours=c(re,"white",gr),limits = c(-2, 2),
@@ -404,7 +407,7 @@ plot.alphas <- df_param_all %>%
                                     fill = NA))
 
 plot.alphas
-ggsave(paste0(home.dic,"figures/Parameters_distribution_Class.pdf"),
+ggsave(paste0(home.dic,"figures/Parameters_distribution_Species.pdf"),
        dpi="retina",
        units = c("cm"),
        plot.alphas
@@ -419,9 +422,11 @@ plot.alphas.small <- df_param_all %>%
                                 focal == "CETE" ~"Centaurium  tenuiflorum",
                                 focal == "HOMA" ~"Hordeum marinum",
                                 focal == "LEMA" ~"Leontodon maroccanus"))  %>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
   mutate(parameter = factor(parameter,
                             levels = rev(c("Plant - plant", "Intraspecific",
-                                           "Plant - herbivore","Plant - floral visitor"
+                                           "Plant - pollinator","Plant - herbivore"
                             )))) %>%
   ggplot() +  
   geom_density_ridges_gradient(aes(x=estimate, y=parameter,
@@ -448,6 +453,7 @@ plot.alphas.small <- df_param_all %>%
   theme_minimal() +
   theme(strip.placement = "outside",
         legend.key.size = unit(1, 'cm'),
+        legend.position = "bottom",
         title =element_text(size=16),
         axis.text.x= element_text(size=16),
         axis.text.y= element_text(size=16),
@@ -458,7 +464,7 @@ plot.alphas.small <- df_param_all %>%
                                     fill = NA))
 
 plot.alphas.small
-ggsave(paste0("figures/Parameters_distribution_fam2020.pdf"),
+ggsave(paste0(home.dic,"figures/Parameters_distribution_fam2020.pdf"),
        # dpi="retina",
        # width = 21,
        # height = 16,
@@ -530,21 +536,21 @@ df_param_perc <- df_param_perc %>%
                                     levels = c("class","family","code.plant")),
          complexity.plant  = case_when(complexity.plant=="class"~ "1.Order",
                                        complexity.plant=="family"~ "2.Family",
-                                       complexity.plant=="code.plant"~ "3.Species"),
-         parameter = factor(parameter,
-                            levels = c("Plant - plant", "Intraspecific",
-                                       "Plant - floral visitor","Plant - herbivore"
-                            )))
+                                       complexity.plant=="code.plant"~ "3.Species")
+  )
 
-levels(df_param_perc$parameter)
 
 plot_param_perc <- df_param_perc %>%
   mutate(focal.name = case_when(focal == "CHFU" ~"Chamaemelum \nfuscatum",
                                 focal == "CETE" ~"Centaurium  \ntenuiflorum",
                                 focal == "HOMA" ~"Hordeum \nmarinum",
                                 focal == "LEMA" ~"Leontodon \nmaroccanus")) %>%
-  mutate(parameter = fct_relevel(parameter,"Plant - plant", "Intraspecific",
-                                 "Plant - floral visitor","Plant - herbivore")) %>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
+  mutate(parameter = factor(parameter,
+                            levels = rev(c("Plant - plant", "Intraspecific",
+                                           "Plant - pollinator","Plant - herbivore"
+                            )))) %>%
   ggplot(aes(y=as.factor(parameter),x=positive.perc, fill=as.factor(parameter))) + 
   geom_rect(xmin=0.4,xmax=0.6,ymin=-Inf,ymax=Inf,
             fill="grey", color="grey", size=0.5, alpha=0.02) + 
@@ -563,7 +569,7 @@ plot_param_perc <- df_param_perc %>%
   scale_fill_manual(values=rev(c("#332288","#117733","#DDCC77","#88CCEE"))) +
   scale_shape_manual(values=c(21,22,24)) +
   scale_y_discrete(limits=rev(c("Plant - plant", "Intraspecific",
-                                "Plant - herbivore", "Plant - floral visitor","Sum all"))) +
+                                "Plant - herbivore", "Plant - pollinator","Sum all"))) +
   scale_x_continuous("ratio Positive(+)/Negative(-)",
                      breaks=c(0,0.25,0.5,0.75,1),
                      labels = rev(c("100% + \n 0% -", 
@@ -607,9 +613,13 @@ plot_param_perc_small <- df_param_perc %>%
                                 focal == "CETE" ~"Centaurium  \ntenuiflorum",
                                 focal == "HOMA" ~"Hordeum \nmarinum",
                                 focal == "LEMA" ~"Leontodon \nmaroccanus")) %>%
-  mutate(parameter = fct_relevel(parameter,"Plant - plant", "Intraspecific",
-                                 "Plant - floral visitor","Plant - herbivore"),
-         ParYear=paste0(parameter,"_",year)) %>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
+  mutate(parameter = factor(parameter,
+                            levels = rev(c("Plant - plant", "Intraspecific",
+                                           "Plant - pollinator","Plant - herbivore"
+                            )))) %>%
+  mutate(ParYear=paste0(parameter,"_",year)) %>%
   mutate(ParYearInt=case_when(ParYear == "Plant - plant_2021" ~17,
                               ParYear == "Plant - plant_2020"~16,
                               ParYear == "Plant - plant_2019"~15,
@@ -619,9 +629,9 @@ plot_param_perc_small <- df_param_perc %>%
                               ParYear == "Plant - herbivore_2021"~7,
                               ParYear == "Plant - herbivore_2020"~ 6,
                               ParYear == "Plant - herbivore_2019"~ 5,
-                              ParYear == "Plant - floral visitor_2021"~2,
-                              ParYear == "Plant - floral visitor_2020"~1,
-                              ParYear == "Plant - floral visitor_2019"~0)) %>%
+                              ParYear == "Plant - pollinator_2021"~2,
+                              ParYear == "Plant - pollinator_2020"~1,
+                              ParYear == "Plant - pollinator_2019"~0)) %>%
   ggplot(aes(x=positive.perc,y=ParYearInt,label=year,
              shape=as.factor(focal.name))) +
   geom_vline(xintercept=0.5,color="black") +
@@ -653,16 +663,16 @@ plot_param_perc_small <- df_param_perc %>%
   scale_y_continuous(breaks =c(16,11,6,1),
                      minor_breaks =c(0,2,5,7,10,12,15,17),
                      labels=c("Plant - plant", "Intraspecific",
-                              "Plant - herbivore", "Plant - floral visitor")) +
+                              "Plant - herbivore", "Plant - pollinator")) +
   theme_minimal() +
   labs(y="",x="",
-       shape="Focal plant species",
+       shape="Focal \nplant species",
        fill="Direction of effect") +
   guides(color= "none",fill="none",
          shape=guide_legend(override.aes = list(size = 10,color="black"),
-                            nrow = 4,
-                            direction="vertical",
-                            byrow = TRUE,
+                            nrow = 1,
+                            direction="horizontal",
+                            byrow = T,
                             title.hjust = 0.1)) +
   geom_text(x = 1.05, # Set the position of the text to always be at '14.25'
             hjust = 0,
@@ -671,7 +681,7 @@ plot_param_perc_small <- df_param_perc %>%
             fontface="plain") +
   coord_cartesian(xlim = c(0, 1), # This focuses the x-axis on the range of interest
                   clip = 'off') +   # This keeps the labels from disappearing
-  theme(legend.position = c(1.28, 0.5),
+  theme(legend.position = c(0.40, -0.45),
         panel.grid.minor.x = element_blank(),
         panel.spacing.y=unit(0.5, "lines") ,
         #panel.spacing.x=unit(1.5,"lines"),
@@ -684,7 +694,7 @@ plot_param_perc_small <- df_param_perc %>%
         strip.text = element_text(size=20, face="italic"),
         panel.border = element_rect(color = "white", 
                                     fill = NA),
-        plot.margin=grid::unit(c(1,100,35,1), "mm"))
+        plot.margin=grid::unit(c(1,20,60,1), "mm"))
 plot_param_perc_small
 
 img <- readPNG(paste0(home.dic,"figures/xaxisfig2.png"))
@@ -692,7 +702,7 @@ g <- rasterGrob(img, interpolate=TRUE)
 
 theme_set(theme_cowplot())
 plot_param_perc_small_2 <- ggdraw() +
-  draw_image(img,  x = -0.02, y = -0.41, scale = .52) +
+  draw_image(img,  x = 0.09, y = -0.26, scale = .64) +
   #draw_image(img,  x = 0.2125 , y = -0.4, scale = .35) +
   draw_plot(plot_param_perc_small)    
 plot_param_perc_small_2 
@@ -750,7 +760,7 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
   }
 }
 
-source("code/6.1.Mean.abudance.sp.R") 
+source(paste0(home.dic,"code/6.1.Mean.abudance.sp.R"))
 # make two dataframe for mean number of individuals observed per plot, per year, around each focal
 # join the data frame for group=specific parameters
 df_param_strength_hat_adj <-  df_param_strength_hat %>%
@@ -760,6 +770,13 @@ df_param_strength_hat_adj <-  df_param_strength_hat %>%
   mutate( complexity.plant  = case_when(complexity.plant=="class"~ "Order",
                                         complexity.plant=="family"~ "Family",
                                         complexity.plant=="code.plant"~ "Species")) %>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
+  mutate(parameter = factor(parameter,
+                            levels = rev(c("Plant - plant", "Intraspecific",
+                                           "Plant - pollinator","Plant - herbivore"
+                            )))) %>%
+  
   mutate(focal.name = case_when(focal == "CHFU" ~"Chamaemelum \nfuscatum",
                                 focal == "CETE" ~"Centaurium \ntenuiflorum",
                                 focal == "HOMA" ~"Hordeum \nmarinum",
@@ -774,10 +791,9 @@ df_param_strength_hat_adj <-  df_param_strength_hat %>%
                               ParYear == "Plant - herbivore_2021"~7,
                               ParYear == "Plant - herbivore_2020"~ 6,
                               ParYear == "Plant - herbivore_2019"~ 5,
-                              ParYear == "Plant - floral visitor_2021"~2,
-                              ParYear == "Plant - floral visitor_2020"~1,
-                              ParYear == "Plant - floral visitor_2019"~0)) %>%
-  mutate(parameter = fct_relevel(parameter,"Plant - plant","Plant - herbivore")) %>%
+                              ParYear == "Plant - pollinator_2021"~2,
+                              ParYear == "Plant - pollinator_2020"~1,
+                              ParYear == "Plant - pollinator_2019"~0)) %>%
   mutate(complexity.plant = fct_relevel(complexity.plant,"Order",
                                         "Family","Species"))
 
@@ -802,8 +818,12 @@ plot_param_strength <- df_param_strength %>%
                                 focal == "CETE" ~"Centaurium  \ntenuiflorum",
                                 focal == "HOMA" ~"Hordeum \nmarinum",
                                 focal == "LEMA" ~"Leontodon \nmaroccanus")) %>%
-  mutate(parameter = fct_relevel(parameter,"Plant - plant", "Intraspecific",
-                                 "Plant - floral visitor","Plant - herbivore")) %>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
+  mutate(parameter = factor(parameter,
+                            levels = rev(c("Plant - plant", "Intraspecific",
+                                           "Plant - pollinator","Plant - herbivore"
+                            )))) %>%
   mutate(complexity.plant = fct_relevel(complexity.plant,"Order",
                                         "Family","Species")) %>%
   ggplot(aes(x=exp(mean.adjusted),y=as.factor(parameter))) +
@@ -826,7 +846,7 @@ plot_param_strength <- df_param_strength %>%
                                 "+10%","+20%","+30%","+40%","+50%"),
                      limits = c(0.7,1.5)) +
   scale_y_discrete(limits=rev(c("Plant - plant", "Intraspecific",
-                                "Plant - herbivore", "Plant - floral visitor","Sum all"))) +
+                                "Plant - herbivore", "Plant - pollinator","Sum all"))) +
   facet_grid( focal.name ~ complexity.plant) +
   theme_minimal() +
   labs(y="",x="Strength on fecundity") +
@@ -874,9 +894,17 @@ plot_param_strength <- df_param_strength %>%
                                 focal == "CETE" ~"Centaurium \ntenuiflorum",
                                 focal == "HOMA" ~"Hordeum \nmarinum",
                                 focal == "LEMA" ~"Leontodon \nmaroccanus")) %>%
-  mutate(parameter = fct_relevel(parameter,"Plant - plant", "Intraspecific",
-                                 "Plant - floral visitor","Plant - herbivore"),
-         ParYear=paste0(parameter,"_",year)) %>%
+  mutate(focal.name = factor(focal.name,
+                            levels = rev(c("Centaurium \ntenuiflorum", "Chamaemelum \nfuscatum",
+                                           "Hordeum \nmarinum","Leontodon \nmaroccanus"
+                            ))))%>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
+  mutate(parameter = factor(parameter,
+                            levels = rev(c("Plant - plant", "Intraspecific",
+                                           "Plant - pollinator","Plant - herbivore"
+                            )))) %>%
+  mutate(ParYear=paste0(parameter,"_",year)) %>%
   mutate(ParYearInt=case_when(ParYear == "Plant - plant_2021" ~17,
                               ParYear == "Plant - plant_2020"~16,
                               ParYear == "Plant - plant_2019"~15,
@@ -886,9 +914,9 @@ plot_param_strength <- df_param_strength %>%
                               ParYear == "Plant - herbivore_2021"~7,
                               ParYear == "Plant - herbivore_2020"~ 6,
                               ParYear == "Plant - herbivore_2019"~ 5,
-                              ParYear == "Plant - floral visitor_2021"~2,
-                              ParYear == "Plant - floral visitor_2020"~1,
-                              ParYear == "Plant - floral visitor_2019"~0)) %>%
+                              ParYear == "Plant - pollinator_2021"~2,
+                              ParYear == "Plant - pollinator_2020"~1,
+                              ParYear == "Plant - pollinator_2019"~0)) %>%
   ggplot() +
   geom_vline(xintercept=1,color="black") + 
   #geom_linerange(aes( xmin = mean.estimate - sqrt(var.estimate , 
@@ -912,15 +940,15 @@ plot_param_strength <- df_param_strength %>%
   scale_y_continuous(breaks =c(16,11,6,1),
                      minor_breaks =c(0,2,5,7,10,12,15,17),
                      labels=c("Plant - plant", "Intraspecific",
-                              "Plant - herbivore", "Plant - floral visitor")) +
+                              "Plant - herbivore", "Plant - pollinator")) +
   theme_minimal() +
   labs(y="",x="",
-       shape="Focal plant species",
+       shape="Focal \nplant species",
        fill="Direction of effect") +
   guides(color= "none",fill="none",
          shape=guide_legend(override.aes = list(size = 10,color="black"),
-                            nrow = 4,
-                            direction="vertical",
+                            nrow = 1,
+                            direction="horizontal",
                             byrow = TRUE,
                             title.hjust = 0.1)) +
   geom_text(aes(label=year,y=ParYearInt),
@@ -931,7 +959,7 @@ plot_param_strength <- df_param_strength %>%
             fontface="plain") +
   coord_cartesian(#xlim = c(0.7, 1.5), # This focuses the x-axis on the range of interest
                   clip = 'off') +   # This keeps the labels from disappearing
-  theme(legend.position = c(1.25, 0.5),
+  theme(legend.position = c(0.38, -0.35),
         panel.grid.minor.x = element_blank(),
         panel.spacing.y=unit(0.5, "lines") ,
         #panel.spacing.x=unit(1.5,"lines"),
@@ -939,18 +967,18 @@ plot_param_strength <- df_param_strength %>%
         axis.title =element_text(size=24),
         axis.text.x= element_text(size=22),
         axis.text.y= element_text(size=24),
-        legend.text=element_text(size=22, face="italic"),
+        legend.text=element_text(size=21, face="italic"),
         legend.title=element_text(size=24),
         strip.text = element_text(size=20, face="italic"),
         panel.border = element_blank(),
-        plot.margin=grid::unit(c(1,100,35,1), "mm"))# This widens the right margin
+        plot.margin=grid::unit(c(1,20,50,1), "mm"))# This widens the right margin
 plot_param_strength 
-img <- readPNG("figures/xaxisfig3.png")
+img <- readPNG(paste0(home.dic,"figures/xaxisfig3.png"))
 g <- rasterGrob(img, interpolate=TRUE)
 
 theme_set(theme_cowplot())
 plot_param_strength_2 <- ggdraw() +
-  draw_image(img,  x = -0.041, y = -0.4, scale = .53) +
+  draw_image(img,  x = 0.079, y = -0.3, scale = .64) +
   #draw_image(img,  x = 0.2125 , y = -0.4, scale = .35) +
   draw_plot(plot_param_strength)    
 plot_param_strength_2 
@@ -965,6 +993,12 @@ ggsave(paste0("figures/plot_param_strength_small.pdf"),
 
 
 var.estimate.plot <- test.full.df %>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
+  mutate(parameter = factor(parameter,
+                            levels = rev(c("Plant - plant", "Intraspecific",
+                                           "Plant - pollinator","Plant - herbivore"
+                            )))) 
   filter(complexity.plant=="family") %>%
   ggplot(aes(  x = median.estimate, y = sqrt(var.estimate))) +
   geom_point(aes(shape=parameter, 
@@ -1050,7 +1084,7 @@ for( n in c(1:length(compl.levels))){
   }else{
     names(species.tesaurus.inclus.n) <- c( n.name,"guild")
     species.tesaurus.inclus.n <- left_join(species.tesaurus.inclus.n,
-                                           unique(tesaurus[,compl.levels[1:n]]),
+                                           unique(tesaurus.plant[,compl.levels[1:n]]),
                                            multiple = "all") %>%
       mutate(complexity = n.name)
     names(species.tesaurus.inclus.n)[1] <-c("grouping")
@@ -1279,7 +1313,8 @@ plant.neigh.density <- plant.neigh.df %>%
        y="type of neighbours",
        title="Frequency of abundances observed in the neighboorhood") +
   facet_grid(focal~year, scales="free") +
-  theme(legend.position = "top",legend.key.size = unit(1, 'cm'),
+  theme(legend.position = "top",
+        legend.key.size = unit(1, 'cm'),
         title =element_text(size=16),
         axis.text.y= element_text(size=12),
         legend.text=element_text(size=16),
