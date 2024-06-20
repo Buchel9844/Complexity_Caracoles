@@ -1,1 +1,25 @@
-find read me file under docs/index.html, created with spicedata package in R
+Project for the article entitled 
+""
+by
+Lisa Buche, Margie Mayfield, Peter Vesk, Lauren shoemaker, Lauren Hallett ,Ignasi Bartomeus, Christopher Weiss-Lehman and Oscar Godoy
+Published in 
+""
+
+
+Please find the read me file for the data under docs/index.html, created with spicedata package in R
+
+For the different script, see below
+
+
+Code of the article entitled "" 
+by Lisa Buche, Margie Mayfield, Peter Vesk, Lauren shoemaker, Lauren Hallett ,Ignasi Bartomeus, Christopher Weiss-Lehman and Oscar Godoy
+(). Buche,L. et al (2024), Buchel9844/: Initial release (v0.1). Zenodo. DOI: Contact details: Lisa Buche (buchel9844@gmail.com or lbuche@student.unimelb.edu.au) and Oscar Godoy (oscar.godoy@uca.edu.es)Statement of authorship: I
+
+Authorship of code: Authorship of data: Data was collected by the Oscar Godoy, Ignasi Bartomeus and Lisa Buche (2020-2021). Abstract: 
+
+1.Caracoles_ModelFit"code/1.1.Group_Seedprod_Plantinteraction.R"
+2.ExtractMatrix_fct
+2.1.Group_FvH
+3.ExtractInclusion_fct
+4.ExtractEstimates
+

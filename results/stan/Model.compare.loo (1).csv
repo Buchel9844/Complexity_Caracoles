@@ -1,0 +1,37 @@
+focal,year,model,elpd_diff,se_diff,elpd_loo,se_elpd_loo,p_loo,se_p_loo,looic,se_looic,Sign.int,significance
+LEMA,2019,Family,0.000,0.000,-2169.882,11.025,3.598,0.334,4339.763,22.050,0.000,not significantly diff
+LEMA,2019,Class,-0.163,0.569,-2170.045,11.055,3.757,0.354,4340.089,22.111,1.116,not significantly diff
+LEMA,2019,Species,-0.977,1.297,-2170.858,10.795,3.626,0.368,4341.717,21.590,2.542,not significantly diff
+LEMA,2020,Class,0.000,0.000,-1755.269,18.784,5.533,0.805,3510.537,37.568,0.000,not significantly diff
+LEMA,2020,Family,-0.613,2.891,-1755.881,18.848,5.250,0.680,3511.762,37.697,5.666,not significantly diff
+LEMA,2020,Species,-2.127,3.214,-1757.395,18.879,5.345,0.651,3514.790,37.758,6.299,not significantly diff
+LEMA,2021,Species,0.000,0.000,-1927.754,15.370,4.310,1.092,3855.509,30.741,0.000,not significantly diff
+LEMA,2021,Family,-4.484,2.931,-1932.239,15.891,4.185,0.901,3864.477,31.782,5.746,not significantly diff
+LEMA,2021,Class,-5.394,1.561,-1933.148,15.663,5.649,1.976,3866.297,31.326,3.059,significantly diff
+CHFU,2019,Species,0.000,0.000,-2189.200,8.896,3.260,0.327,4378.400,17.792,0.000,not significantly diff
+CHFU,2019,Family,-0.369,0.403,-2189.569,8.899,3.118,0.335,4379.138,17.798,0.789,not significantly diff
+CHFU,2019,Class,-0.878,0.566,-2190.079,8.886,3.080,0.283,4380.157,17.772,1.110,not significantly diff
+CHFU,2020,Family,0.000,0.000,-971.849,16.540,3.584,0.598,1943.699,33.081,0.000,not significantly diff
+CHFU,2020,Species,-1.520,0.906,-973.369,16.820,3.887,0.723,1946.738,33.641,1.775,not significantly diff
+CHFU,2020,Class,-6.182,1.558,-978.031,16.758,3.601,0.711,1956.063,33.515,3.053,significantly diff
+CHFU,2021,Family,0.000,0.000,-811.958,11.335,3.931,0.765,1623.916,22.670,0.000,not significantly diff
+CHFU,2021,Species,-0.667,1.060,-812.625,11.245,4.217,0.770,1625.250,22.490,2.078,not significantly diff
+CHFU,2021,Class,-0.963,1.518,-812.921,11.223,3.776,0.711,1625.842,22.446,2.976,not significantly diff
+HOMA,2019,Class,0.000,0.000,-617.600,0.144,0.070,0.016,1235.200,0.288,0.000,not significantly diff
+HOMA,2019,Species,-0.084,0.015,-617.684,0.154,0.080,0.021,1235.369,0.308,0.030,significantly diff
+HOMA,2019,Family,-0.098,0.010,-617.698,0.146,0.074,0.017,1235.396,0.292,0.020,significantly diff
+HOMA,2020,Species,0.000,0.000,-955.130,13.390,4.531,0.721,1910.260,26.781,0.000,not significantly diff
+HOMA,2020,Family,-4.515,1.680,-959.646,13.522,4.105,0.700,1919.291,27.044,3.292,significantly diff
+HOMA,2020,Class,-5.116,1.609,-960.247,13.441,3.899,0.638,1920.493,26.882,3.153,significantly diff
+HOMA,2021,Family,0.000,0.000,-954.491,15.899,6.745,4.031,1908.982,31.798,0.000,not significantly diff
+HOMA,2021,Class,-2.713,3.364,-957.204,14.662,6.642,2.494,1914.408,29.324,6.594,not significantly diff
+HOMA,2021,Species,-5.540,1.971,-960.031,15.191,7.903,3.901,1920.062,30.383,3.863,significantly diff
+CETE,2019,Class,0.000,0.000,-330.577,0.221,0.190,0.044,661.154,0.441,0.000,not significantly diff
+CETE,2019,Species,-0.050,0.020,-330.627,0.225,0.201,0.046,661.254,0.451,0.038,significantly diff
+CETE,2019,Family,-0.054,0.013,-330.631,0.222,0.198,0.044,661.262,0.444,0.025,significantly diff
+CETE,2020,Class,0.000,0.000,-1526.190,11.965,5.332,1.249,3052.381,23.930,0.000,not significantly diff
+CETE,2020,Family,-0.213,0.201,-1526.403,11.948,5.547,1.280,3052.806,23.895,0.395,not significantly diff
+CETE,2020,Species,-1.332,0.631,-1527.523,11.743,5.647,1.302,3055.045,23.486,1.236,significantly diff
+CETE,2021,Family,0.000,0.000,-1407.652,7.090,3.818,0.572,2815.304,14.180,0.000,not significantly diff
+CETE,2021,Class,-0.342,0.481,-1407.994,7.099,3.767,0.556,2815.989,14.199,0.943,not significantly diff
+CETE,2021,Species,-0.419,0.601,-1408.071,7.173,3.637,0.520,2816.143,14.347,1.179,not significantly diff

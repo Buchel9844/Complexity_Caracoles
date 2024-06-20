@@ -261,7 +261,7 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
       complexity.animal <- c("group","family","species")[complexity.level]
       complexity.plant <-c("class","family","code.plant")[complexity.level]
       
-      df_alpha_n <- read.csv(paste0(project.dic,"results/parameters/Parameters_",
+      df_alpha_n <- read.csv(paste0(project.dic,"results/parameters/raw/Parameters_",
                                     focal,"_", year,"_",complexity.plant,
                                     complexity.animal,"_FinalFit.csv"))
       

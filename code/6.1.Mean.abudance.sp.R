@@ -34,6 +34,10 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
                   complexity.animal,".RData")
            )
 
+      specific.int.names <- c(colnames(Inclusion_all$Inclusion_FV)[Inclusion_all$Inclusion_FV==1],
+              colnames(Inclusion_all$Inclusion_H)[Inclusion_all$Inclusion_H==1],
+                    colnames(Inclusion_all$Inclusion_ij)[Inclusion_all$Inclusion_ij==1])
+      
       abund.mean.df.i <- data.frame(focal = focal, year= year, 
                                     complexity.animal = complexity.animal,
                                     complexity.plant =  complexity.plant,
@@ -43,24 +47,42 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
                                       abund.sp = c(Inclusion_all$SpMatrix %>% colMeans(),
                                                    Inclusion_all$SpMatrix_H %>% colMeans(),
                                                    Inclusion_all$SpMatrix_FV %>% colMeans()),
+                                    abund.sp.min = c(Inclusion_all$SpMatrix %>% apply(.,2,min),
+                                                 Inclusion_all$SpMatrix_H %>% apply(.,2,min),
+                                                 Inclusion_all$SpMatrix_FV %>%  apply(.,2,min)),
+                                    abund.sp.max = c(Inclusion_all$SpMatrix %>%  apply(.,2,max),
+                                                 Inclusion_all$SpMatrix_H %>%  apply(.,2,max),
+                                                 Inclusion_all$SpMatrix_FV %>%  apply(.,2,max)),
                                       parameter = c(rep("Plant - plant",length(Inclusion_all$SpNames)-1),
                                                       "Intraspecific",
                                                       rep("Plant - herbivore",length(colnames(Inclusion_all$Inclusion_H))),
                                                       rep("Plant - floral visitor",length(colnames(Inclusion_all$Inclusion_FV))))
-                                      )
+                                      ) %>%
+        mutate(inclus = case_when( name.sp %in% specific.int.names ~ "inclus",
+                                   T ~ "non-inclus"))
+               
+      
       Trophic.mean.df.i <- data.frame(focal = focal, year= year, 
                                     complexity.animal = complexity.animal,
                                     complexity.plant =  complexity.plant,
                                     abund.sp.mean = c(mean(rowSums(Inclusion_all$SpMatrix[,!Inclusion_all$Intra])),
-                                                 Inclusion_all$SpMatrix[Inclusion_all$Intra] %>% 
+                                                 Inclusion_all$SpMatrix[,Inclusion_all$Intra] %>% 
                                                    mean(),
                                                  mean(rowSums(Inclusion_all$SpMatrix_H)),
                                                  mean(rowSums(Inclusion_all$SpMatrix_FV))),
                                     abund.sp.median = c(median(rowSums(Inclusion_all$SpMatrix[,!Inclusion_all$Intra])),
-                                                 Inclusion_all$SpMatrix[Inclusion_all$Intra] %>% 
+                                                 Inclusion_all$SpMatrix[,Inclusion_all$Intra] %>% 
                                                    median(),
                                                  median(rowSums(Inclusion_all$SpMatrix_H)),
                                                  median(rowSums(Inclusion_all$SpMatrix_FV))),
+                                    abund.sp.max= c(max(Inclusion_all$SpMatrix[,!Inclusion_all$Intra]),
+                                                        max(Inclusion_all$SpMatrix[,Inclusion_all$Intra]),
+                                                        max(Inclusion_all$SpMatrix_H),
+                                                        max(Inclusion_all$SpMatrix_FV)),
+                                    abund.sp.min= c(min(Inclusion_all$SpMatrix[,!Inclusion_all$Intra]),
+                                                    min(Inclusion_all$SpMatrix[,Inclusion_all$Intra]),
+                                                    min(Inclusion_all$SpMatrix_H),
+                                                    min(Inclusion_all$SpMatrix_FV)),
                                     parameter = c("Plant - plant",
                                                     "Intraspecific",
                                                     "Plant - herbivore",
@@ -76,60 +98,10 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
 }
 view(Trophic.mean.df)
 write.csv(Trophic.mean.df,
-          "results/Trophic.mean.df")
-
-# for specific observation
-
-summary.interactions.short <- read.csv(paste0(home.dic,"results/inclusion/Chapt1_Inclusion_parameters_short.csv"))
-
-Hat.mean.df <- NULL
-for( n in 1:nrow( summary.interactions.short)){
-      df_hat <- summary.interactions.short[n,]
-      
-          load(paste0(home.dic,"results/stan/Inclusion",
-                  df_hat$focal,"_", df_hat$year,"_",df_hat$complexity_plant,"_",
-                  df_hat$complexity.animal,".RData"))
-          mean.plant_hat <-NA
-          mean.FV_hat <-NA
-          mean.H_hat <-NA
-   if(df_hat$n.competitors_plant_inclus==1){
-    mean.plant_hat <- mean(Inclusion_all$SpMatrix[,df_hat$competitors_plant_inclus == Inclusion_all$SpNames])
-    competitors_plant_inclus <- df_hat$competitors_plant_inclus
-      }
-  if(df_hat$n.competitors_plant_inclus>1){
-            mean.plant_hat <- colMeans(Inclusion_all$SpMatrix[,Inclusion_all$SpNames %in% strsplit(df_hat$competitors_plant_inclus,split=",")[[1]]])
-            competitors_plant_inclus <- strsplit(df_hat$competitors_plant_inclus,split=",")[[1]]
-            }
-          
-   if(df_hat$n.competitors_FV_inclus==1){
-      mean.FV_hat <-mean(Inclusion_all$SpMatrix_FV[,df_hat$competitors_FV_inclus == colnames(Inclusion_all$Inclusion_FV)])
-      }
-    if(df_hat$n.competitors_H_inclus==1){
-      mean.H_hat <-mean(Inclusion_all$SpMatrix_H[,df_hat$competitors_H_inclus == colnames(Inclusion_all$Inclusion_H)])
-      }
-          
-          
-      Hat.mean.df.i <- data.frame(focal = df_hat$focal, year= df_hat$year, 
-                                      complexity.animal = df_hat$complexity.animal,
-                                      complexity.plant =  df_hat$complexity_plant,
-                                  
-                                      abund.sp.mean = c(mean.plant_hat,
-                                                        mean.FV_hat,
-                                                        mean.H_hat),
-                                      parameter_hat =c(competitors_plant_inclus,
-                                                       df_hat$competitors_FV_inclus,
-                                                       df_hat$competitors_H_inclus ),
-                                      parameter = c(rep("Plant - plant",length(competitors_plant_inclus)),
-                                                    "Plant - floral visitor",
-                                                    "Plant - herbivore"))
-      
-      Hat.mean.df <- bind_rows(  Hat.mean.df,  Hat.mean.df.i)
-      
-}
-Hat.mean.df <-  Hat.mean.df %>%
-  filter(!is.na(abund.sp.mean))
-view(Hat.mean.df)
-
+          "results/Trophic.mean.df.csv")
+view(abund.mean.df)
+write.csv(abund.mean.df,
+          "results/abund.mean.df.csv")
 
 # unstandard abundance
 plant.class <- read.csv(paste0(home.dic,"data/plant_code.csv"), sep=",")
