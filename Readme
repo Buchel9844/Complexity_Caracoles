@@ -1,25 +1,42 @@
 Project for the article entitled 
-""
+"Sparse structures of positive and negative weak interactions drive plant species performance in highly diverse communities."
 by
-Lisa Buche, Margie Mayfield, Peter Vesk, Lauren shoemaker, Lauren Hallett ,Ignasi Bartomeus, Christopher Weiss-Lehman and Oscar Godoy
+Lisa Buche, Lauren Shoemaker, Lauren Hallett,  Ignasi Bartomeus, Peter Vesk, Christopher Weiss-Lehman  Margie Mayfield and Oscar Godoy
 Published in 
 ""
+Buche,L. et al (2024), Buchel9844/: Initial release (v0.1). Zenodo. DOI: Contact details: Lisa Buche (buchel9844@gmail.com or lbuche@student.unimelb.edu.au) and Oscar Godoy (oscar.godoy@uca.edu.es)Statement of authorship: Oscar Godoy, Ignasi Bartomeus and Lisa Buche designed the study and collected the data. Margaret Mayfield, Oscar Godoy, Lauren Hallett and Lauren Shoemaker obtained the necessary funding. Lisa Buche analysed the data with substantial input from Oscar Godoy and technical guidance from Peter Vesk and Christopher Weiss-Lehman. Lisa Buche wrote the manuscript with substantial input from Oscar Godoy and Margaret Mayfield. All co-authors contributed to reviewing the manuscripts. Abstract: 
+Ecologists poorly understand whether highly diverse ecosystems translate to a complex web of interactions. Using a sparse modelling approach, we assessed generic and specific interactions on annual plants arising from a wide community of pollinators, insect herbivores, and neighbours of the same and different annual plant species over three years. Generic effects following a continuum of positive to negative interactions were enough to describe variation in plant performance. Specifically, we found that most interspecific plant interactions were competitive, pollinators mostly promote mutualistic effects on plants, while herbivores and conspecific plant individuals varied in their effects from weakly positive to weakly negative. These findings suggest that highly-diverse assemblages do not translate into complex structures of species interactions to describe plant performance. Therefore, real-world diverse assemblages can be described using a broad resolution rather than a species-level one. 
 
 
-Please find the read me file for the data under docs/index.html, created with spicedata package in R
+Authorship of data: Oscar Godoy, Ignasi Bartomeus, and Lisa Buche (2020-2021) collected the data. Please find the read-me file for the data under docs/index.html, created with Spicedata package in R
 
-For the different script, see below
+Authorship of code: R Code was written by Lisa Buche. Stan Cade was modified from WeissLehman et al., 2022. 
 
 
-Code of the article entitled "" 
-by Lisa Buche, Margie Mayfield, Peter Vesk, Lauren shoemaker, Lauren Hallett ,Ignasi Bartomeus, Christopher Weiss-Lehman and Oscar Godoy
-(). Buche,L. et al (2024), Buchel9844/: Initial release (v0.1). Zenodo. DOI: Contact details: Lisa Buche (buchel9844@gmail.com or lbuche@student.unimelb.edu.au) and Oscar Godoy (oscar.godoy@uca.edu.es)Statement of authorship: I
+Details of R script and their function:
 
-Authorship of code: Authorship of data: Data was collected by the Oscar Godoy, Ignasi Bartomeus and Lisa Buche (2020-2021). Abstract: 
+1.Caracoles_ModelFit.R - Fit the performance model written in the Caracoles_R_Preliminary.stan and Caracoles_R_Final.stan scripts. This script runs a loop to fit the model for each focal, each year and grouping level. The script also calls other scripts to extract the raw data ("2.ExtractMatrix_fct"), extract the name of the group(s) which have an effect different from the generic effect proper to its trophic level ("3.ExtractInclusion_fct") and finally extract the estimated parameters ("4.ExtractEstimates)
+1.1.Group_Seedprod_Plantinteraction.R - Groups the observations data collected in the field for plant neighbourhood and seed set data counted a posteriori in the lab. When a specific seed set was not available for a focal in a subplot for a year, the seed set for that neighbourhood observation was approximated from the seed set of that focal at the plot level, at the site level or across the year in case of a low number of seed set count.
 
-1.Caracoles_ModelFit"code/1.1.Group_Seedprod_Plantinteraction.R"
-2.ExtractMatrix_fct
-2.1.Group_FvH
-3.ExtractInclusion_fct
-4.ExtractEstimates
+2.ExtractMatrix_fct.R - Extracts the raw data specific to the year and focal species. It calls on a second script which groups the higher trophic level according to the grouping level specified in the for-loop ("2.1.Group_FvH"). The script gives a list used to fit the performance model with the Bayesian Sparse approach. 
+
+2.1.Group_FvH.R - Groups the higher trophic level according to the grouping level specified in the for-loop
+
+3.ExtractInclusion_fct.R - Extracts the name of the group(s) which have an effect different from the generic effect proper to its trophic level (see folder results/stan and results/inclusion). The relevant group-specific parameters are designated by the preliminary fit done by "Caracoles_R_Preliminary.stan". The script gives a list of parameters to estimate in the final fit.
+
+4.ExtractEstimates.R - Extracts the estimated parameters (see folder results/parameters/raw). The parameters have been estimated across the 4 chains and 2000 during the final fit in the model done by "Caracoles_R_Final.stan". 
+
+5.ExtractModelBehaviors.R - Extracts the models' convergence, posterior fit (figures/supp/Supp_ModelsBehavior.pdf) and explanatory power of the final fitted models, which were evaluated according to Root mean squared deviance and the leave-one-out approximation (see Appendix section "Model behaviour check" and section "Model comparison"). 
+
+6. Figures.R—Scripts to create all the figures in the manuscript and the supp, with some additional figures. 
+
+6.1. Mean.abundance.sp.R - Compute the mean abundances observed in the neighbourhood of a specific focal for a specific year of individuals within and across trophic levels. 
+
+7. NoData.R - Verification of the correct specification of the priors specified in the Bayesian Sparse approach. We check for this by fitting an empty dataset to the Caracoles_R_Preliminary.stan and Caracoles_R_Final.stan scripts (see Appendix section "Bayesian priors"). 
+
+8.SimulatedData.R - Preliminary exploration of the Bayesian Sparse approach by fitting simulated data to the Caracoles_R_Preliminary.stan and Caracoles_R_Final.stan scripts. We check that parameters specified to create the simulated data were correctly retrieved (see Appendix section "With Simulated data").
+
+9. Caracoles_ModelFit_allyears.R - We check that the generic parameters proper to each year were relatively similar to parameters estimated across years (see Appendix section "All years together").
+
+The folder "ignore" contains unused scripts. 
 
