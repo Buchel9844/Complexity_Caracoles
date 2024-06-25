@@ -41,10 +41,10 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
       abund.mean.df.i <- data.frame(focal = focal, year= year, 
                                     complexity.animal = complexity.animal,
                                     complexity.plant =  complexity.plant,
-                                    name.sp = c(Inclusion_all$SpNames,
+                                    parameter_hat = c(Inclusion_all$SpNames,
                                                  colnames(Inclusion_all$Inclusion_H),
                                                  colnames(Inclusion_all$Inclusion_FV)),
-                                      abund.sp = c(Inclusion_all$SpMatrix %>% colMeans(),
+                                    abund.sp = c(Inclusion_all$SpMatrix %>% colMeans(),
                                                    Inclusion_all$SpMatrix_H %>% colMeans(),
                                                    Inclusion_all$SpMatrix_FV %>% colMeans()),
                                     abund.sp.min = c(Inclusion_all$SpMatrix %>% apply(.,2,min),
@@ -53,12 +53,12 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
                                     abund.sp.max = c(Inclusion_all$SpMatrix %>%  apply(.,2,max),
                                                  Inclusion_all$SpMatrix_H %>%  apply(.,2,max),
                                                  Inclusion_all$SpMatrix_FV %>%  apply(.,2,max)),
-                                      parameter = c(rep("Plant - plant",length(Inclusion_all$SpNames)-1),
+                                    parameter = c(rep("Plant - plant",length(Inclusion_all$SpNames)-1),
                                                       "Intraspecific",
                                                       rep("Plant - herbivore",length(colnames(Inclusion_all$Inclusion_H))),
                                                       rep("Plant - floral visitor",length(colnames(Inclusion_all$Inclusion_FV))))
                                       ) %>%
-        mutate(inclus = case_when( name.sp %in% specific.int.names ~ "inclus",
+        mutate(inclus = case_when( parameter_hat %in% specific.int.names ~ "inclus",
                                    T ~ "non-inclus"))
                
       
@@ -119,7 +119,7 @@ SpDataFocal <- bind_rows(SpDataFocal,SpDataFocal.n)
 
 SpDataFocal <- SpDataFocal %>%
   filter(year %in% c("2019","2020","2021"))
-
+str(SpDataFocal)
 max(SpDataFocal$abundance.all)
 
 median(SpDataFocal$abundance.all)
