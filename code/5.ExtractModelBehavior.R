@@ -18,6 +18,7 @@ library(tidyverse)
 library(stringr)
 library(dplyr)
 library(ggplot2) 
+library(ggpubr)
 library(loo)
 
 #---- 1.IMPORT DATA -----
@@ -44,7 +45,7 @@ for( focal in focal.levels){ # "CHFU","HOMA","CHFU","HOMA","CETE"
       #---- 1.2. Import the raw data ----
       
       #setwd("~/Eco_Bayesian/Complexity_caracoles")
-      home.dic <- "/home/lbuche/Eco_Bayesian/Complexity_caracoles/"
+      home.dic <- "/Users/lisabuche/Documents/Projects/Complexity_caracoles/"
       project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
       
       #rm(list = ls())
@@ -197,14 +198,14 @@ str(Model.check)
 #---- 2.Illustration -----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 home.dic <- "/Users/lisabuche/Documents/Projects/Complexity_caracoles/"
-
+Model.check <- read.csv("~/Documents/Projects/Complexity_caracoles/results/ModelCheck.csv")
 ggsave(
 plot=ggarrange(ggplot(Model.check, aes(sd.fec,mean.rmds,color=focal)) + 
   geom_jitter(size=3,width = 3, height = 3,
               aes(shape=as.factor(year)))+
   geom_abline()+
   labs(y="Mean RMDS across chains",
-         x="Standard deviaiton of observed fecundity",
+         x="Standard deviation of observed fecundity",
        shape="year") +
   theme_bw(), 
 ggplot(Model.check, aes(elpd_loo,mean.rmds,color=focal)) +
@@ -221,7 +222,6 @@ common.legend = T,
 legend="bottom"
 ),
 filename=paste0(home.dic,"figures/ModelBehaviorRMDS.linear.pdf"))
-
 
 df_param_all <- read.csv(paste0(home.dic,"results/parameters/Chapt1_Parameters_values.csv"))
 
@@ -339,9 +339,9 @@ ModelCheck <- read.csv(paste0(home.dic,"results/ModelCheck.csv")) %>%
   rename("complexity.plant"=complexity)
 y.lim <- data.frame(focal=rep(c("CETE","CHFU","HOMA","LEMA"),each=3),
                     year=rep(c(2019,2020,2021),times=4),
-                    upp = c(1500,1500,3000,
-                            1000,300,750,
-                            100,100,75,
+                    upp = c(3000,1500,3000,
+                            1000,500,750,
+                            100,400,500,
                             1000,300,500)
            )
 library(ggridges)
@@ -349,7 +349,7 @@ range.plot.rmds <- param.fec.pred %>%
   inner_join(y.lim) %>%
   filter(exp(param.fec.pred$effect.total.max) < upp &
                        exp(param.fec.pred$effect.total.min) < upp &
-                       exp(param.fec.pred$effect.total.mean) < upp) %>%
+                      exp(param.fec.pred$effect.total.mean) < upp) %>%
   ggplot() +
   geom_density_ridges(aes(y=complexity.plant,x=exp(effect.total.min)),
               alpha=0.2,fill="blue",scale=1) +

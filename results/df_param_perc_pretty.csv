@@ -1,0 +1,156 @@
+focal,year,"complexity
+level",parameter,positive perc,"positive
+perc_hat","median
+estimate","ten
+estimate","ninety
+estimate","median
+estimate
+hat","ten
+estimate
+hat","ninety
+estimate
+hat"
+CETE,2019,functional G,Intraspecific,0.492,0,-0.00038,-0.02496,0.02440,NA,NA,NA
+CETE,2019,functional G,Plant - plant,0.49375,0,-0.00004,-0.00368,0.00365,NA,NA,NA
+CETE,2019,functional G,Plant - herbivore,0.497,0,-0.00003,-0.00423,0.00407,NA,NA,NA
+CETE,2019,functional G,Plant - floral visitor,0.49875,0,-0.00029,-0.12281,0.12135,NA,NA,NA
+CETE,2019,family,Intraspecific,0.49025,0,-0.00054,-0.02452,0.02488,NA,NA,NA
+CETE,2019,family,Plant - plant,0.498,0,-0.00001,-0.00378,0.00377,NA,NA,NA
+CETE,2019,family,Plant - herbivore,0.506,0,0.00007,-0.00427,0.00422,NA,NA,NA
+CETE,2019,family,Plant - floral visitor,0.4945,0,-0.00113,-0.11394,0.11438,NA,NA,NA
+CETE,2019,species,Intraspecific,0.50125,0,0.00005,-0.02533,0.02568,NA,NA,NA
+CETE,2019,species,Plant - plant,0.50225,0,0.00002,-0.00368,0.00374,NA,NA,NA
+CETE,2019,species,Plant - herbivore,0.50475,0,0.00004,-0.00410,0.00420,NA,NA,NA
+CETE,2019,species,Plant - floral visitor,0.50775,0,0.00191,-0.11755,0.11935,NA,NA,NA
+CETE,2020,functional G,Intraspecific,0.90775,0,0.06550,0.00785,0.12106,NA,NA,NA
+CETE,2020,functional G,Plant - plant,0.1115,0,-0.03491,-0.06711,-0.00117,NA,NA,NA
+CETE,2020,functional G,Plant - herbivore,0.1895,0,-0.04809,-0.11078,0.01563,NA,NA,NA
+CETE,2020,functional G,Plant - floral visitor,0.78075,0,0.02322,-0.01153,0.06147,NA,NA,NA
+CETE,2020,family,Intraspecific,0.78125,0,0.03365,-0.01755,0.08346,NA,NA,NA
+CETE,2020,family,Plant - plant,0.08075,0,-0.03803,-0.07067,-0.00663,NA,NA,NA
+CETE,2020,family,Plant - herbivore,0.213,0,-0.04936,-0.11663,0.02299,NA,NA,NA
+CETE,2020,family,Plant - floral visitor,0.79425,0,0.02451,-0.01033,0.05981,NA,NA,NA
+CETE,2020,species,Intraspecific,0.7935,0,0.03062,-0.01325,0.07154,NA,NA,NA
+CETE,2020,species,Plant - plant,0.16125,0,-0.02548,-0.05539,0.00477,NA,NA,NA
+CETE,2020,species,Plant - herbivore,0.39,0,-0.01011,-0.05290,0.03325,NA,NA,NA
+CETE,2020,species,Plant - floral visitor,0.7905,0,0.02397,-0.01071,0.06054,NA,NA,NA
+CETE,2021,functional G,Intraspecific,0.8565,0,0.07132,-0.00724,0.14859,NA,NA,NA
+CETE,2021,functional G,Plant - plant,0.141,0,-0.04120,-0.08528,0.00350,NA,NA,NA
+CETE,2021,functional G,Plant - herbivore,0.917,0,0.07542,0.01259,0.14199,NA,NA,NA
+CETE,2021,functional G,Plant - floral visitor,0.7525,0,0.03908,-0.02908,0.11526,NA,NA,NA
+CETE,2021,family,Intraspecific,0.756,0,0.04415,-0.02788,0.11730,NA,NA,NA
+CETE,2021,family,Plant - plant,0.0815,0,-0.04897,-0.09028,-0.00767,NA,NA,NA
+CETE,2021,family,Plant - herbivore,0.91325,0,0.07468,0.01070,0.13926,NA,NA,NA
+CETE,2021,family,Plant - floral visitor,0.74975,0,0.03891,-0.02785,0.11053,NA,NA,NA
+CETE,2021,species,Intraspecific,0.7565,0,0.04358,-0.02910,0.11872,NA,NA,NA
+CETE,2021,species,Plant - plant,0.1555,0,-0.03809,-0.08073,0.00591,NA,NA,NA
+CETE,2021,species,Plant - herbivore,0.9245,0,0.07655,0.01376,0.14224,NA,NA,NA
+CETE,2021,species,Plant - floral visitor,0.72675,0,0.03747,-0.03237,0.11045,NA,NA,NA
+LEMA,2019,functional G,Intraspecific,0.6695,0,0.04024,-0.07015,0.15757,NA,NA,NA
+LEMA,2019,functional G,Plant - plant,0.0045,0.00175,-0.17543,-0.25513,-0.09831,-0.179461115,-0.253979912,-0.108007237
+LEMA,2019,functional G,Plant - herbivore,0.3865,0,-0.01219,-0.06449,0.04093,NA,NA,NA
+LEMA,2019,functional G,Plant - floral visitor,0.6055,0,0.01038,-0.03652,0.05950,NA,NA,NA
+LEMA,2019,family,Intraspecific,0.6535,0,0.03767,-0.07498,0.14902,NA,NA,NA
+LEMA,2019,family,Plant - plant,0.0065,0.00125,-0.18392,-0.26268,-0.09994,-0.174619383,-0.25016912,-0.100790506
+LEMA,2019,family,Plant - herbivore,0.63375,0,0.01716,-0.04179,0.07836,NA,NA,NA
+LEMA,2019,family,Plant - floral visitor,0.58625,0,0.00820,-0.03759,0.05674,NA,NA,NA
+LEMA,2019,species,Intraspecific,0.63975,0,0.03298,-0.07924,0.14912,NA,NA,NA
+LEMA,2019,species,Plant - plant,0,0,-0.34057,-0.37680,-0.29953,NA,NA,NA
+LEMA,2019,species,Plant - herbivore,0.371,0,-0.01522,-0.06627,0.03940,NA,NA,NA
+LEMA,2019,species,Plant - floral visitor,0.40025,0,-0.00650,-0.03770,0.02438,NA,NA,NA
+LEMA,2020,functional G,Intraspecific,0.5495,0,0.01167,-0.09091,0.11037,NA,NA,NA
+LEMA,2020,functional G,Plant - plant,0.0615,0,-0.07105,-0.12382,-0.01826,-0.311117834,-0.373384941,-0.247708108
+LEMA,2020,functional G,Plant - herbivore,1,0.97525,0.30929,0.23720,0.37910,0.156586471,0.067825488,0.247252377
+LEMA,2020,functional G,Plant - floral visitor,0.90925,0,0.06453,0.00798,0.12527,NA,NA,NA
+LEMA,2020,family,Intraspecific,0.5335,0,0.00679,-0.08543,0.09732,NA,NA,NA
+LEMA,2020,family,Plant - plant,0.00325,0,-0.13116,-0.19080,-0.07166,-0.232432544,-0.297249618,-0.170927308
+LEMA,2020,family,Plant - herbivore,1,0,0.35629,0.30195,0.41169,NA,NA,NA
+LEMA,2020,family,Plant - floral visitor,0.8165,0,0.04606,-0.01378,0.10811,NA,NA,NA
+LEMA,2020,species,Intraspecific,0.5165,0,0.00290,-0.08838,0.09631,NA,NA,NA
+LEMA,2020,species,Plant - plant,5.00E-04,0,-0.15279,-0.21048,-0.09380,-0.197828793,-0.259148044,-0.137280947
+LEMA,2020,species,Plant - herbivore,1,0,0.34731,0.29313,0.40429,NA,NA,NA
+LEMA,2020,species,Plant - floral visitor,0.95425,0,0.07371,0.02164,0.12513,NA,NA,NA
+LEMA,2021,functional G,Intraspecific,0.01275,0,-0.20037,-0.30568,-0.09555,NA,NA,NA
+LEMA,2021,functional G,Plant - plant,0.0025,0.01675,-0.12633,-0.17401,-0.07647,-0.151320346,-0.229684499,-0.073804974
+LEMA,2021,functional G,Plant - herbivore,0.62125,0,0.01726,-0.04232,0.08145,NA,NA,NA
+LEMA,2021,functional G,Plant - floral visitor,0.99525,0,0.12809,0.06805,0.19054,NA,NA,NA
+LEMA,2021,family,Intraspecific,0.011,0,-0.19624,-0.29232,-0.09646,NA,NA,NA
+LEMA,2021,family,Plant - plant,0,0,-0.21164,-0.26046,-0.16057,NA,NA,NA
+LEMA,2021,family,Plant - herbivore,0.86625,0,0.05409,-0.00355,0.11194,NA,NA,NA
+LEMA,2021,family,Plant - floral visitor,0.4725,0,-0.00346,-0.05525,0.04911,NA,NA,NA
+LEMA,2021,species,Intraspecific,0.00375,0,-0.22431,-0.32561,-0.12520,NA,NA,NA
+LEMA,2021,species,Plant - plant,0,0,-0.21663,-0.26669,-0.15950,NA,NA,NA
+LEMA,2021,species,Plant - herbivore,0.65975,0,0.01898,-0.03748,0.07796,NA,NA,NA
+LEMA,2021,species,Plant - floral visitor,0.99975,0,0.14547,0.08863,0.20436,NA,NA,NA
+HOMA,2019,functional G,Intraspecific,0.5035,0,0.00013,-0.01386,0.01484,NA,NA,NA
+HOMA,2019,functional G,Plant - plant,0.4985,0,-0.00006,-0.03053,0.03059,NA,NA,NA
+HOMA,2019,functional G,Plant - herbivore,0.49,0,-0.00039,-0.01886,0.01801,NA,NA,NA
+HOMA,2019,functional G,Plant - floral visitor,0.50575,0,0.00122,-0.11846,0.11867,NA,NA,NA
+HOMA,2019,family,Intraspecific,0.507,0,0.00034,-0.01642,0.01658,NA,NA,NA
+HOMA,2019,family,Plant - plant,0.509,0,0.00068,-0.04757,0.04759,NA,NA,NA
+HOMA,2019,family,Plant - herbivore,0.502,0,0.00009,-0.02104,0.02081,NA,NA,NA
+HOMA,2019,family,Plant - floral visitor,0.50625,0,0.00150,-0.11819,0.11708,NA,NA,NA
+HOMA,2019,species,Intraspecific,0.51275,0,0.00034,-0.01344,0.01457,NA,NA,NA
+HOMA,2019,species,Plant - plant,0.50725,0,0.00044,-0.03019,0.03110,NA,NA,NA
+HOMA,2019,species,Plant - herbivore,0.5045,0,0.00015,-0.01890,0.01775,NA,NA,NA
+HOMA,2019,species,Plant - floral visitor,0.5,0,0.00001,-0.11391,0.11574,NA,NA,NA
+HOMA,2020,functional G,Intraspecific,0,0,-0.24829,-0.31147,-0.18441,NA,NA,NA
+HOMA,2020,functional G,Plant - plant,0.53875,0,0.00471,-0.04634,0.05563,NA,NA,NA
+HOMA,2020,functional G,Plant - herbivore,0.3065,0,-0.02386,-0.07868,0.03081,NA,NA,NA
+HOMA,2020,functional G,Plant - floral visitor,0.49975,0,-0.00001,-0.11227,0.11560,NA,NA,NA
+HOMA,2020,family,Intraspecific,0,0,-0.23497,-0.29071,-0.17694,NA,NA,NA
+HOMA,2020,family,Plant - plant,0.42875,0,-0.00777,-0.06396,0.04834,NA,NA,NA
+HOMA,2020,family,Plant - herbivore,0.54925,0,0.00490,-0.04309,0.05477,NA,NA,NA
+HOMA,2020,family,Plant - floral visitor,0.49875,0,-0.00053,-0.11949,0.11914,NA,NA,NA
+HOMA,2020,species,Intraspecific,0,0,-0.23453,-0.28840,-0.17783,NA,NA,NA
+HOMA,2020,species,Plant - plant,0.73575,0.00975,0.02970,-0.02540,0.08622,-0.193191478,-0.287397334,-0.099766561
+HOMA,2020,species,Plant - herbivore,0.5175,0,0.00182,-0.04792,0.05521,NA,NA,NA
+HOMA,2020,species,Plant - floral visitor,0.508,0,0.00226,-0.11451,0.11812,NA,NA,NA
+HOMA,2021,functional G,Intraspecific,0,0,-0.23345,-0.29301,-0.17233,NA,NA,NA
+HOMA,2021,functional G,Plant - plant,0,0,-0.16697,-0.20876,-0.12461,NA,NA,NA
+HOMA,2021,functional G,Plant - herbivore,0.859,0,0.04435,-0.00403,0.09030,NA,NA,NA
+HOMA,2021,functional G,Plant - floral visitor,0.71525,0,0.03167,-0.03283,0.09819,NA,NA,NA
+HOMA,2021,family,Intraspecific,0,0,-0.17234,-0.21203,-0.13027,NA,NA,NA
+HOMA,2021,family,Plant - plant,0,0,-0.15107,-0.18319,-0.11724,NA,NA,NA
+HOMA,2021,family,Plant - herbivore,0.90275,0,0.05385,0.00540,0.10285,NA,NA,NA
+HOMA,2021,family,Plant - floral visitor,0.496,0,-0.00101,-0.11510,0.11116,NA,NA,NA
+HOMA,2021,species,Intraspecific,0,0,-0.17036,-0.21254,-0.12908,NA,NA,NA
+HOMA,2021,species,Plant - plant,0,0,-0.13446,-0.17288,-0.09374,NA,NA,NA
+HOMA,2021,species,Plant - herbivore,0.925,0,0.05694,0.01021,0.10585,NA,NA,NA
+HOMA,2021,species,Plant - floral visitor,0.72275,0,0.03331,-0.03115,0.10439,NA,NA,NA
+CHFU,2019,functional G,Intraspecific,0.56575,0,0.01404,-0.08838,0.11936,NA,NA,NA
+CHFU,2019,functional G,Plant - plant,0,0,-0.32792,-0.37898,-0.27341,NA,NA,NA
+CHFU,2019,functional G,Plant - herbivore,0.32875,0,-0.02501,-0.08770,0.04265,NA,NA,NA
+CHFU,2019,functional G,Plant - floral visitor,0.695,0,0.02061,-0.02533,0.06769,NA,NA,NA
+CHFU,2019,family,Intraspecific,0.5505,0,0.01173,-0.08826,0.11474,NA,NA,NA
+CHFU,2019,family,Plant - plant,0,0,-0.33425,-0.38494,-0.27863,NA,NA,NA
+CHFU,2019,family,Plant - herbivore,0.2495,0,-0.04951,-0.13673,0.03754,NA,NA,NA
+CHFU,2019,family,Plant - floral visitor,0.604,0,0.01084,-0.03718,0.06127,NA,NA,NA
+CHFU,2019,species,Intraspecific,0.55375,0,0.01162,-0.09495,0.11422,NA,NA,NA
+CHFU,2019,species,Plant - plant,0,0,-0.32838,-0.38145,-0.27502,NA,NA,NA
+CHFU,2019,species,Plant - herbivore,0.14325,0,-0.08281,-0.17241,0.01030,NA,NA,NA
+CHFU,2019,species,Plant - floral visitor,0.73675,0,0.02263,-0.01982,0.06512,NA,NA,NA
+CHFU,2020,functional G,Intraspecific,0.4605,0,-0.00977,-0.12644,0.10751,NA,NA,NA
+CHFU,2020,functional G,Plant - plant,0.006,0.1185,-0.19495,-0.28188,-0.10504,-0.118152824,-0.237829309,-0.000677755
+CHFU,2020,functional G,Plant - herbivore,0.53675,0,0.00778,-0.09079,0.10990,NA,NA,NA
+CHFU,2020,functional G,Plant - floral visitor,0.923,0,0.09778,0.01681,0.18064,NA,NA,NA
+CHFU,2020,family,Intraspecific,0.40925,0,-0.02351,-0.14079,0.09218,NA,NA,NA
+CHFU,2020,family,Plant - plant,0.00025,0.126875,-0.24507,-0.32381,-0.16759,-0.117942211,-0.237460904,0.003221776
+CHFU,2020,family,Plant - herbivore,0.54325,0,0.01044,-0.09334,0.11379,NA,NA,NA
+CHFU,2020,family,Plant - floral visitor,0.85475,0,0.07567,-0.00855,0.16069,NA,NA,NA
+CHFU,2020,species,Intraspecific,0.4115,0,-0.02199,-0.13970,0.09244,NA,NA,NA
+CHFU,2020,species,Plant - plant,0,0.063,-0.24647,-0.32530,-0.16852,-0.131934208,-0.236009419,-0.031364021
+CHFU,2020,species,Plant - herbivore,0.6065,0,0.02523,-0.08214,0.13439,NA,NA,NA
+CHFU,2020,species,Plant - floral visitor,0.9205,0,0.08054,0.01404,0.15083,NA,NA,NA
+CHFU,2021,functional G,Intraspecific,0.3465,0,-0.04148,-0.15671,0.07393,NA,NA,NA
+CHFU,2021,functional G,Plant - plant,0.6855,0,0.03208,-0.04221,0.10565,NA,NA,NA
+CHFU,2021,functional G,Plant - herbivore,0.3965,0,-0.02134,-0.11243,0.07438,NA,NA,NA
+CHFU,2021,functional G,Plant - floral visitor,0.90925,0,0.07125,0.00923,0.13648,NA,NA,NA
+CHFU,2021,family,Intraspecific,0.21425,0,-0.07552,-0.18767,0.03300,NA,NA,NA
+CHFU,2021,family,Plant - plant,0.175,0,-0.05167,-0.11365,0.01284,NA,NA,NA
+CHFU,2021,family,Plant - herbivore,0.65325,0,0.02981,-0.06166,0.12731,NA,NA,NA
+CHFU,2021,family,Plant - floral visitor,0.9405,0,0.06665,0.01483,0.11846,NA,NA,NA
+CHFU,2021,species,Intraspecific,0.18475,0,-0.07974,-0.18337,0.02486,NA,NA,NA
+CHFU,2021,species,Plant - plant,0.21775,0,-0.04271,-0.10391,0.02100,NA,NA,NA
+CHFU,2021,species,Plant - herbivore,0.591,0,0.01877,-0.07055,0.10753,NA,NA,NA
+CHFU,2021,species,Plant - floral visitor,0.89825,0,0.05305,0.00390,0.10204,NA,NA,NA
