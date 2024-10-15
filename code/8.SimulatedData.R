@@ -14,15 +14,18 @@ library(gridExtra)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 1. SET UP: Simulate data, create df with abundances ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#setwd("~/Eco_Bayesian/Complexity_caracoles")
-home.dic <- "/home/lbuche/Eco_Bayesian/Complexity_caracoles/"
-project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
+home.dic <- "/Users/lisabuche/Documents/Projects/Complexity_caracoles/"
+project.dic <- "/Users/lisabuche/Documents/Projects/Complexity_caracoles/"
 
 
 # rm(list = ls()) # empty envi
 print("S = 1, K = 5, H = 5, FV = 5, pI = 25% and pI_HTL = 65%")
-source("~/Eco_Bayesian/Test_simulation/code/simul_data.R")
+source(paste0(home.dic,"code/8.1.simul_data_toolbox.R"))
 set.seed(1698)
+S = 1 # one focal species
+K = 5 # 5 plant neighbours
+H = 5 # 5 herbivores
+FV = 5 # 5 floral visitor
 
 simul_data_list <- simul_data( S = 1,   # number of focal groups / species
                                K = 5,   # number of neighbour of focals 
@@ -35,7 +38,7 @@ simul_data_list <- simul_data( S = 1,   # number of focal groups / species
 
 
 save(file= paste0(home.dic,"results/TestFit_sparsity_simdata.RData"),
-     simdata)
+     simul_data_list)
 
 simdata <- simul_data_list$simdata
 str(simdata)
@@ -237,12 +240,12 @@ options(mc.cores = parallel::detectCores())
 print("preliminary test fit for plant pairwise interactions model starts")
 
 options(mc.cores = parallel::detectCores())
-TestFit_sparsity <- stan(file = paste0(home.dic,"code/Short_Caracoles_BH_FH_Preliminary.stan"), 
+TestFit_sparsity <- stan(file = paste0(home.dic,"code/Caracoles_R_Preliminary.stan"), 
                          data = DataVec,
                          init="random", # all initial values are 0 
                          control=list(max_treedepth=15),
-                         warmup = 1000,
-                         iter = 2000, 
+                         warmup = 500,
+                         iter = 1000, 
                          chains = 4,
                          seed= 1616)
 
@@ -375,7 +378,7 @@ set.seed(1616)
 std.error <- function(x) sd(x)/sqrt(length(x))
 
 
-Final_sparsity_model <- stan(file = paste0(home.dic,"code/Short_Caracoles_BH_Final.stan"), 
+Final_sparsity_model <- stan(file = paste0(home.dic,"code/Caracoles_R_Final.stan"), 
                              data = DataVec.final,
                              init="random", # all initial values are 0 
                              control=list(max_treedepth=12), #  increase the limit to avoid wrong sampling
