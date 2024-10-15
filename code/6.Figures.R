@@ -1,9 +1,9 @@
 # This script will make the figures of chap 1, of the natural data part, number- XXX of the manuscript
-
+library(cli)
 library(ggplot2)
 library(tidyverse)
+library(dplyr)
 library(ggsci)
-library(tidyverse)
 #install.packages("ggthemes")
 library(ggthemes)
 #install.packages("ggridges")
@@ -19,9 +19,11 @@ library(grid)
 #remotes::install_github("coolbutuseless/ggpattern",force = TRUE,dependencies=T)
 library(ggpattern)
 
-home.dic <- "/Users/lisabuche/Documents/Projects/Complexity_caracoles/"
-project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
+#home.dic <- "/Users/lisabuche/Documents/Projects/Complexity_caracoles/"
+#project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
 
+home.dic <- "/home/lbuche/Eco_Bayesian/Complexity_caracoles/"
+project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
 
 colorBlindGrey8   <- c("#999999", "#E69F00", "#56B4E9", "#009E73", 
                        "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
@@ -66,11 +68,11 @@ summary.potential.interaction <- data.frame(levelparametercomplexity=c("high","m
                                                                              length(complexitylevel.plant.family),
                                                                              length(complexitylevel.plant.class)),
                                             pollinator = c(paste0("e.g., ",FVtoKeep_species[2]),
-                                                              paste0("e.g., ",FVtoKeep_family[2]),
-                                                              paste0("e.g., ",FVtoKeep_group[2])),
+                                                           paste0("e.g., ",FVtoKeep_family[2]),
+                                                           paste0("e.g., ",FVtoKeep_group[2])),
                                             "number\npollinator\ninteraction" = c(length(FVtoKeep_species),
-                                                                                     length(FVtoKeep_family),
-                                                                                     length(FVtoKeep_group)),
+                                                                                  length(FVtoKeep_family),
+                                                                                  length(FVtoKeep_group)),
                                             herbivore = c(paste0("e.g., ",HtoKeep_species[3]),
                                                           paste0("e.g., ",HtoKeep_family[3]),
                                                           paste0("e.g., ",HtoKeep_group[3])),
@@ -95,7 +97,7 @@ for( focal in c("LEMA","CHFU","HOMA","CETE")){ # "CHFU","HOMA",
       complexity.animal <- c("group","family","species")[complexity.level]
       complexity.plant <-c("class","family","code.plant")[complexity.level]
       
-      load(paste0(home.dic,"results/stan/Inclusion",focal,"_",
+      load(paste0(home.dic,"results/Inclusion",focal,"_",
                   year,"_",complexity.plant,"_",complexity.animal,".RData"))
       
       assign(paste0("Inclusion",focal,"_",
@@ -115,10 +117,10 @@ for( focal in c("LEMA","CHFU","HOMA","CETE")){ # "CHFU","HOMA",
 }
 write.csv(df_inclusion_nat,
           file = paste0(home.dic,"results/Chapt1_Inclusion_parameters.csv"))
-df_inclusion_nat <- read.csv( paste0(home.dic,"results/Chapt1_Inclusion_parameters.csv"))
+#df_inclusion_nat <- read.csv( paste0(home.dic,"results/Chapt1_Inclusion_parameters.csv"))
 
-summary.interactions <- read.csv(paste0(home.dic,"results/inclusion/Chapt1_Inclusion_parameters.csv"))
-df_inclusion_nat <- summary.interactions 
+#summary.interactions <- read.csv(paste0(home.dic,"results/inclusion/Chapt1_Inclusion_parameters.csv"))
+#df_inclusion_nat <- summary.interactions 
 #n.inclus <- grep(pattern = '^n.*inclus$', x = colnames(df_inclusion_nat), value = T)
 
 n.inclus <- c("n.competitors_plant_inclus","n.competitors_FV_inclus","n.competitors_H_inclus",
@@ -170,41 +172,10 @@ df_inclusion_nat_vertical <- df_inclusion_nat %>%
                                  interaction== "interactors_H" ~ "Plant - herbivore"))
 
 
-pal <- wes_palette("Zissou1", 100, type = "continuous")
-
-df_inclusion_nat_ratio <- df_inclusion_nat_vertical %>%
-  mutate(ratio =  (n.number/(n.potential.interactor-1)) ) %>%
-  mutate(year =  as.integer(year)) %>%
-  #mutate(interactor =  as.character(interactor)) %>%
-  mutate(interaction =factor(interaction))%>%
-  mutate(complexity_plant =factor(complexity_plant,
-                                  levels=c("class","family","code.plant")))
-
-
-scale_fill_colorblind7 = function(.ColorList = 2L:8L, ...){
-  scale_fill_discrete(..., type = colorblind_pal()(8)[.ColorList])
-}
-
-
-df_inclusion_nat_vertical$interaction <- factor(df_inclusion_nat_vertical$interaction,
-                                                levels = c("Plant - plant", "Plant - herbivore", "Plant - floral visitor",
-                                                           "Plant - plant - plant","Plant - plant - herbivore","Plant - plant - floral visitor"))
-df_inclusion_nat_vertical.2 <- df_inclusion_nat_vertical %>%
-  mutate(complexity_plant = case_when(complexity_plant == "class" ~ "Class",
-                                      complexity_plant == "family" ~ "Family",
-                                      complexity_plant == "code.plant" ~ "Species")) %>%
-  mutate(type.interaction = case_when((interaction =="Plant - plant" | interaction==  "Plant - floral visitor"|
-                                         interaction== "Plant - herbivore") ~ "Direct interactions",
-                                      (interaction ==  "Plant - plant - floral visitor"| interaction== "Plant - plant - herbivore"|
-                                         interaction== "Plant - plant - plant") ~ "HOIs"))
-
-
-
-
 #---- 4. Results for interactions values ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#---- 4.1 Figure of pairwise interactions distributions ----
+#---- 4.1 Figure of pairwise interactions distributions and Intra Vs Inter ----
 #extraction generic parameters
 df_param <- NULL
 
@@ -215,7 +186,7 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
       complexity.animal <- c("group","family","species")[complexity.level]
       complexity.plant <-c("class","family","code.plant")[complexity.level]
       
-      df_alpha_n <- read.csv(paste0(home.dic,"results/parameters/raw/Parameters_",
+      df_alpha_n <- read.csv(paste0(project.dic,"results/parameters/Parameters_",
                                     focal,"_", year,"_",complexity.plant,
                                     complexity.animal,"_FinalFit.csv"))
       
@@ -230,7 +201,7 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
 # species specific parameters
 df_param_hat <- NULL
 
-inclusion.interaction.type <-unique(df_inclusion_nat_vertical[,c("interaction","interactor")]) %>%
+inclusion.interaction.type <- unique(df_inclusion_nat_vertical[,c("interaction","interactor")]) %>%
   separate(interactor, into=paste0("interactor", 1:max(df_inclusion_nat_vertical$n.number,na.rm=T)), sep=",")  %>%
   gather(paste0("interactor", 1:max(df_inclusion_nat_vertical$n.number,na.rm=T)),key="to.remove",value="interactor") %>%
   filter(!is.na(interactor)) %>%
@@ -244,7 +215,7 @@ for ( i in 1:nrow(df_inclusion_nat_short)){
   complexity.plant <- df_inclusion_nat_short[i,'complexity_plant']
   complexity.animal <- df_inclusion_nat_short[i,'complexity.animal']
   
-  df_param_hat_n <- read.csv(paste0(home.dic,"results/parameters/raw/Parameters_hat_",
+  df_param_hat_n <- read.csv(paste0(project.dic,"results/parameters/Parameters_hat_",
                                     focal,"_", year,"_",complexity.plant,
                                     complexity.animal,"_FinalFit.csv"))
   name.species.specific <- names(df_param_hat_n)[which(!names(df_param_hat_n) %in% c("X","focal","year",
@@ -272,11 +243,11 @@ for ( i in 1:nrow(df_inclusion_nat_short)){
            key="parameter_hat",value="estimate_hat") %>%
     mutate(parameter_hat =   rep(name.species.specific_n, each= nrow(.)/length(name.species.specific_n)))
   
-   type_n <- data.frame(parameter_hat = rep(NA,nlevels(as.factor(df_param_hat_n$parameter_hat))),
+  type_n <- data.frame(parameter_hat = rep(NA,nlevels(as.factor(df_param_hat_n$parameter_hat))),
                        parameter = rep(NA,nlevels(as.factor(df_param_hat_n$parameter_hat))))
   for(n in 1:nlevels(as.factor(df_param_hat_n$parameter_hat))){
     type_n$parameter_hat[n] <- levels(as.factor(df_param_hat_n$parameter_hat))[n]
-    type_n$parameter[n] <- as.character(inclusion.interaction.type$interaction[which(inclusion.interaction.type$interactor == levels(as.factor(df_param_hat_n$parameter_hat))[n])][1])
+    type_n$parameter[n] <- inclusion.interaction.type$interaction[which(inclusion.interaction.type$interactor == levels(as.factor(df_param_hat_n$parameter_hat))[n])][1]
   }
   
   df_param_hat_n <- df_param_hat_n%>%
@@ -310,7 +281,8 @@ df_param_all <- full_join(df_param_vert,df_param_hat,
 write.csv(df_param_all,
           file = paste0(home.dic,"results/Chapt1_Parameters_values.csv"))
 
-df_param_all <- read.csv(paste0(home.dic,"results/parameters/Chapt1_Parameters_values.csv"))
+df_param_all <- read.csv(paste0(home.dic,
+                                "results/Chapt1_Parameters_values.csv"))
 str(df_param_all)
 #df_param_all <- df_param_all[,-1]
 
@@ -323,7 +295,7 @@ plot.alphas <- df_param_all %>%
                                T~parameter)) %>%
   mutate(parameter = factor(parameter,
                             levels = rev(c("Plant - plant", "Intraspecific",
-                                           "Plant - herbivore","Plant - pollinator"
+                                           "Plant - pollinator","Plant - herbivore"
                             )))) %>%
   filter(complexity.plant == "code.plant") %>%
   ggplot() +  
@@ -350,7 +322,6 @@ plot.alphas <- df_param_all %>%
   ) +
   theme_minimal() +
   theme(strip.placement = "outside",
-        legend.position = "bottom",
         legend.key.size = unit(1, 'cm'),
         title =element_text(size=16),
         axis.text.x= element_text(size=16),
@@ -362,7 +333,7 @@ plot.alphas <- df_param_all %>%
                                     fill = NA))
 
 plot.alphas
-ggsave(paste0(home.dic,"figures/Parameters_distribution_Species.pdf"),
+ggsave(paste0(home.dic,"figure/Parameters_distribution_Species.pdf"),
        dpi="retina",
        units = c("cm"),
        plot.alphas
@@ -381,7 +352,7 @@ plot.alphas.small <- df_param_all %>%
                                T~parameter)) %>%
   mutate(parameter = factor(parameter,
                             levels = rev(c("Plant - plant", "Intraspecific",
-                                          "Plant - herbivore", "Plant - pollinator"
+                                           "Plant - pollinator","Plant - herbivore"
                             )))) %>%
   ggplot() +  
   geom_density_ridges_gradient(aes(x=estimate, y=parameter,
@@ -391,29 +362,31 @@ plot.alphas.small <- df_param_all %>%
                    color=parameter_hat),
                width=0.3,alpha=0.4,outlier.shape = NA) +
   facet_wrap(.~as.factor(focal.name) , ncol=2, nrow=2) +
-  #scale_x_continuous(limits=c(-0.5,0.5)) + 
-  #scale_y_discrete(labels=c("Generic Inter-specific",
-  #                          "Intra-specific")) + 
-  labs(y="Interactions", x= "Estimated distribution",
-       color = "Family-specific \n parameters") + 
-  scale_color_manual(values=rep(c("black"),times=9)) +
+  labs(y="Guild-level interactions", x= "Estimated distribution",
+       color = "Relevant family-specific \nparameters") + 
+  scale_color_manual(values=rep(c("black","grey"),times=9)) +
   scale_fill_gradientn(
     colours=c(re,"white",gr),limits = c(-2, 2),
-    #midpoint = 0,
-    #space = "Lab",
     na.value = "grey50",
     guide = "none",
     aesthetics = "fill"
   ) +
-  theme_minimal() +
+  geom_vline(xintercept=0,color="black",size=0.5) +
+  guides(color= guide_legend(position="bottom",
+                             direction="horizontal",
+                             byrow = TRUE,
+                             nrow = 2)) +
+  theme_clean() +
   theme(strip.placement = "outside",
-        legend.key.size = unit(1, 'cm'),
+        legend.key.size = unit(0.5, 'cm'),
         legend.position = "bottom",
+        legend.background = element_rect(color = NA),
         title =element_text(size=16),
+        axis.title= element_text(size=16),
         axis.text.x= element_text(size=16),
         axis.text.y= element_text(size=16),
         legend.text=element_text(size=16),
-        legend.title=element_text(size=16),
+        legend.title=element_text(size=16,face="plain"),
         strip.text = element_text(size=16,face="italic"),
         panel.border = element_rect(color = "black", 
                                     fill = NA))
@@ -427,7 +400,6 @@ ggsave(paste0(home.dic,"figures/Parameters_distribution_fam2020.pdf"),
        plot.alphas.small
 )
 
-#df_param_all <- df_param_all[,-1]
 #---- 4.2.Figure of pairwise interactions sign percentage ----
 df_param_perc  <- NULL
 for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
@@ -481,8 +453,6 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
 }
 str(df_param_perc)  
 view(df_param_perc)
-write.csv(df_param_perc,
-          file=paste0(home.dic,"results/df_param_perc.csv"))
 df_param_perc$positive.perc_hat[which(df_param_perc$neg.perc_hat==0 & 
                                         df_param_perc$positive.perc_hat==0)] <- NA
 
@@ -558,7 +528,7 @@ plot_param_perc
 ggsave(paste0(home.dic,"figures/Plot_param_perc.pdf"),
        dpi="retina",
        #width = 25,
-      # height = 16,
+       # height = 16,
        units = c("cm"),
        plot_param_perc
 )
@@ -570,8 +540,7 @@ plot_param_perc_small <- df_param_perc %>%
   mutate(focal.name = case_when(focal == "CHFU" ~"Chamaemelum \nfuscatum",
                                 focal == "CETE" ~"Centaurium  \ntenuiflorum",
                                 focal == "HOMA" ~"Hordeum \nmarinum",
-                                focal == "LEMA" ~"Leontodon \nmaroccanus"
-                                )) %>%
+                                focal == "LEMA" ~"Leontodon \nmaroccanus")) %>%
   mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
                                T~parameter)) %>%
   mutate(parameter = factor(parameter,
@@ -591,7 +560,6 @@ plot_param_perc_small <- df_param_perc %>%
                               ParYear == "Plant - pollinator_2021"~2,
                               ParYear == "Plant - pollinator_2020"~1,
                               ParYear == "Plant - pollinator_2019"~0)) %>%
-  #dplyr::filter(focal =="LEMA") %>%
   ggplot(aes(x=positive.perc,y=ParYearInt,label=year,
              shape=as.factor(focal.name))) +
   geom_vline(xintercept=0.5,color="black") +
@@ -613,7 +581,6 @@ plot_param_perc_small <- df_param_perc %>%
                        limits = c(0, 1),
                        guide = "none", aesthetics = "fill") +
   scale_shape_manual(values=c(21,22,23,24)) +
-    #values=c(24)) +
   scale_x_continuous("",
                      breaks=c(0,0.25,0.5,0.75,1),
                      labels = rev(c("100% + \n 0% -", 
@@ -630,39 +597,41 @@ plot_param_perc_small <- df_param_perc %>%
        shape="Focal \nplant species",
        fill="Direction of effect") +
   guides(color= "none",fill="none",
-         shape=guide_legend(override.aes = list(size = 10,color="black")#,
-                          #  nrow = 1,  direction="vertical", byrow = T, title.hjust = 0.1
-                            )) +
+         shape=guide_legend(override.aes = list(size = 10,color="black"),
+                            nrow = 1,
+                            direction="horizontal",
+                            byrow = T,
+                            title.hjust = 0.1)) +
   geom_text(x = 1.05, # Set the position of the text to always be at '14.25'
             hjust = 0,
-            size = 7,
+            size = 5,
             family= "sans",
             fontface="plain") +
   coord_cartesian(xlim = c(0, 1), # This focuses the x-axis on the range of interest
                   clip = 'off') +   # This keeps the labels from disappearing
-  theme(legend.position = "left",#c(1, -0.45),
+  theme(legend.position = c(0.40, -0.45),
         panel.grid.minor.x = element_blank(),
         panel.spacing.y=unit(0.5, "lines") ,
         #panel.spacing.x=unit(1.5,"lines"),
         legend.key.size = unit(1, 'cm'),
-        axis.title =element_text(size=22),
-        axis.text.x= element_text(size=22),
-        axis.text.y= element_text(size=22),
-        legend.text=element_text(size=20, face="italic"),
-        legend.title=element_text(size=22),
-        strip.text = element_text(size=20, face="italic"),
+        axis.title =element_text(size=16),
+        axis.text.x= element_text(size=16),
+        axis.text.y= element_text(size=16),
+        legend.text=element_text(size=12, face="italic"),
+        legend.title=element_text(size=16),
+        strip.text = element_text(size=16, face="italic"),
         panel.border = element_rect(color = "white", 
                                     fill = NA),
-        plot.margin=grid::unit(c(1,20,30,1), "mm"))
+        plot.margin=grid::unit(c(1,20,40,1), "mm"))
 plot_param_perc_small
 
-img <- readPNG(paste0(home.dic,"figures/xaxisfig2.png"))
+img <- readPNG(paste0(home.dic,"figure/xaxisfig2.png"))
 g <- rasterGrob(img, interpolate=TRUE)
 
 theme_set(theme_cowplot())
 plot_param_perc_small_2 <- ggdraw() +
-  #draw_image(img,  x = 0.094, y = -0.28, scale = .65) +
-  draw_image(img,  x = 0.18  , y = -0.4, scale = .52) +
+  draw_image(img,  x = 0.075, y = -0.28, scale = .62) +
+  #draw_image(img,  x = 0.2125 , y = -0.4, scale = .35) +
   draw_plot(plot_param_perc_small)    
 plot_param_perc_small_2 
 
@@ -673,6 +642,7 @@ ggsave(paste0(home.dic,"figures/Plot_param_perc_fam.pdf"),
        #units = c("cm"),
        plot_param_perc_small_2 
 )
+
 
 #---- 4.3.Figure of species strength ----
 
@@ -699,12 +669,12 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
                ten.estimate,ninety.estimate,var.estimate) %>%
         unique()
       
-    
+      
       df_param_strength <- bind_rows(df_param_strength,df_param_strength_n)
       
       if(!sum(!is.na(df_param_all$estimate_hat[which(df_param_all$focal==focal  & 
-                            df_param_all$year == year &
-                            df_param_all$complexity.plant == complexity.plant)])) == 0){
+                                                     df_param_all$year == year &
+                                                     df_param_all$complexity.plant == complexity.plant)])) == 0){
         df_param_strength_n_hat <-  df_param_all[which(df_param_all$focal==focal  & 
                                                          df_param_all$year == year &
                                                          df_param_all$complexity.plant == complexity.plant),] %>%
@@ -725,7 +695,7 @@ source(paste0(home.dic,"code/6.1.Mean.abudance.sp.R"))
 df_param_strength_hat_adj <-  df_param_strength_hat %>%
   mutate(year=as.character(year)) %>%
   left_join(abund.mean.df, by=c("parameter_hat","focal",
-                              "year","complexity.plant")) %>%
+                                "year","complexity.plant")) %>%
   mutate(mean_hat_adjusted = estimate_hat_add * abund.sp ) %>%
   mutate( complexity.plant  = case_when(complexity.plant=="class"~ "Funct.Group",
                                         complexity.plant=="family"~ "Family",
@@ -761,13 +731,13 @@ df_param_strength_hat_adj <-  df_param_strength_hat %>%
 write.csv(df_param_strength_hat_adj,
           file=paste0(home.dic,"results/df_param_strength_hat_adj.csv"))
 
+
 df_param_strength_adj <- df_param_strength %>%
   select(year,focal,complexity.plant,parameter,
          mean.estimate,var.estimate,median.estimate) %>%
   mutate( year = as.character(year)) %>%
   left_join(Trophic.mean.df, by=c("year", "focal",
-                                  "parameter","complexity.plant"),
-            relationship = "many-to-many") %>%
+                                  "parameter","complexity.plant")) %>%
   mutate( mean.adjusted = mean.estimate* abund.sp.mean,
           median.adjusted = median.estimate*abund.sp.mean,
           var.adjuster = var.estimate* abund.sp.mean) %>%
@@ -794,8 +764,7 @@ plot_param_strength <- df_param_strength %>%
          mean.estimate,var.estimate,median.estimate) %>%
   mutate( year = as.character(year)) %>%
   left_join(Trophic.mean.df, by=c("year", "focal",
-                                  "parameter","complexity.plant"),
-            relationship = "many-to-many") %>%
+                                  "parameter","complexity.plant")) %>%
   mutate( mean.adjusted = mean.estimate* abund.sp.mean,
           median.adjusted = median.estimate*abund.sp.mean,
           var.adjuster = var.estimate* abund.sp.mean) %>%
@@ -814,6 +783,7 @@ plot_param_strength <- df_param_strength %>%
                             levels = rev(c("Plant - plant", "Intraspecific",
                                            "Plant - pollinator","Plant - herbivore"
                             )))) %>%
+  filter(!(focal =="HOMA" & parameter =="Plant - pollinator")) %>%
   ggplot(aes(x=exp(mean.adjusted),y=as.factor(parameter))) +
   geom_linerange(aes( xmin = exp(mean.adjusted) - exp(var.adjuster) , 
                       xmax = exp(mean.adjusted) + exp(var.adjuster)))+ 
@@ -821,9 +791,9 @@ plot_param_strength <- df_param_strength %>%
              size=7) +
   geom_point( data=df_param_strength_hat_adj,
               aes(x=exp(mean_hat_adjusted),y=as.factor(parameter),
-                 shape=as.factor(year),
-                 fill=exp(mean_hat_adjusted)),color="red",
-             size=5) +
+                  shape=as.factor(year),
+                  fill=exp(mean_hat_adjusted)),color="red",
+              size=5) +
   geom_vline(xintercept=1,color="darkgrey") + 
   scale_fill_gradientn(colours=c("#E69F00","white","#009E73"),
                        limits = c(0.5, 1.5),
@@ -834,7 +804,7 @@ plot_param_strength <- df_param_strength %>%
                                 "+10%","+20%","+30%","+40%","+50%"),
                      limits = c(0.7,1.5)) +
   scale_y_discrete(limits=rev(c("Plant - plant", "Intraspecific",
-                                "Plant - herbivore", "Plant - pollinator","Sum all"))) +
+                                "Plant - herbivore", "Plant - pollinator"))) +
   facet_grid( focal.name ~ complexity.plant) +
   theme_minimal() +
   labs(y="",x="Strength on fecundity") +
@@ -856,11 +826,11 @@ plot_param_strength <- df_param_strength %>%
         plot.margin=grid::unit(c(1,1,1,1), "mm"))
 plot_param_strength
 
-ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figures/plot_param_strength.pdf"),
+ggsave(paste0(home.dic,"figure/plot_param_strength.pdf"),
        #dpi="retina",
-       #width = 25,
-       #height = 16,
-       #units = c("cm"),
+       width = 30,
+       height = 20,
+       units = c("cm"),
        plot_param_strength
 )
 
@@ -870,7 +840,7 @@ view(df_param_strength_hat_adj)
 plot_param_strength <- df_param_strength %>%
   select(year,focal,complexity.plant,parameter,
          mean.estimate,var.estimate,median.estimate) %>%
-  mutate( year = as.numeric(year)) %>%
+  mutate( year = as.character(year)) %>%
   left_join(Trophic.mean.df, by=c("year", "focal",
                                   "parameter","complexity.plant"),
             relationship = "many-to-many") %>%
@@ -878,15 +848,14 @@ plot_param_strength <- df_param_strength %>%
           median.adjusted = median.estimate*abund.sp.mean,
           var.adjuster = var.estimate* abund.sp.mean) %>% 
   filter(complexity.plant =="family") %>%
-  mutate( complexity.plant  = case_when(complexity.plant=="class"~ "Funct.Group",
-                                        complexity.plant=="family"~ "Family",
-                                        complexity.plant=="code.plant"~ "Species")) %>%
-  mutate(complexity.plant  = factor(complexity.plant,
-                                    levels = c("Funct.Group","Family","Species"))) %>%
   mutate(focal.name = case_when(focal == "CHFU" ~"Chamaemelum \nfuscatum",
                                 focal == "CETE" ~"Centaurium \ntenuiflorum",
                                 focal == "HOMA" ~"Hordeum \nmarinum",
                                 focal == "LEMA" ~"Leontodon \nmaroccanus")) %>%
+  mutate(focal.name = factor(focal.name,
+                             levels = rev(c("Centaurium \ntenuiflorum", "Chamaemelum \nfuscatum",
+                                            "Hordeum \nmarinum","Leontodon \nmaroccanus"
+                             ))))%>%
   mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
                                T~parameter)) %>%
   mutate(parameter = factor(parameter,
@@ -906,16 +875,12 @@ plot_param_strength <- df_param_strength %>%
                               ParYear == "Plant - pollinator_2021"~2,
                               ParYear == "Plant - pollinator_2020"~1,
                               ParYear == "Plant - pollinator_2019"~0)) %>%
-  mutate(focal.name = factor(focal.name,
-                             levels = rev(c("Centaurium \ntenuiflorum", "Chamaemelum \nfuscatum",
-                                            "Hordeum \nmarinum","Leontodon \nmaroccanus"
-                             )))) %>%
   ggplot() +
   geom_vline(xintercept=1,color="black") + 
   #geom_linerange(aes( xmin = mean.estimate - sqrt(var.estimate , 
   #                   xmax = mean.estimate + sqrt(var.estimate))+ 
   geom_point(aes(x=exp(median.adjusted),y=ParYearInt,
-                 fill=exp(median.adjusted),shape=as.factor(focal.name)),
+                 fill=exp(median.adjusted),shape=focal.name),
              color="black",size=10,alpha=0.95) +
   geom_point(data = df_param_strength_hat_adj[which(df_param_strength_hat_adj$complexity.plant=="Family"),], 
              aes(x=exp(mean_hat_adjusted),
@@ -925,12 +890,11 @@ plot_param_strength <- df_param_strength %>%
   scale_fill_gradientn(colours=c("#E69F00","white","#009E73"),
                        limits = c(0.5, 1.5),
                        guide = "none", aesthetics = "fill") +
-  scale_shape_manual(values=c(24,23,22,21)) +
-  scale_x_continuous(breaks = c(0.5,0.6,0.7,0.8,0.9,
-                                1,1.1,1.2,1.3,1.4,1.5),
-                     labels = c("-50%","-40%","-30%","-20%","-10%","No\neffect",
-                                "+10%","+20%","+30%","+40%","+50%"),
-                     limits = c(0.5,1.5)) +
+  scale_shape_manual(values=c(21,22,23,24)) +
+  scale_x_continuous(breaks = c(0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4),
+                     labels = c("-40%","-30%","-20%","-10%","No\neffect",
+                                "+10%","+20%","+30%","+40%"),
+                     limits = c(0.6,1.45)) +
   scale_y_continuous(breaks =c(16,11,6,1),
                      minor_breaks =c(0,2,5,7,10,12,15,17),
                      labels=c("Plant - plant", "Intraspecific",
@@ -939,44 +903,40 @@ plot_param_strength <- df_param_strength %>%
   labs(y="",x="",
        shape="Focal \nplant species",
        fill="Direction of effect") +
-    geom_text(aes(label=year,y=ParYearInt),
-            x = 1.52, # Set the position of the text to always be at '14.25'
+  guides(color= "none",fill="none",
+         shape=guide_legend(override.aes = list(size = 10,color="black"),
+                            nrow = 1,
+                            direction="horizontal",
+                            byrow = TRUE,
+                            title.hjust = 0.1)) +
+  geom_text(aes(label=year,y=ParYearInt),
+            x = 1.42, # Set the position of the text to always be at '14.25'
             hjust = 0,
             size = 7,
             family= "sans",
             fontface="plain") +
   coord_cartesian(#xlim = c(0.7, 1.5), # This focuses the x-axis on the range of interest
-                  clip = 'off') +   # This keeps the labels from disappearing
-  guides(color= "none",fill="none",
-         shape=guide_legend(override.aes = list(size = 10,
-                                                color="black"),
-                            nrow = 1,
-                            direction="horizontal",
-                            byrow = TRUE,
-                            title.hjust = 0.1)) + 
-theme(legend.position = c(0.38, -0.35),
-        legend.spacing.y = unit(10.0, 'cm'),
-        legend.spacing.x = unit(10.0, 'cm'),
+    clip = 'off') +   # This keeps the labels from disappearing
+  theme(legend.position = c(0.38, -0.35),
         panel.grid.minor.x = element_blank(),
-        panel.spacing.y=unit(3, "cm") ,
+        panel.spacing.y=unit(0.5, "lines") ,
         #panel.spacing.x=unit(1.5,"lines"),
         legend.key.size = unit(1, 'cm'),
-        axis.title =element_text(size=22),
-        axis.text.x= element_text(size=18),
-        axis.text.y= element_text(size=22),
-        legend.text=element_text(size=20, face="italic"),
-        legend.title=element_text(size=22),
+        axis.title =element_text(size=24),
+        axis.text.x= element_text(size=22),
+        axis.text.y= element_text(size=24),
+        legend.text=element_text(size=21, face="italic"),
+        legend.title=element_text(size=24),
         strip.text = element_text(size=20, face="italic"),
         panel.border = element_blank(),
-        plot.margin=grid::unit(c(1,20,50,1), "mm")) # This widens the right margin
-  
+        plot.margin=grid::unit(c(1,20,50,1), "mm"))# This widens the right margin
 plot_param_strength 
 img <- readPNG(paste0(home.dic,"figures/xaxisfig3.png"))
 g <- rasterGrob(img, interpolate=TRUE)
 
 theme_set(theme_cowplot())
 plot_param_strength_2 <- ggdraw() +
-  draw_image(img,  x = 0.088, y = -0.32, scale = .66) +
+  draw_image(img,  x = 0.079, y = -0.3, scale = .64) +
   #draw_image(img,  x = 0.2125 , y = -0.4, scale = .35) +
   draw_plot(plot_param_strength)    
 plot_param_strength_2 
@@ -987,6 +947,54 @@ ggsave(paste0("figures/plot_param_strength_small.pdf"),
        #height = 16,
        #units = c("cm"),
        plot_param_strength_2
+)
+
+
+var.estimate.plot <- test.full.df %>%
+  mutate(parameter = case_when(parameter =="Plant - floral visitor"~"Plant - pollinator",
+                               T~parameter)) %>%
+  mutate(parameter = factor(parameter,
+                            levels = rev(c("Plant - plant", "Intraspecific",
+                                           "Plant - pollinator","Plant - herbivore"
+                            )))) 
+filter(complexity.plant=="family") %>%
+  ggplot(aes(  x = median.estimate, y = sqrt(var.estimate))) +
+  geom_point(aes(shape=parameter, 
+                 fill=positive.perc),size=7,
+             alpha=0.8, stroke = 1.5) +
+  geom_point(aes( y = sqrt(var.estimate_hat), x = sqrt(median.estimate_hat),
+                  fill=positive.perc_hat),size=7,
+             color="black",alpha=0.8, stroke = 1.5,shape=25) +
+  scale_shape_manual("Type of\ngeneric interaction",values=c(21,22,23,24,25)) +
+  scale_fill_gradientn("sign of interactions",
+                       colours=c("#E69F00","white","#009E73"), limits = c(0, 1),
+                       #midpoint = 0,
+                       #space = "Lab",na.value = "grey50",
+                       # guide = "none",
+                       aesthetics = "fill",
+                       breaks=c(0,0.5,1),
+                       labels=c("100% Fac", "50/50", "100% Comp")) +
+  labs(x="Median of estimated generic interactions",
+       y="Standard deviation of estimated generic interactions") +
+  scale_x_continuous(limits= c(-0.4,0.4)) +
+  guides(#fill = guide_legend(override.aes = list(color="white")),
+    shape = guide_legend(override.aes = list(size=5,alpha=1, stroke = 2))) +
+  theme_minimal() +
+  theme(legend.key.size = unit(1, 'cm'),
+        axis.title.x= element_text(size=16, hjust =0.5),
+        axis.title.y= element_text(size=16, hjust = 0.5),
+        axis.text= element_text(size=16),
+        legend.text=element_text(size=16),
+        legend.title=element_text(size=16),
+        strip.text = element_text(size=16))
+var.estimate.plot
+
+ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/var.estimate.plot.pdf"),
+       #dpi="retina",
+       #width = 25,
+       #height = 16,
+       #units = c("cm"),
+       var.estimate.plot 
 )
 
 
@@ -1094,13 +1102,8 @@ df_inclusion_nat_species <- df_inclusion_nat_species  %>%
 view(df_inclusion_nat_species) 
 
 
-plot_inclusion_species_order <- df_inclusion_nat_species[which(df_inclusion_nat_species$guild=="plant"),]%>%
-  mutate( complexity  = case_when(complexity=="class"~ "Funct.Group",
-                                       complexity=="family"~ "Family",
-                                        complexity=="species"~ "Species")) %>%
-  mutate(complexity = factor(complexity,
-                                    levels = c("Funct.Group","Family","Species"))) %>%
-  ggplot(aes(x=fct_inorder(interactor), y = n.number, fill=fct_inorder(class))) +
+plot_inclusion_species_order <-  ggplot(df_inclusion_nat_species[which(df_inclusion_nat_species$guild=="plant"),], 
+                                        aes(x=fct_inorder(interactor), y = n.number, fill=fct_inorder(class))) +
   geom_bar(stat="identity") +
   scale_fill_manual(values = c(safe_colorblind_palette,"blue","orange")) +
   facet_wrap(complexity ~ ., nrow=1,
@@ -1122,6 +1125,41 @@ ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/plot_inclusion_species
        plot_inclusion_species_order )
 
 
+
+var.estimate.plot <- ggplot(test.full.df, 
+                            aes(  x = sqrt(var.abundance), y = sqrt(var.estimate))) +
+  #geom_smooth(color="black",alpha=0.1) +
+  geom_point(aes(color=parameter, 
+                 fill=neg.perc,size=abs(median.estimate)),
+             shape=21,alpha=0.8, stroke = 1.5) +
+  geom_point(aes( y = sqrt(var.estimate_hat), x = sqrt(var.abundance_hat),
+                  fill=neg.perc_hat, size=abs(median.estimate_hat)),
+             shape=21, color="#661100",alpha=0.8, stroke = 1.5) +
+  scale_size_continuous("strenght of interactions\n(absolute value)",
+                        range = c(1, 8),
+                        breaks=c(0.1,0.2,0.3),
+                        labels = c("< 0.1", "[0.1,0.2]", "> 0.2")) +
+  scale_fill_gradient("Sign of interaction", 
+                      low = "white",high = "black",
+                      breaks=c(0,0.5,1),
+                      labels=c("100% Fac", "50/50", "100% Comp")) +
+  scale_color_manual(values=c("#DDCC77","#88CCEE","#999933","#117733","#661100")) + 
+  labs(x="Standard deviation in the observed abundance of neighbours",
+       y="Standard deviation in estimation of interaction") +
+  #geom_tile(aes(fill=abs(median.estimate))) +
+  #geom_errorbarh(aes(xmin=abs(ten.estimate),xmax=abs(ninety.estimate)  ))+
+  guides(#fill = guide_legend(override.aes = list(color="white")),
+    colour = guide_legend(override.aes = list(size=5,alpha=1, stroke = 2))) +
+  theme_minimal() +
+  theme(legend.key.size = unit(1, 'cm'),
+        axis.title.x= element_text(size=16, hjust =0.5),
+        axis.title.y= element_text(size=16, hjust = 0.5),
+        axis.text= element_text(size=16),
+        legend.text=element_text(size=16),
+        legend.title=element_text(size=16),
+        strip.text = element_text(size=16))
+
+var.estimate.plot 
 
 
 #---- 4.5.Figure of gradient neighbors ----
@@ -1162,13 +1200,7 @@ HTL_abundance <- floral_visitor %>%
 SpData <- read.csv(paste0(home.dic,"data/SpData.csv")) 
 plant.neigh.df <- SpData %>%
   filter(focal %in% c("CETE","HOMA","CHFU","LEMA"))%>%
-  filter(year %in% c("2019","2020","2021")) 
-plant.neigh.df  <- plant.neigh.df %>%
-  spread(family,abundance ) %>%
-  left_join(plant.neigh.df %>%
-              spread(code.plant,abundance )) %>%
-  left_join(plant.neigh.df %>%
-              spread(class,abundance ))
+  filter(year %in% c("2019","2020","2021"))
 plant.neigh.df$species.specific <- NA
 for(n in 1:nrow(plant.neigh.df)){
   print(n)
@@ -1205,7 +1237,7 @@ plant.neigh.density.summary <- plant.neigh.df %>%
   group_by(focal,year) %>%
   summarise_at(vars(all_of(c(complexitylevel.plant.class,"CETE","HOMA","LEMA","CHFU"))),
                list( mean)) 
-  
+
 
 
 plant.neigh.density <- plant.neigh.df %>%
@@ -1311,14 +1343,13 @@ test.full.df <- test.full.df[-which(is.na(test.full.df$parameter)),]
 
 
 var.abundance.estimate.plot <- ggplot(test.full.df, 
-                                      aes(  x = sqrt(var.abundance), y = sqrt(var.estimate))) +
+                                      aes(  x = sqrt(var.abundance)/mean.abundance, y = sqrt(var.estimate))) +
   #geom_smooth(color="black",alpha=0.1) +
   geom_point(aes(shape=parameter, 
                  fill=positive.perc,
                  size=abs(mean.estimate)),
              alpha=0.8, stroke = 1.5) +
-  geom_point(aes( y = sqrt(var.estimate_hat),
-                  x = sqrt(var.abundance_hat),
+  geom_point(aes( y = sqrt(var.estimate_hat), x = sqrt(var.abundance_hat)/mean.abundance_hat,
                   fill=positive.perc_hat, size=abs(median.estimate_hat)),
              color="red",alpha=0.8, stroke = 1.5,shape=25) +
   scale_shape_manual(values=c(21,22,23,24,25)) +
@@ -1335,7 +1366,7 @@ var.abundance.estimate.plot <- ggplot(test.full.df,
                        breaks=c(0,0.5,1),
                        labels=rev(c("100% Fac", "50/50", "100% Comp"))) +
   #scale_color_manual(values=c("#DDCC77","#88CCEE","#999933","#117733","#661100")) + 
-  labs(x="Standard deviation in the observed abundance of neighbours",
+  labs(x="Standard deviation divided by mean in the observed abundance of neighbours",
        y="Standard deviation in estimation of interaction") +
   #geom_tile(aes(fill=abs(median.estimate))) +
   #geom_errorbarh(aes(xmin=abs(ten.estimate),xmax=abs(ninety.estimate)  ))+
@@ -1353,7 +1384,7 @@ var.abundance.estimate.plot <- ggplot(test.full.df,
         strip.text = element_text(size=16))
 var.abundance.estimate.plot
 
-ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figures/var.abundance.estimate.plot.pdf"),
+ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/var.abundance.estimate.plot.pdf"),
        dpi="retina",
        width = 30,
        height = 21,
@@ -1371,22 +1402,22 @@ for( focal in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
       
       complexity.animal <- c("group","family","species")[complexity.level]
       complexity.plant <-c("class","family","code.plant")[complexity.level]
-      load(paste0(home.dic,"results/stan/Inclusion",
+      load(paste0(home.dic,"results/Inclusion",
                   focal,"_", year,"_",complexity.plant,"_",
                   complexity.animal,".RData"))
       
       
       df_lambda_n <- df_param_all[which(df_param_all$focal==focal  & 
-                           df_param_all$year == year &
-                           df_param_all$complexity.plant == complexity.plant),] %>%
+                                          df_param_all$year == year &
+                                          df_param_all$complexity.plant == complexity.plant),] %>%
         mutate(lambdas = lambdas * Inclusion_all$U,
                U = Inclusion_all$U) %>%
         select(focal,year,complexity.plant,lambdas,U)
       
-        
+      
       df_lambda <- bind_rows(df_lambda,df_lambda_n)
       remove(Inclusion_all)
-       
+      
     }
   }
 }
@@ -1396,9 +1427,9 @@ df_lambda %>%
 
 
 plot_lambda <-   df_lambda %>%
-  mutate( complexity.plant  = case_when(complexity.plant=="class"~ "Funct.Group",
-                                                       complexity.plant=="family"~ "Family",
-                                                       complexity.plant=="code.plant"~ "Species")) %>%
+  mutate( complexity.plant  = case_when(complexity.plant=="class"~ "Order",
+                                        complexity.plant=="family"~ "Family",
+                                        complexity.plant=="code.plant"~ "Species")) %>%
   mutate(focal.name = case_when(focal == "CHFU" ~"Chamaemelum \nfuscatum",
                                 focal == "CETE" ~"Centaurium \ntenuiflorum",
                                 focal == "HOMA" ~"Hordeum \nmarinum",
@@ -1410,33 +1441,28 @@ plot_lambda <-   df_lambda %>%
   labs(x="Intrinsic fecundity", y="year") +
   labs(fill="focal") +
   theme(panel.grid.minor.x = element_blank(),
-      panel.spacing.y=unit(0.5, "lines") ,
-      #panel.spacing.x=unit(1.5,"lines"),
-      legend.key.size = unit(1, 'cm'),
-      axis.title =element_text(size=24),
-      axis.text.x= element_text(size=22),
-      axis.text.y= element_text(size=24),
-      legend.text=element_text(size=22, face="italic"),
-      legend.title=element_text(size=24),
-      strip.text = element_text(size=20, face="italic"))
+        panel.spacing.y=unit(0.5, "lines") ,
+        #panel.spacing.x=unit(1.5,"lines"),
+        legend.key.size = unit(1, 'cm'),
+        axis.title =element_text(size=24),
+        axis.text.x= element_text(size=22),
+        axis.text.y= element_text(size=24),
+        legend.text=element_text(size=22, face="italic"),
+        legend.title=element_text(size=24),
+        strip.text = element_text(size=20, face="italic"))
 plot_lambda
 
 ggsave( "figures/Lambdas.pdf", 
         plot_lambda)
 
-#---- 5.2. Correlation between alpha_intra and lambda ----
+#---- 5.3. Correlation between alpha_intra and lambda ----
 df.corr <- NULL
 for( focal in c("CETE","LEMA","CHFU","HOMA")){ # "CHFU","HOMA",
   for( year in c("2019","2020","2021")){
-    for( compl in c("class","code.plant","family")){
-    res <- cor.test(df_param_all$estimate[which(df_param_all$focal==focal &
-                                                 df_param_all$year==year &
-                                                  df_param_all$complexity.plant == compl &
-                                                   df_param_all$parameter=="Intraspecific")],
-                    df_param_all$lambdas[which(df_param_all$focal==focal & 
-                                                 df_param_all$year==year &
-                                                df_param_all$complexity.plant==compl &
-                                               df_param_all$parameter=="Intraspecific")],
+    res <- cor.test(df_param_all$alpha_intra[which(df_param$focal==focal &
+                                                 df_param$year==year)],
+                    df_param$lambdas[which(df_param$focal==focal & 
+                                             df_param$year==year)],
                     method=c("pearson"))
     if(res$p.value < 0.05){
       significant = "yes"
@@ -1445,11 +1471,9 @@ for( focal in c("CETE","LEMA","CHFU","HOMA")){ # "CHFU","HOMA",
     df.corr <- bind_rows(  df.corr,
                            data.frame( focal = focal, 
                                        year = year,
-                                       compl=compl,
                                        p.value =    res$p.value, 
                                        corr =   res$estimate,
                                        significant = significant))
-    }
   }
 }
 write.csv(df.corr, file="~/Eco_Bayesian/Complexity_caracoles/results/CORRIntravsLambda")
@@ -1563,7 +1587,6 @@ ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/Poll_plot.pdf"),
        #units = c("cm"),
        Poll_plot)
 
-
 #----6.3. Precipitation across time ----
 Isla_Mayor <- read.csv("~/Documents/Projects/Complexity_caracoles/data/Isla_Mayor.csv",
                        sep=";") 
@@ -1585,42 +1608,42 @@ sum.isla <- Isla_Mayor %>%
 library(ggridges)
 library(ggpubr)
 prep.plot <- ggarrange(
-ggplot(sum.isla ,aes(y=Se20Precip, x=year)) +
-  geom_point() +
-  geom_path() +
-  theme_bw() +
-  geom_hline(yintercept = mean(sum.isla$Se20Precip))+
+  ggplot(sum.isla ,aes(y=Se20Precip, x=year)) +
+    geom_point() +
+    geom_path() +
+    theme_bw() +
+    geom_hline(yintercept = mean(sum.isla$Se20Precip))+
+    
+    geom_hline(yintercept = mean(sum.isla$Se20Precip) - sd(sum.isla$Se20Precip),
+               linetype="dashed")+
+    geom_hline(yintercept = mean(sum.isla$Se20Precip) + sd(sum.isla$Se20Precip),
+               linetype="dashed")+
+    scale_y_continuous(limits=c(100,900)) +
+    labs(y="Mean precipitation per year (mm)",
+         x="Year",
+         title="Mean Precipitation per year in the last 20-years"),
   
-  geom_hline(yintercept = mean(sum.isla$Se20Precip) - sd(sum.isla$Se20Precip),
-             linetype="dashed")+
-  geom_hline(yintercept = mean(sum.isla$Se20Precip) + sd(sum.isla$Se20Precip),
-             linetype="dashed")+
-  scale_y_continuous(limits=c(100,900)) +
-  labs(y="Mean precipitation per year (mm)",
-       x="Year",
-       title="Mean Precipitation per year in the last 20-years"),
-
-ggplot(sum.isla ,aes(x=0,y=Se20Precip,
-                     width=after_stat(density))) +
-  geom_vridgeline(stat="ydensity",
-                  trim=FALSE, alpha = 0.85,
-                  scale = 2) +
-  geom_hline(yintercept = mean(sum.isla$Se20Precip))+
-
-  geom_hline(yintercept = mean(sum.isla$Se20Precip) - sd(sum.isla$Se20Precip),
-             linetype="dashed")+
-  geom_hline(yintercept = mean(sum.isla$Se20Precip) + sd(sum.isla$Se20Precip),
-             linetype="dashed")+
-  theme_bw() +
-  scale_y_continuous(limits=c(100,900))+
-  labs(y="",
-       x="Density",
-       title=""),
+  ggplot(sum.isla ,aes(x=0,y=Se20Precip,
+                       width=after_stat(density))) +
+    geom_vridgeline(stat="ydensity",
+                    trim=FALSE, alpha = 0.85,
+                    scale = 2) +
+    geom_hline(yintercept = mean(sum.isla$Se20Precip))+
+    
+    geom_hline(yintercept = mean(sum.isla$Se20Precip) - sd(sum.isla$Se20Precip),
+               linetype="dashed")+
+    geom_hline(yintercept = mean(sum.isla$Se20Precip) + sd(sum.isla$Se20Precip),
+               linetype="dashed")+
+    theme_bw() +
+    scale_y_continuous(limits=c(100,900))+
+    labs(y="",
+         x="Density",
+         title=""),
   nrow=1, widths = c(1,0.3),
-align = "h")
+  align = "h")
 
 
 
 mean(sum.isla$Se20Precip)
 sd(sum.isla$Se20Precip)
-               
+
