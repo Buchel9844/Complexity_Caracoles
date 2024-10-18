@@ -5,21 +5,30 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
                            complexity.plant =c("class","family","code.plant"),
                            complexity.animal= c("group","family","species"),
                            plant.class,SpData){
-
+  
   #---- 1.4. Import df of abundances----    
-  # view complexity levels
-  # determine the levels of complexity for plant 
+  
   complexitylevel.plant <- levels(as.factor(plant.class[,complexity.plant]))
   if (complexity.plant != "code.plant"){complexity.minimize <- T}else{complexity.minimize <- F}
   
   FocalPrefix <- focal # "LEMA" or "HOMA" or "CHFU"
   
-  # Load in the data and subset out the current focal species and complexity levels
-  #SpData <- read.csv("/home/lisavm/Simulations/data/competition.csv")
-  
-  SpData$seed <- round(SpData$seed)
-  
-  SpData <- na.omit(SpData) 
+  SpData <-  SpData %>%
+    dplyr::select(all_of(c("day","month","year","plot",
+                           "subplot","focal","fruit","seed",
+                           "abundance",complexity.plant))) %>%
+    aggregate(abundance ~ day + month + year + plot + focal+
+                subplot + .[,complexity.plant] +
+                fruit + seed , FUN=sum) %>%
+    rename(complexity.plant = ".[, complexity.plant]") %>%
+    tidyr::spread(complexity.plant ,abundance) %>%
+    left_join(SpData %>% dplyr::select(all_of(c("day","month","year","plot",
+                                                "subplot","focal","fruit","seed",
+                                                "abundance","code.plant"))) %>%
+                dplyr::filter(code.plant ==  FocalPrefix) %>% tidyr::spread(code.plant,abundance) 
+    ) %>%
+    as.data.frame() %>%
+    mutate(seed = round(seed))
   
   SpData <- SpData[which(SpData$year == as.numeric(year)),]
   
@@ -37,9 +46,8 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     levels.of.focal <- plant.class[which(plant.class$code.plant==FocalPrefix),complexity.plant]
     SpDataFocal[,levels.of.focal] <- SpDataFocal[,levels.of.focal] - SpDataFocal[,FocalPrefix]
   }else{
-    SpDataFocal <- rename(SpDataFocal, c(focal_neighbour = focal[1]))
     complexitylevel.plant <- complexitylevel.plant[which(!complexitylevel.plant %in% focal )]
-    focal <- "focal_neighbour"}
+  }
   
   #head(SpDataFocal)
   
@@ -47,14 +55,14 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   standard.abudance <- function(x){
     x <- (x*5)/max(x,na.rm=T) 
     return(x)}
-  
+  std.max.plt <-  max(SpDataFocal[,c(focal,complexitylevel.plant)])
   SpDataFocal[,c(focal[1],complexitylevel.plant)] <- standard.abudance(SpDataFocal[,c(focal,complexitylevel.plant)]) 
   
   if(!max(SpDataFocal[,c(focal,complexitylevel.plant)],na.rm=T) ==5){print("Standardisation of plants UNcorrect")}
   
   
   #import higher trophic levels data 
-  source(paste0(home.dic,"code/2.1.Group_FvH.R"))
+  source(paste0(home.dic,"code/Group_FvH.R"))
   
   # add H presences and floral visitor visits
   SpData_H <- get(paste0("herbivore","_",complexity.animal))
@@ -65,12 +73,15 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   
   SpData_H <- SpDataFocal %>%
     dplyr::select(c("day","month","year","plot","subplot","focal")) %>%
-    left_join(SpData_H)
+    left_join(SpData_H) %>% 
+    mutate(code.plant = focal)
   
   if(levels(as.factor(SpData_H$focal)) != FocalPrefix & 
      levels(as.factor(SpData_H$year)) != year){
     print("WRONG FOCAL or YEAR in SpData_H")}
-  SpData_H[is.na(SpData_H)] <- 0
+  
+  SpData_H <-  replace(SpData_H, is.na(SpData_H), 0)
+  
   
   SpData_FV <- get(paste0("floral_visitor","_",complexity.animal))
   SpData_FV <- SpData_FV[which(SpData_FV$year == as.integer(year)),]
@@ -81,13 +92,18 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   
   SpData_FV <- SpDataFocal %>%
     dplyr::select(c("day","month","year","plot","subplot","focal")) %>%
-    left_join(SpData_FV)
+    left_join(SpData_FV)%>% 
+    mutate(code.plant = focal)
+  
   
   if(levels(as.factor(SpData_FV$focal)) != FocalPrefix & 
      levels(as.factor(SpData_FV$year)) != year){
     print("WRONG FOCAL or YEAR in SpData_FV")}
   
-  SpData_FV[is.na(SpData_FV)] <- 0
+  
+  SpData_FV <-  replace(SpData_FV, is.na(SpData_FV), 0)
+  
+  
   
   # determine the levels of complexity  animals
   complexitylevel.H <- names(SpData_H)[which(!names(SpData_H) %in% c(complexitylevel.plant,"focal","seed",
@@ -98,8 +114,10 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   if(ncol(SpData_H[,complexitylevel.H])<1){
     print("wrong level of herbivory")
   }
+  std.max.H <-  max(SpData_H[,complexitylevel.H])
+  
   SpData_H[,complexitylevel.H] <- standard.abudance(SpData_H[,complexitylevel.H])
-  SpData_H[is.na(SpData_H)] <- 0
+  
   if(!max(SpData_H[,complexitylevel.H],na.rm=T) ==5){print("Standardisation of Herbivory UNcorrect")}
   if(sum(colSums(SpData_H[,complexitylevel.H]),na.rm=T)==0){print("No herbivory")}
   
@@ -112,7 +130,9 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     print("wrong level of FV")
   }
   
+  std.max.FV <-  max(SpData_FV[,complexitylevel.FV])
   SpData_FV[,complexitylevel.FV] <- standard.abudance(SpData_FV[,complexitylevel.FV])
+  
   SpData_FV[is.na(SpData_FV)] <- 0
   if(!max(SpData_FV[,complexitylevel.FV],na.rm=T) ==5){print("Standardisation of Floral visitors UNcorrect")}
   if(sum(colSums(SpData_FV[,complexitylevel.FV]),na.rm=T)==0){print("No floral visits")}
@@ -138,9 +158,9 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   AllSpAbunds <- SpDataFocal %>% 
     dplyr::select(all_of(AllSpNames))
   
-  SpTotals <- colSums(AllSpAbunds)
+  SpTotals <- colSums(AllSpAbunds,na.rm = F)
+  SpTotals <- replace_na(SpTotals, 0)
   SpToKeep <- SpTotals > 0
-  
   S <- sum(SpToKeep)
   SpMatrix <- matrix(NA, nrow = N, ncol = S)
   i <- 1
@@ -157,7 +177,9 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   #assign(paste0("SpNames_",FocalPrefix),
   #     SpNames)
   Intra <- ifelse(SpNames == FocalPrefix, 1, 0)
-  
+  if(sum(Intra)==0){
+    Intra <- ifelse(SpNames == Focal, 1, 0)
+  }
   # creation of a matrix of S by S of the interaction jk in HOIs_ijk for plants
   matrix_HOIs_plant <- list()
   for (i in 1:N){
@@ -183,6 +205,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     dplyr::select(all_of(complexitylevel.H))
   
   SpTotals_H <- colSums(AllSpAbunds_H, na.rm = T)
+  SpTotals_H <- replace_na(SpTotals_H,0)
   SpToKeep_H  <- SpTotals_H  > 0
   H <- sum(SpToKeep_H)
   if(H==0){RemoveH = 1}else{RemoveH = 0}
@@ -210,8 +233,8 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     dplyr::select(all_of(complexitylevel.FV))
   
   SpTotals_FV <- colSums(AllSpAbunds_FV, na.rm = T)
-  SpToKeep_FV <- SpTotals_FV  > 0
-  
+  SpTotals_FV  <- replace_na(SpTotals_FV,0)
+  SpToKeep_FV <- SpTotals_FV > 0
   FV <- sum(SpToKeep_FV)
   if(FV==0){RemoveFV = 1}else{RemoveFV = 0}
   
@@ -247,7 +270,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     gather(all_of(complexitylevel.FV),
            key = "FV", value = "visits")
   
-  SpData_FV_comp$abundance.plant.comp <-as.numeric(SpData_FV_comp$abundance.plant.comp)
+  SpData_FV_comp$abundance.plant.comp <- as.numeric(SpData_FV_comp$abundance.plant.comp)
   SpData_FV_comp$comp.abund_visits <- SpData_FV_comp$visits*SpData_FV_comp$abundance.plant.comp
   SpData_FV_comp <-  unite(SpData_FV_comp,
                            plant.comp, FV,
@@ -256,16 +279,18 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   SpData_FV_comp <- aggregate(comp.abund_visits ~ plant_FV + focal + fruit + 
                                 seed + subplot 
                               + plot + year + month + day, 
-                              SpData_FV_comp, sum,na.action=na.omit)
+                              SpData_FV_comp,FUN=sum, na.rm=TRUE, na.action=NULL)
   
   SpData_FV_comp <-  spread(SpData_FV_comp ,plant_FV, comp.abund_visits)
   SpData_FV_comp <- unique(SpData_FV_comp)
+  
   
   SpData_FV_comp <- SpDataFocal %>%
     dplyr::select(c("day","month","year","plot","subplot","seed","fruit")) %>%
     left_join(SpData_FV_comp,by=c("day","month","year","plot","subplot","seed","fruit"),
               multiple = "all",
               copy=FALSE)
+  
   
   if( !nrow(SpData_FV_comp) == N){
     print("problem in the numbr of observation, they don't match, 
@@ -294,8 +319,8 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   # this part is strickly to know the potential of interaction at the before the sparsity approach
   
   SpTotals_FV_comp <- colSums(AllSpAbunds_FV_comp, na.rm = T)
-  SpToKeep_FV_comp <- SpTotals_FV_comp  > 0
-  
+  SpTotals_FV_comp <- replace_na(SpTotals_FV_comp,0)
+  SpToKeep_FV_comp <- SpTotals_FV_comp > 0
   FV_comp <- sum(SpToKeep_FV_comp)
   SpMatrix_FV_comp  <- matrix(NA, nrow = N, ncol = FV_comp )
   
@@ -325,16 +350,17 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
     matrix_i <- matrix(nrow=S,ncol=FV)  
     n = 1
     m=1
-    if(FV_comp ==0){
-      matrix_i <- matrix(nrow=S,ncol=1, data=rep(0,times=S))}else{
-        for (fv in 1:FV_comp) {
-          if(fv == vector_FV_comp[n] + 1){
-            n = n+1
-            m = 1 }
-          matrix_i[n,m] = SpMatrix_FV_comp[i,fv]
-          m = m+1 
-        }
+    if(FV_comp == 0){
+      matrix_i <- matrix(nrow=S,ncol=1, data=rep(0,times=S))
+    }else{
+      for (fv in 1:FV_comp) {
+        if(fv == vector_FV_comp[n] + 1){
+          n = n+1
+          m = 1 }
+        matrix_i[n,m] = SpMatrix_FV_comp[i,fv]
+        m = m+1 
       }
+    }
     matrix_i[is.na(matrix_i)]<- 0
     matrix_HOIs_ijf[[i]]  <- matrix_i
     if(sum(rowSums(is.na(matrix_i)))==T){
@@ -368,7 +394,7 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   SpData_H_comp <- aggregate(comp.abund_presence ~ plant_H + focal + fruit + 
                                seed + subplot 
                              + plot + year + month + day, 
-                             SpData_H_comp, sum,na.action=na.omit)
+                             SpData_H_comp, FUN=sum, na.rm=TRUE, na.action=NULL)
   
   SpData_H_comp <-  spread(SpData_H_comp ,plant_H, comp.abund_presence)
   
@@ -404,8 +430,8 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
   # this part is strickly to know the potential of interaction at the before the sparsity approach
   
   SpTotals_H_comp <- colSums(AllSpAbunds_H_comp, na.rm = T)
+  SpTotals_H_comp <- replace_na( SpTotals_H_comp,0)
   SpToKeep_H_comp <- SpTotals_H_comp  > 0
-  
   H_comp <- sum(SpToKeep_H_comp)
   SpMatrix_H_comp  <- matrix(NA, nrow = N, ncol = H_comp)
   i <- 1
@@ -512,6 +538,9 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
                   SpNames = SpNames,
                   S=S,
                   U=U,
+                  std.max.FV=  std.max.FV,
+                  std.max.H=  std.max.H,
+                  std.max.plt=  std.max.plt,
                   RemoveFvH= RemoveFvH,
                   RemoveH = RemoveH,
                   RemoveFV= RemoveFV,
