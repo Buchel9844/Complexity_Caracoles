@@ -5,7 +5,15 @@ Lisa Buche, Lauren Shoemaker, Lauren Hallett,  Ignasi Bartomeus, Peter Vesk, Chr
 Published in 
 ""
 Buche,L. et al (2024), Buchel9844/: Initial release (v0.1). Zenodo. DOI: 10.5281/zenodo.13459947
-Contact details: Lisa Buche (buchel9844@gmail.com or lbuche@student.unimelb.edu.au) and Oscar Godoy (oscar.godoy@uca.edu.es)Contact details: Lisa Buche (buchel9844@gmail.com or lbuche@student.unimelb.edu.au) and Oscar Godoy (oscar.godoy@uca.edu.es)Statement of authorship: Oscar Godoy, Ignasi Bartomeus and Lisa Buche designed the study and collected the data. Margaret Mayfield, Oscar Godoy, Lauren Hallett and Lauren Shoemaker obtained the necessary funding. Lisa Buche analysed the data with substantial input from Oscar Godoy and technical guidance from Peter Vesk and Christopher Weiss-Lehman. Lisa Buche wrote the manuscript with substantial input from Oscar Godoy and Margaret Mayfield. All co-authors contributed to reviewing the manuscripts. Abstract: 
+Contact details: Lisa Buche (buchel9844@gmail.com or lbuche@student.unimelb.edu.au) and Oscar Godoy (oscar.godoy@uca.edu.es)
+
+Contact details: Lisa Buche (buchel9844@gmail.com or lbuche@student.unimelb.edu.au) and Oscar Godoy (oscar.godoy@uca.edu.es)
+
+Statement of authorship: Oscar Godoy, Ignasi Bartomeus and Lisa Buche designed the study and collected the data. Margaret Mayfield, Oscar Godoy, Lauren Hallett and Lauren Shoemaker obtained the necessary funding. Lisa Buche analysed the data with substantial input from Oscar Godoy and technical guidance from Peter Vesk and Christopher Weiss-Lehman. Lisa Buche wrote the manuscript with substantial input from Oscar Godoy and Margaret Mayfield. All co-authors contributed to reviewing the manuscripts. 
+
+To see the figures, including the figures of models behavior, please visit the following dropbox: https://www.dropbox.com/scl/fo/l19nz7peqnnkkvzxm9mjj/ANZpE1TJhuk7NMw4yNkYizs?rlkey=1bay8g81yn63qhj00zncfc5ac&st=r2xqhf47&dl=0
+
+Abstract: 
 Ecologists poorly understand whether highly diverse ecosystems translate to a complex web of interactions. Using a sparse modelling approach, we assessed generic and specific interactions on annual plants arising from a wide community of pollinators, insect herbivores, and neighbours of the same and different annual plant species over three years. Generic effects following a continuum of positive to negative interactions were enough to describe variation in plant performance. Specifically, we found that most interspecific plant interactions were competitive, pollinators mostly promote mutualistic effects on plants, while herbivores and conspecific plant individuals varied in their effects from weakly positive to weakly negative. These findings suggest that highly-diverse assemblages do not translate into complex structures of species interactions to describe plant performance. Therefore, real-world diverse assemblages can be described using a broad resolution rather than a species-level one. 
 
 
@@ -17,7 +25,8 @@ Authorship of code: R Code was written by Lisa Buche. Stan Cade was modified fro
 Details of R script and their function:
 
 1.Caracoles_ModelFit.R - Fit the performance model written in the Caracoles_R_Preliminary.stan and Caracoles_R_Final.stan scripts. This script runs a loop to fit the model for each focal, each year and grouping level. The script also calls other scripts to extract the raw data ("2.ExtractMatrix_fct"), extract the name of the group(s) which have an effect different from the generic effect proper to its trophic level ("3.ExtractInclusion_fct") and finally extract the estimated parameters ("4.ExtractEstimates)
-1.1.Group_Seedprod_Plantinteraction.R - Groups the observations data collected in the field for plant neighbourhood and seed set data counted a posteriori in the lab. When a specific seed set was not available for a focal in a subplot for a year, the seed set for that neighbourhood observation was approximated from the seed set of that focal at the plot level, at the site level or across the year in case of a low number of seed set count.
+
+1.1.Group_Seedprod_Plantinteraction.R - Groups the observations data collected in the field for plant neighbourhood and seed set data counted a posteriori in the lab. When a specific seed set was not available for a focal in a subplot for a year, the seed set for that neighbourhood observation was approximated from the seed set of that focal at the plot level, at the site level or across the year in case of a low number of seed set count.
 
 2.ExtractMatrix_fct.R - Extracts the raw data specific to the year and focal species. It calls on a second script which groups the higher trophic level according to the grouping level specified in the for-loop ("2.1.Group_FvH"). The script gives a list used to fit the performance model with the Bayesian Sparse approach. 
 
