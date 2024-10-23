@@ -170,17 +170,31 @@ write.csv(  moran.df,
             file=paste0(home.dic, "results/Moran.df.csv"))
 moran.df <- read.csv(paste0(home.dic, "results/Moran.df.csv"))
 
-moran.family.sum <- moran.family.df  %>% 
-  group_by(focal,plot) %>%
-  summarise(n_pos = sum(pvalue <0.01), n_neg = sum(pvalue >0), ratio = n_pos/n_neg)
+moran.sum <- moran.df  %>% 
+  group_by(complexity,) %>%
+  summarise(n_positive = sum(statistic>0),
+            n_negative= sum(statistic<0),
+            n_significant0.01 = sum(pvalue <=0.01),
+            n_significant0.05 = sum(pvalue <=0.05), 
+            n= length(pvalue)) %>%
+  mutate(percentage.sign.0.01 =  n_significant0.01/n,
+         percentage.sign.0.05 =  n_significant0.05/n)
+moran.sum
 write.csv(  moran.family.sum,
             file=paste0(home.dic, "results/Moran.family.sum.csv"))
 
 
 moran.family.df <-  moran.df %>%
   dplyr::filter(complexity =="family")
+write.csv(  moran.family.df ,
+            file=paste0(home.dic, "results/Moran.family.csv"))
+
+
 nrow(moran.family.df[which(moran.family.df$pvalue<=0.01),])/nrow(moran.family.df)
 nrow(moran.family.df[which(moran.family.df$pvalue<=0.05),])/nrow(moran.family.df)
+
+write.csv(  moran.family.df,
+            file=paste0(home.dic, "results/moran.family.df.csv"))
 
 
 moran.class.df <-  moran.df %>%
