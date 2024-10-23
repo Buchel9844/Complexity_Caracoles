@@ -2,12 +2,20 @@
 # Groups of floral_visitor and Herbivor
 #################################################################################
 #---- floral visitor----
+#FVtoKeep_species <- groupinglevels$grouping[which(groupinglevels$HTL =="floral.visitor" &
+#                                                    groupinglevels$complexity == "species" & (groupinglevels$YesNo == "yes"|groupinglevels$YesNo == "maybe"))]
+#FVtoKeep_family <- groupinglevels$grouping[which(groupinglevels$HTL =="floral.visitor" &
+#                                                  groupinglevels$complexity == "family" & (groupinglevels$YesNo == "yes"|groupinglevels$YesNo == "maybe"))]
+#FVtoKeep_group <- groupinglevels$grouping[which(groupinglevels$HTL =="floral.visitor" &
+#                                                 groupinglevels$complexity == "functional.groups" & (groupinglevels$YesNo == "yes"|groupinglevels$YesNo == "maybe"))]
+
 FVtoKeep_species <- groupinglevels$grouping[which(groupinglevels$HTL =="floral.visitor" &
-                                                    groupinglevels$complexity == "species" & (groupinglevels$YesNo == "yes"|groupinglevels$YesNo == "maybe"))]
+                                                    groupinglevels$complexity == "species" & groupinglevels$YesNo == "yes")]
 FVtoKeep_family <- groupinglevels$grouping[which(groupinglevels$HTL =="floral.visitor" &
-                                                   groupinglevels$complexity == "family" & (groupinglevels$YesNo == "yes"|groupinglevels$YesNo == "maybe"))]
+                                                   groupinglevels$complexity == "family" & groupinglevels$YesNo == "yes")]
 FVtoKeep_group <- groupinglevels$grouping[which(groupinglevels$HTL =="floral.visitor" &
-                                                  groupinglevels$complexity == "functional.groups" & (groupinglevels$YesNo == "yes"|groupinglevels$YesNo == "maybe"))]
+                                                  groupinglevels$complexity == "functional.groups" & groupinglevels$YesNo == "yes")]
+
 
 
 names(floral_visitor)[which(names(floral_visitor)=="plant")] <- "code.plant"
@@ -22,7 +30,8 @@ test.fv.sp <- floral_visitor_species %>%
   group_by(id_final) %>%
   summarise(mean.sp = mean(number_visits),
             var.sp = var(number_visits)) %>%
-  filter(mean.sp<=var.sp) 
+  filter(0<round(var.sp,digits=2)) 
+#filter(mean.sp<=var.sp) 
 FVtoKeep_species <- test.fv.sp$id_final[test.fv.sp$id_final %in% FVtoKeep_species]
 
 floral_visitor_species <-  dplyr::filter(floral_visitor_species,
@@ -44,7 +53,8 @@ test.fv.fam <- floral_visitor_family %>%
   group_by(family) %>%
   summarise(mean.sp = mean(number_visits),
             var.sp = var(number_visits)) %>%
-  filter(mean.sp<=var.sp) 
+  #filter(mean.sp<=var.sp) %>%
+  filter(0<round(var.sp,digits=2)) 
 FVtoKeep_family <- test.fv.fam$family[test.fv.fam$family %in% FVtoKeep_family]
 
 floral_visitor_family  <- dplyr::filter(floral_visitor_family , 
@@ -68,7 +78,8 @@ test.fv.group <- floral_visitor_group %>%
   group_by(group) %>%
   summarise(mean.sp = mean(number_visits,na.rm = T),
             var.sp = var(number_visits,na.rm = T)) %>%
-  filter(mean.sp<=var.sp) 
+  #filter(mean.sp<=var.sp) %>%
+  filter(0<round(var.sp,digits=2)) 
 FVtoKeep_group <- test.fv.group$group[test.fv.group$group %in% FVtoKeep_group]
 
 floral_visitor_group <- dplyr::filter(floral_visitor_group , 
@@ -83,13 +94,19 @@ head(floral_visitor_group)
 length(which(!names( floral_visitor_group) %in% c("plot","year","subplot","code.plant")))
 
 #---- herbivor ----
-HtoKeep_species <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
-                                                   groupinglevels$complexity == "species" & (groupinglevels$YesNo == "maybe"|groupinglevels$YesNo == "yes"))]
-HtoKeep_family <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
-                                                  groupinglevels$complexity == "family" & (groupinglevels$YesNo == "maybe"|groupinglevels$YesNo == "yes"))]
-HtoKeep_group <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
-                                                 groupinglevels$complexity == "functional.groups" & (groupinglevels$YesNo == "maybe"|groupinglevels$YesNo == "yes"))]
+#HtoKeep_species <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
+#                                                  groupinglevels$complexity == "species" & (groupinglevels$YesNo == "maybe"|groupinglevels$YesNo == "yes"))]
+#HtoKeep_family <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
+#                                                 groupinglevels$complexity == "family" & (groupinglevels$YesNo == "maybe"|groupinglevels$YesNo == "yes"))]
+#HtoKeep_group <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
+#                                                  groupinglevels$complexity == "functional.groups" & (groupinglevels$YesNo == "maybe"|groupinglevels$YesNo == "yes"))]
 
+HtoKeep_species <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
+                                                   groupinglevels$complexity == "species" & groupinglevels$YesNo == "yes")]
+HtoKeep_family <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
+                                                  groupinglevels$complexity == "family" & groupinglevels$YesNo == "yes")]
+HtoKeep_group <- groupinglevels$grouping[which(groupinglevels$HTL =="herbivore" &
+                                                 groupinglevels$complexity == "functional.groups" & groupinglevels$YesNo == "yes")]
 
 levels(as.factor(herbivorypredator$type))
 names(herbivorypredator)[which(names(herbivorypredator)=="plant")] <- "code.plant"
@@ -105,7 +122,8 @@ test.h.sp <- herbivore_species %>%
   group_by(id_final) %>%
   summarise(mean.sp = mean(number_animal),
             var.sp = var(number_animal)) %>%
-  filter(mean.sp<=var.sp) 
+  #filter(mean.sp<=var.sp) %>%
+  filter(0<round(var.sp,digits=2)) 
 
 HtoKeep_species <- test.h.sp$id_final[test.h.sp$id_final %in% HtoKeep_species]
 
@@ -130,7 +148,8 @@ test.h.fam <- herbivore_family %>%
   group_by(family) %>%
   summarise(mean.sp = mean(number_animal),
             var.sp = var(number_animal)) %>%
-  filter(mean.sp<=var.sp) 
+  #filter(mean.sp<=var.sp) %>%
+  filter(0<round(var.sp,digits=2)) 
 
 HtoKeep_family <- test.h.fam$family[test.h.fam$family %in% HtoKeep_family]
 
@@ -151,7 +170,8 @@ test.h.group <- herbivore_group %>%
   group_by(group) %>%
   summarise(mean.sp = mean(number_animal),
             var.sp = var(number_animal)) %>%
-  filter(mean.sp<=var.sp) 
+  #filter(mean.sp<=var.sp) %>%
+  filter(0<round(var.sp,digits=2)) 
 
 HtoKeep_group <- test.h.group$group[test.h.group$group %in% HtoKeep_group]
 

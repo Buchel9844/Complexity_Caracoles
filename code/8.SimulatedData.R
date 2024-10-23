@@ -18,10 +18,16 @@ library(gridExtra)
 home.dic <- "/home/lbuche/Eco_Bayesian/Complexity_caracoles/"
 project.dic <- "/data/projects/punim1670/Eco_Bayesian/Complexity_caracoles/"
 inclusion.df <- NULL
-Simulated.parameter.df  <- NULL
-Specific.parameter.df <- NULL
-Generic.parameter.df <- NULL
-for( sim.i in 1:100){
+Simulated.parameter.df <- read.csv(paste0(home.dic,"results/Simulated.parameter.df.csv"))
+Simulated.parameter.df <- Simulated.parameter.df[,-1]
+
+Generic.parameter.df <- read.csv(paste0(home.dic,"results/Generic.parameter.df.csv"))
+Generic.parameter.df  <- Generic.parameter.df[,-1]
+
+Specific.parameter.df <- read.csv(paste0(home.dic,"results/Specific.parameter.df.csv"))
+Specific.parameter.df  <- Specific.parameter.df[,-1]
+init <- max(Generic.parameter.df$sim)
+for( sim.i in init:100){
   inclusion.df.n <- NULL
   # rm(list = ls()) # empty envi
   source("/home/lbuche/Eco_Bayesian/Test_simulation/code/simul_data.R")
@@ -67,6 +73,9 @@ for( sim.i in 1:100){
   Fecundity <- SpData$seeds 
   plot(density(Fecundity ))
   U <- floor(log(mean(Fecundity)))
+  if(U ==0){
+    U <- 1
+  }
   FV <- 5
   H <- 5
   K <- 5
@@ -179,8 +188,6 @@ for( sim.i in 1:100){
       i <- i + 1
     }else{next}
   }
-  SpMatrix_H %>%
-    colMeans()
   
   HMatrix <- matrix(0, nrow = K, ncol = H)
   matrix_HOIs_ijh <- list()
@@ -550,7 +557,8 @@ for( sim.i in 1:100){
 
 
 Specific.parameter.df <- read.csv(paste0(home.dic,"results/Specific.parameter.df.csv"))
-view(Specific.parameter.df)
+#view(Specific.parameter.df)
+summary(Specific.parameter.df)
 prob.detection.df <- Specific.parameter.df %>%
   mutate(true.detection = case_when((inclusion==1 & !value==0) ~ 1,
                                     T~0)) %>%
@@ -559,12 +567,21 @@ prob.detection.df <- Specific.parameter.df %>%
               mutate(should.detected = case_when((!value==0) ~ 1,
                                                  T~0)) %>%
               aggregate(should.detected  ~ parameter, sum)) %>%
-  mutate(probability.of.detection= true.detection /should.detected)
+  left_join(Specific.parameter.df %>%
+              mutate(should.NOT.detected = case_when((inclusion==1 & value==0) ~ 1,
+                                                     T~0)) %>%
+              aggregate(should.NOT.detected  ~ parameter, sum)) %>%
+  left_join(Specific.parameter.df %>%
+              mutate(total.param = 1) %>%
+              aggregate(total.param  ~ parameter, sum)) %>%
+  mutate(probability.of.detection= true.detection /should.detected,
+         probability.of.WRONG.detection= should.NOT.detected/total.param)
 
+prob.detection.df
 Specific.parameter.plot <- Specific.parameter.df %>%
   filter(inclusion ==1 & !value==0) %>%
   ggplot(aes(x=median.estimated - value,y=parameter)) +
-  geom_density_ridges(quantile_lines = TRUE,
+  geom_density_ridges(quantile_lines = TRUE,scale=1,
                       quantiles = c(0.025,0.5, 0.975)) +
   geom_vline(xintercept=0,color="red") +
   theme_clean()
@@ -576,16 +593,23 @@ Simulated.parameter.df <- Simulated.parameter.df[,-1]
 
 Generic.parameter.df <- read.csv(paste0(home.dic,"results/Generic.parameter.df.csv"))
 Generic.parameter.df  <- Generic.parameter.df[,-1]
-head(Generic.parameter.df)
+#view(Generic.parameter.df)
 summary(Generic.parameter.df)
 generic.plot <- Generic.parameter.df %>%
-  gather(alpha_generic,alpha_intra,FV_generic,H_generic, lambda,key="parameter",value="estimate") %>%
-  full_join(Simulated.parameter.df %>%
-              gather(alpha_generic,alpha_intra,FV_generic,H_generic,lambda,key="parameter",value="true.value")) %>%
+  gather(alpha_generic,alpha_intra,FV_generic,
+         H_generic, lambda,
+         key="parameter",
+         value="estimate") %>%
+  left_join(Simulated.parameter.df %>%
+              gather(alpha_generic,alpha_intra,FV_generic,
+                     H_generic,lambda,
+                     key="parameter",value="true.value"),
+            by=c("sim","parameter"),
+            multiple = "all") %>%
   mutate(diff = estimate -true.value) %>%
   filter(!parameter=="lambda") %>%
   ggplot(aes(x=estimate-true.value,y=parameter)) +
-  geom_density_ridges(quantile_lines = TRUE,
+  geom_density_ridges(quantile_lines = TRUE,scale=1, 
                       quantiles = c(0.025,0.5, 0.975)) +
   geom_vline(xintercept=0,color="red") +
   theme_clean()

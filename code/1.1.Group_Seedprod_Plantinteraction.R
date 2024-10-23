@@ -4,7 +4,7 @@
 install.packages("readr")
 install.packages("devtools")
 devtools::install_github("ropenscilabs/dataspice")
-1
+
 library(dataspice)
 
 # 0.1. CREATE TEMPLATES
@@ -28,8 +28,6 @@ edit_creators() #
 # but if things like bounding box coordinates are not included, 
 # then when the website is generated there will not be a bounding box map generated
 edit_biblio()
-
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #---- 1. SET UP: Import data, create df with abundances ----
@@ -105,6 +103,7 @@ full.comp <- full.comp %>%
 
 full.comp.plot <- full.comp %>%
   filter(focal %in% c("HOMA","CHFU","LEMA","CETE")) %>%
+  filter(year %in% c("2019","2020","2021")) %>%
   aggregate(fruit ~ focal + year, length) %>%
   #filter(year %in% c("2020","2021")) %>%
   ggplot(aes(y=fruit,x=as.factor(year),fill=as.factor(focal))) +
@@ -182,77 +181,140 @@ ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/seed.prod.plot.pdf"),
        seed.prod.plot)
 
 #---- 2.3. Join seed and interactions -----
-seed.prod <- seed.prod %>%
-  filter(year %in% c("2020","2021"))
 
-for(i in c(1:nrow(full.comp))){
-  year.i <- full.comp[i,"year"] 
-  focal.i <- full.comp[i,"focal"]
-  plot.i <- full.comp[i,"plot"] 
-  subplot.i <- full.comp[i,"subplot"] 
+focal.comp <- full.comp %>%
+  filter(focal %in% c("HOMA","CHFU","LEMA","CETE")) %>%
+  filter(year %in% c("2019","2020","2021"))
+view(focal.comp)
+set.seed(1616)
+
+for(i in c(1:nrow(focal.comp))){
+  year.i <- focal.comp[i,"year"] 
+  focal.i <- focal.comp[i,"focal"]
+  plot.i <- focal.comp[i,"plot"] 
+  subplot.i <- focal.comp[i,"subplot"] 
   seeds.fruit.i <- NA
   
-  if(year.i == "2019"|year.i == "2022"|year.i == "2023" | (year.i == "2021" &  (focal.i =="CETE"|focal.i =="HOMA"))){
-    year.i <- "2020"
+  if(focal.i =="CETE" & year.i  %in% c("2019","2021")){
+    year.i = "2020"} # seed sample in 2020 
+  if(focal.i == c("HOMA") & year.i %in% c("2019","2021")){
+    year.i = c("2020") # seed sample in 2020 and 2019 
+  }
+  if(focal.i  %in% c("CHFU","LEMA") & year.i  %in% c("2019")){
+    year.i = c("2020","2019","2021") # seed sample in all years
   }
   
-  if (year.i == "2020"|year.i == "2021"){
-    seeds.fruit.i <- mean(seed.prod[which(seed.prod$year==year.i &
-                                            seed.prod$focal == focal.i &
-                                            seed.prod$plot == plot.i &
-                                            seed.prod$subplot == subplot.i),
-                                    "seeds.fruit"],na.rm=T)
-    if(is.na(seeds.fruit.i)){
-      seeds.fruit.i <- mean(seed.prod[which(seed.prod$year==year.i &
-                                              seed.prod$focal == focal.i &
-                                              seed.prod$plot == plot.i),
-                                      "seeds.fruit"],na.rm=T)
-      
-    }
-    if(is.na(seeds.fruit.i)){
-      seeds.fruit.i <- mean(seed.prod[which(seed.prod$year==year.i &
-                                              seed.prod$focal == focal.i),
-                                      "seeds.fruit"],na.rm=T)
-      
-    }
+  seeds.fruit.i <- abs(rnorm(1,mean = mean(seed.prod[which(seed.prod$year %in% year.i &
+                                                             seed.prod$focal == focal.i &
+                                                             seed.prod$plot == plot.i &
+                                                             seed.prod$subplot == subplot.i),
+                                                     "seeds.fruit"], na.rm=T),
+                             sd = sd(seed.prod[which(seed.prod$year  %in% year.i &
+                                                       seed.prod$focal == focal.i &
+                                                       seed.prod$plot == plot.i),
+                                               "seeds.fruit"], na.rm=T)))
+  
+  if(is.na(seeds.fruit.i)){
+    seeds.fruit.i <- abs(rnorm(1,mean(seed.prod[which(seed.prod$year  %in% year.i &
+                                                        seed.prod$focal == focal.i &
+                                                        seed.prod$plot == plot.i),
+                                                "seeds.fruit"], na.rm=T),
+                               sd = sd(seed.prod[which(seed.prod$year  %in% year.i &
+                                                         seed.prod$focal == focal.i),
+                                                 "seeds.fruit"], na.rm=T)))
     
-    full.comp$seed[i] <-  seeds.fruit.i*full.comp[i,"fruit"]
+    
   }
+  if(is.na(seeds.fruit.i)){
+    seeds.fruit.i <- abs(rnorm(1,mean(seed.prod[which(seed.prod$year %in% year.i &
+                                                        seed.prod$focal == focal.i),
+                                                "seeds.fruit"], na.rm=T),
+                               sd = sd(seed.prod[which(seed.prod$year %in% year.i),
+                                                 "seeds.fruit"], na.rm=T)))
+    
+  }
+  
+  focal.comp$seed[i] <-  seeds.fruit.i*focal.comp[i,"fruit"]
 }
 
 view(full.comp)
-full.comp.seed.plot <- full.comp %>%
+focal.comp.seed.plot <- focal.comp %>%
   filter(focal %in% c("HOMA","CHFU","LEMA","CETE")) %>%
   filter(year %in% c("2019","2020","2021")) %>%
+  filter(seed < 3000) %>%
   ggplot(aes(seed,group=as.factor(year),color=as.factor(year))) +
   geom_density() +
-  labs(color="year",x="total seeds peer individual") + 
+  labs(color="year",x="total seeds per individual") + 
   scale_color_colorblind() +
   facet_wrap(focal~., scales="free") + 
-  theme_bw() 
-full.comp.seed.plot 
+  theme_bw()  
+focal.comp.seed.plot 
+
 
 ggsave(paste0("~/Eco_Bayesian/Complexity_caracoles/figure/full.comp.seed.plot.pdf"),
        dpi="retina",
        width = 21,
        height = 16,
        units = c("cm"),
-       full.comp.seed.plot)
+       focal.comp.seed.plot)
 
 
 #check the present of Na in seed production
-full.comp.NA <- full.comp[is.na(full.comp$seed),]
-levels(as.factor(cbind(full.comp.NA$year,full.comp.NA$focal)))
+focal.comp.NA <- focal.comp[is.na(focal.comp$seed),]
+levels(as.factor(cbind(focal.comp.NA$year,focal.comp.NA$focal)))
 
 #threshold of seed. production to 1000
 
-full.comp$seed[which( full.comp$seed > 3000 )] <- 3000
+focal.comp <- focal.comp[which(focal.comp$seed <= 3000),]
 
 #capitalize the plant species names
 not.capitalized.name <- c("day","month","year", "plot","subplot","focal","fruit",
                           "seed","observers","comments")
-names(full.comp)[!names(full.comp) %in% not.capitalized.name] <-toupper(names(full.comp)[!names(full.comp) %in% not.capitalized.name])
+names(focal.comp)[!names(focal.comp) %in% not.capitalized.name] <-toupper(names(focal.comp)[!names(focal.comp) %in% not.capitalized.name])
 
-view(full.comp)
+view(focal.comp)
 # 3 - write the csv for all years and per years
-readr::write_delim(full.comp ,file = "data/competition.csv",delim = ",")
+readr::write_delim(focal.comp ,file = paste0(home.dic,"data/competition.csv"),
+                   delim = ",")
+#----Make SpDATA----
+
+competition.plant <- read.csv(paste0(home.dic,"data/competition.csv"), sep=",")
+
+species.neigh <- names(competition.plant )
+species.neigh  <- species.neigh[!species.neigh %in% c("day","month","year",
+                                                      "plot","subplot","focal","fruit","comments",
+                                                      "observers", "site",
+                                                      "treatment","seed")]
+
+competition.to.keep <- competition.plant  %>%  
+  dplyr::select(all_of(c(species.neigh)))%>%
+  mutate_at( species.neigh, as.numeric) %>%
+  colSums(na.rm=T)
+
+
+# change the format of the rows to numeric 
+competition.plant[species.neigh] <- sapply(competition.plant[species.neigh],as.numeric)
+
+# change na values to 0
+competition.plant[is.na(competition.plant)] <- 0
+
+plant.class <- read.csv(paste0(home.dic,"data/plant_code.csv"),sep=",")
+
+
+competition.plant_long <- competition.plant %>%
+  gather(any_of(plant.class$code.plant), key="code.plant",
+         value="abundance") %>%
+  #left_join(plant.class, by="code.plant") %>%
+  left_join(plant.class %>%
+              select(code.plant,family,class),
+            by="code.plant")  %>%
+  dplyr::select(day,month,year,plot,subplot,focal,fruit,seed,code.plant,family,class,
+                abundance) %>%
+  aggregate(abundance ~ day + month + year + plot + focal+
+              subplot + code.plant + family + class +
+              fruit + seed , FUN=sum) 
+
+readr::write_delim(competition.plant_long ,
+                   file = paste0(home.dic,"data/SpData.csv"),
+                   delim = ",")
+

@@ -42,7 +42,7 @@ for( focal.n in c("CETE","LEMA","HOMA","CHFU")){ # "CHFU","HOMA","CETE"
                         .[,"year"] == as.character(year.n)& 
                         .[,"complexity.plant"] == as.character(complexity.plant.n) &
                         !is.na(estimate_hat )) %>%
-        select(parameter,parameter_hat,complexity.plant) %>%
+        dplyr::select(parameter,parameter_hat,complexity.plant) %>%
         unique()
       
       specific.int.names <-  df_param_name_hat$parameter_hat
