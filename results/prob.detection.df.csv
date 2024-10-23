@@ -1,0 +1,5 @@
+"","parameter","true.detection","should.detected","should.NOT.detected","total.param","probability.of.detection","probability.of.WRONG.detection"
+"1","HOI.plant",791,827,57,2700,0.956469165659008,0.0211111111111111
+"2","plant.her",230,413,58,540,0.556900726392252,0.107407407407407
+"3","plant.plant",245,379,41,540,0.646437994722955,0.0759259259259259
+"4","plant.pol",388,388,151,540,1,0.27962962962963
