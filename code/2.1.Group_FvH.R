@@ -161,8 +161,9 @@ length(which(!names(herbivore_family) %in% c("plot","year","subplot","code.plant
 
 
 
-herbivore_group <- dplyr::select( herbivore,c("day","month","year","plot","subplot",
-                                              "group","number_animal","code.plant")) 
+herbivore_group <- dplyr::select( herbivore,
+                                  c("day","month","year","plot","subplot",
+                                    "group","number_animal","code.plant")) 
 herbivore_group <-stats::aggregate(number_animal ~ group + year + plot  + code.plant +subplot ,
                                    data=   herbivore_group,
                                    sum)
@@ -186,24 +187,30 @@ length(which(!names(herbivore_group) %in% c("plot","year","subplot","code.plant"
 
 
 H.obs.variation <- bind_rows(test.h.sp %>%
+                               dplyr::filter(id_final%in% HtoKeep_species) %>%
                                mutate(grouping="species") %>%
                                rename("ID"=id_final),
                              test.h.fam %>%
+                               dplyr::filter(family %in% HtoKeep_family) %>%
                                mutate(grouping="family") %>%
                                rename("ID"=family),
                              test.h.group %>%
+                               dplyr::filter(group %in% HtoKeep_group) %>%
                                mutate(grouping="group") %>%
                                rename("ID"=group))
 write.csv(H.obs.variation ,
           file=paste0(home.dic,"results/H.obs.variation.csv"))
 
 FV.obs.variation <- bind_rows(test.fv.sp %>%
+                                dplyr::filter(id_final %in% all_of(FVtoKeep_species)) %>%
                                 mutate(grouping="species") %>%
                                 rename("ID"=id_final),
                               test.fv.fam %>%
+                                dplyr::filter(family %in% FVtoKeep_family) %>%
                                 mutate(grouping="family") %>%
                                 rename("ID"=family),
                               test.fv.group %>%
+                                dplyr::filter(group %in% FVtoKeep_group) %>%
                                 mutate(grouping="group") %>%
                                 rename("ID"=group))
 write.csv(FV.obs.variation ,
