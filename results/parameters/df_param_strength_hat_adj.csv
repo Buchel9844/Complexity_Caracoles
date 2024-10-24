@@ -1,0 +1,17 @@
+"","parameter_hat","focal","year","complexity.plant","estimate_hat_add","complexity.animal","abund.sp","abund.sp.min","abund.sp.max","parameter","inclus","mean_hat_adjusted","focal.name","ParYear","ParYearInt"
+"1","Grass","LEMA","2019","Funct.Group",-0.361207055612506,"group",1.62844827586207,0,5,"Plant - plant","inclus",-0.5882070069414,"Leontodon 
+maroccanus","Plant - plant_2019",15
+"2","Poaceae","LEMA","2019","Family",-0.364909815723969,"family",1.62844827586207,0,5,"Plant - plant","inclus",-0.594236760260843,"Leontodon 
+maroccanus","Plant - plant_2019",15
+"3","beetle","LEMA","2020","Funct.Group",0.475883471067194,"group",0.646825396825397,0,5,"Plant - herbivore","inclus",0.307813515015685,"Leontodon 
+maroccanus","Plant - herbivore_2020",6
+"4","Grass","LEMA","2020","Funct.Group",-0.35254203151425,"group",0.676851851851852,0,5,"Plant - plant","inclus",-0.238618726886034,"Leontodon 
+maroccanus","Plant - plant_2020",16
+"5","LEMA_bee","LEMA","2020","Funct.Group",-0.138012637454114,"group",0.0678856465893503,0,12.5,"Intraspecific","inclus",-0.0093690771310741,"Leontodon 
+maroccanus","Intraspecific_2020",11
+"6","Nitidulidae","LEMA","2020","Family",0.451743123383594,"family",0.52391975308642,0,5,"Plant - herbivore","inclus",0.236677145661621,"Leontodon 
+maroccanus","Plant - herbivore_2020",6
+"7","Poaceae","LEMA","2020","Family",-0.360906935925458,"family",0.676851851851852,0,5,"Plant - plant","inclus",-0.244280527927324,"Leontodon 
+maroccanus","Plant - plant_2020",16
+"8","HOMA","LEMA","2020","Species",-0.341804100505773,"species",0.617592592592593,0,5,"Plant - plant","inclus",-0.211095680590139,"Leontodon 
+maroccanus","Plant - plant_2020",16

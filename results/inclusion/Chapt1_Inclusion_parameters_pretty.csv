@@ -1,0 +1,52 @@
+focal,year,"complexity level
+","number of plants
+","number of plant HOIs
+","number of herbivores
+","number of herbivore HOIs
+","number of pollinators
+","number of pollinator HOIs
+","number of plants selected
+","name(s) of plants selected
+","number of herbivores
+ selected
+","name(s) of herbivores selected
+","number of HOIs pollinator selected
+ selected
+","name(s) of HOIs pollinator selected
+"
+CHFU,2019,functional group,2,3,4,10,3,7,0,NA,0,NA,0,NA
+CHFU,2019,family,8,36,5,9,8,33,0,NA,0,NA,0,NA
+CHFU,2019,species,12,78,6,12,18,76,0,NA,0,NA,0,NA
+CHFU,2020,functional group,2,3,4,10,2,6,0,NA,0,NA,0,NA
+CHFU,2020,family,9,45,4,15,9,40,0,NA,0,NA,0,NA
+CHFU,2020,species,19,190,5,25,14,93,0,NA,0,NA,0,NA
+CHFU,2021,functional group,2,3,2,4,2,6,0,NA,0,NA,0,NA
+CHFU,2021,family,8,36,2,8,9,51,0,NA,0,NA,0,NA
+CHFU,2021,species,17,153,3,22,15,115,0,NA,0,NA,0,NA
+CETE,2019,functional group,2,3,1,3,NA,NA,0,NA,0,NA,NA,NA
+CETE,2019,family,6,21,2,10,NA,NA,0,NA,0,NA,NA,NA
+CETE,2019,species,11,66,2,14,NA,NA,0,NA,0,NA,NA,NA
+CETE,2020,functional group,2,3,2,4,2,6,0,NA,0,NA,0,NA
+CETE,2020,family,7,28,2,7,4,13,0,NA,0,NA,0,NA
+CETE,2020,species,18,171,1,10,5,23,0,NA,0,NA,0,NA
+CETE,2021,functional group,2,3,1,3,2,3,0,NA,0,NA,0,NA
+CETE,2021,family,7,28,2,9,3,7,0,NA,0,NA,0,NA
+CETE,2021,species,16,136,3,18,4,9,0,NA,0,NA,0,NA
+HOMA,2019,functional group,2,3,4,12,NA,NA,0,NA,0,NA,NA,NA
+HOMA,2019,family,7,28,9,44,NA,NA,0,NA,0,NA,NA,NA
+HOMA,2019,species,12,78,16,91,NA,NA,0,NA,0,NA,NA,NA
+HOMA,2020,functional group,2,3,4,12,NA,NA,0,NA,0,NA,NA,NA
+HOMA,2020,family,7,28,6,38,NA,NA,0,NA,0,NA,NA,NA
+HOMA,2020,species,17,153,8,84,NA,NA,0,NA,0,NA,NA,NA
+HOMA,2021,functional group,2,3,4,12,NA,NA,0,NA,0,NA,NA,NA
+HOMA,2021,family,8,36,5,26,NA,NA,0,NA,0,NA,NA,NA
+HOMA,2021,species,17,153,8,58,NA,NA,0,NA,0,NA,NA,NA
+LEMA,2019,functional group,2,3,4,12,2,6,1,Grass,0,NA,0,NA
+LEMA,2019,family,8,36,6,41,7,51,1,Poaceae,0,NA,0,NA
+LEMA,2019,species,16,136,9,70,17,159,0,NA,0,NA,0,NA
+LEMA,2020,functional group,2,3,6,14,4,12,1,Grass,1,beetle,1,LEMA_bee
+LEMA,2020,family,9,45,9,55,15,80,1,Poaceae,1,Nitidulidae,0,NA
+LEMA,2020,species,19,190,12,103,24,163,1,HOMA,0,NA,0,NA
+LEMA,2021,functional group,2,3,4,12,3,9,0,NA,0,NA,0,NA
+LEMA,2021,family,8,36,7,32,11,58,0,NA,0,NA,0,NA
+LEMA,2021,species,17,153,11,65,27,184,0,NA,0,NA,0,NA

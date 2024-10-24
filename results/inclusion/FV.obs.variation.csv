@@ -1,0 +1,71 @@
+grouping,ID,mean.sp,var.sp
+species,Anastoechus spp,1.91,0.69
+species,Andrena argentata,1.5,0.5
+species,Andrena cinerea elliptica,1.58,0.84
+species,Andrena hesperia,1.33,0.33
+species,Andrena humilis,2.81,9.39
+species,Andrena spp,1.89,1.87
+species,Apidae,1.41,1.09
+species,Apis mellifera,2.89,3.36
+species,Bibionidae,2.2,1.2
+species,Bombyliidae,2.99,16.92
+species,Bombylius major,1.3,0.23
+species,Calliphoridae,2.25,2.21
+species,Colias croceus,1.81,2.87
+species,Cylindromyia sp red color,1.29,0.57
+species,Dilophus spp,1.6,1.18
+species,Diptera,2.89,5.64
+species,Empididae,1.2,0.17
+species,Episyrphus balteatus,2.35,4.06
+species,Eristalinus taeniops,1.67,0.33
+species,Eristalis similis,1.35,0.6
+species,Eucera spp,1.63,1.15
+species,Euchloe crameri,1.33,0.33
+species,Eupeodes corollae,2.12,4.34
+species,Halictidae,1.5,0.5
+species,Hymenoptera,3.74,13.81
+species,Lasiocampa trifolii,1.37,0.47
+species,Lasioglossum immunitum,1.5,0.85
+species,Lasioglossum malachurum,1.92,1.59
+species,Lepidoptera,1.55,1.21
+species,Lomatia spp,1.4,0.3
+species,Malachius bipustulatus,1.07,0.07
+species,Meligethes spp,1.23,0.37
+species,Musca spp,1.43,0.8
+species,Nemotelus spp,1.31,0.63
+species,Odontomyia spp,1.64,1.48
+species,Oedemeridae,1.39,0.6
+species,Osmia ligurica,2.22,7.44
+species,Osmia spp,1.2,0.18
+species,Osmia submicans,1.18,0.16
+species,Psilothrix viridicoerulea,1.8,1.4
+species,Sarcophaga spp,2.5,3.98
+species,Scaeva spp,1.29,0.56
+species,Sphaerophoria scripta,1.47,0.71
+species,Syrphidae,2.04,0.96
+species,Tachinidae,2.25,1.58
+species,Thymelicus spp,2.29,3.24
+species,Ulidiidae sp wings with pattern,1.97,1.2
+species,Vanessa cardui,1.5,0.5
+family,Andrenidae,2.07,3.39
+family,Apidae,1.77,2.78
+family,Bibionidae,1.61,1.18
+family,Bombyliidae,2.81,14.77
+family,Empididae,1.17,0.15
+family,Halictidae,1.74,1.31
+family,Hesperiidae,2.29,3.24
+family,Lasiocampidae,1.37,0.47
+family,Megachilidae,1.5,2.4
+family,Muscidae,1.43,0.8
+family,Nymphalidae,1.5,0.5
+family,Oedemeridae,1.39,0.6
+family,Pieridae,1.72,2.53
+family,Sarcophagidae,2.5,3.98
+family,Stratiomyidae,1.58,1.16
+family,Syrphidae,1.7,1.49
+family,Tachinidae,1.64,1.05
+family,Ulidiidae,1.97,1.2
+group,bee,2.22,4.75
+group,butterfly,1.74,2.19
+group,fly,2.75,7.8
+group,wasp,1.13,0.13

@@ -1,0 +1,49 @@
+,focal,parameter,year,mean percentage of positive value,sd,mean percentage of positive hat_value,sd
+1,CETE,Intraspecific,2019,0.44,0.00,NA,NA
+2,CETE,Intraspecific,2020,0.69,0.02,NA,NA
+3,CETE,Intraspecific,2021,0.54,0.00,NA,NA
+4,CETE,Plant - floral visitor,2019,0.49,0.01,NA,NA
+5,CETE,Plant - floral visitor,2020,0.89,0.02,NA,NA
+6,CETE,Plant - floral visitor,2021,0.24,0.00,NA,NA
+7,CETE,Plant - herbivore,2019,0.78,0.01,NA,NA
+8,CETE,Plant - herbivore,2020,0.35,0.03,NA,NA
+9,CETE,Plant - herbivore,2021,0.42,0.00,NA,NA
+10,CETE,Plant - plant,2019,0.44,0.01,NA,NA
+11,CETE,Plant - plant,2020,0.34,0.00,NA,NA
+12,CETE,Plant - plant,2021,0.41,0.00,NA,NA
+13,CHFU,Intraspecific,2019,0.36,0.01,NA,NA
+14,CHFU,Intraspecific,2020,0.42,0.00,NA,NA
+15,CHFU,Intraspecific,2021,0.25,0.03,NA,NA
+16,CHFU,Plant - floral visitor,2019,0.70,0.02,NA,NA
+17,CHFU,Plant - floral visitor,2020,0.80,0.06,NA,NA
+18,CHFU,Plant - floral visitor,2021,0.93,0.03,NA,NA
+19,CHFU,Plant - herbivore,2019,0.36,0.06,NA,NA
+20,CHFU,Plant - herbivore,2020,0.49,0.12,NA,NA
+21,CHFU,Plant - herbivore,2021,0.71,0.28,NA,NA
+22,CHFU,Plant - plant,2019,0.00,0.00,NA,NA
+23,CHFU,Plant - plant,2020,0.00,0.00,NA,NA
+24,CHFU,Plant - plant,2021,0.24,0.04,NA,NA
+25,HOMA,Intraspecific,2019,0.80,0.01,NA,NA
+26,HOMA,Intraspecific,2020,0.02,0.00,NA,NA
+27,HOMA,Intraspecific,2021,0.03,0.01,NA,NA
+28,HOMA,Plant - floral visitor,2019,0.49,0.01,NA,NA
+29,HOMA,Plant - floral visitor,2020,0.50,0.00,NA,NA
+30,HOMA,Plant - floral visitor,2021,0.57,0.07,NA,NA
+31,HOMA,Plant - herbivore,2019,0.43,0.02,NA,NA
+32,HOMA,Plant - herbivore,2020,0.49,0.06,NA,NA
+33,HOMA,Plant - herbivore,2021,0.97,0.01,NA,NA
+34,HOMA,Plant - plant,2019,0.71,0.01,NA,NA
+35,HOMA,Plant - plant,2020,0.81,0.01,NA,NA
+36,HOMA,Plant - plant,2021,0.18,0.02,NA,NA
+37,LEMA,Intraspecific,2019,0.51,0.00,NA,NA
+38,LEMA,Intraspecific,2020,0.51,0.01,0.05,NA
+39,LEMA,Intraspecific,2021,0.02,0.01,NA,NA
+40,LEMA,Plant - floral visitor,2019,0.68,0.11,NA,NA
+41,LEMA,Plant - floral visitor,2020,0.93,0.07,NA,NA
+42,LEMA,Plant - floral visitor,2021,0.96,0.06,NA,NA
+43,LEMA,Plant - herbivore,2019,0.09,0.01,NA,NA
+44,LEMA,Plant - herbivore,2020,1.00,0.00,0.97,0.01
+45,LEMA,Plant - herbivore,2021,0.73,0.08,NA,NA
+46,LEMA,Plant - plant,2019,0.00,0.00,0.00,0.00
+47,LEMA,Plant - plant,2020,0.02,0.01,0.00,0.00
+48,LEMA,Plant - plant,2021,0.00,0.00,NA,NA

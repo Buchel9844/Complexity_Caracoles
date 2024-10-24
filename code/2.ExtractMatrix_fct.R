@@ -90,6 +90,10 @@ extract.matrix <- function(focal= c("LEMA","HOMA","CHFU","CETE"),
                                  SpData_FV$code.plant == FocalPrefix),]
   
   
+  if(FocalPrefix=="HOMA"){
+    SpData_FV[,!names(SpData_FV) %in% c("day","month","year","plot","subplot","code.plant")] <- 0
+  }
+  
   SpData_FV <- SpDataFocal %>%
     dplyr::select(c("day","month","year","plot","subplot","focal")) %>%
     left_join(SpData_FV)%>% 
