@@ -128,7 +128,7 @@ for( focal in c("CETE","HOMA","LEMA","CHFU")){ #"CETE","HOMA","LEMA","CHFU"
         #       ylab="Standardized Lagged Fecundity")
         I <- moran(seed.res.df.p$ID, lw, length(nb), Szero(lw))[1]
         nsim= 999
-        if(length(nb) <- 10){nsim=99}
+        if(length(nb) <= 10){nsim=99}
         if(I==0) next
         if(I < 0 ){
           MC <- moran.mc(seed.res.df.p$ID, lw, nsim=  nsim, alternative="less")
@@ -171,7 +171,7 @@ write.csv(  moran.df,
 moran.df <- read.csv(paste0(home.dic, "results/Moran.df.csv"))
 
 moran.sum <- moran.df  %>% 
-  group_by(complexity,focal) %>%
+  group_by(year,focal) %>%
   summarise(n_positive = sum(statistic>0),
             n_negative= sum(statistic<0),
             n_significant0.01 = sum(pvalue <=0.01),
@@ -182,6 +182,8 @@ moran.sum <- moran.df  %>%
 moran.sum
 write.csv(  moran.sum,
             file=paste0(home.dic, "results/Moran.sum.csv"))
+
+
 moran.family.df <-  moran.df %>%
   dplyr::filter(complexity =="family")
 write.csv(  moran.family.df ,
